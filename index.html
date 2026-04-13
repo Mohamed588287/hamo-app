@@ -1,273 +1,465 @@
-<!doctype html>  
-<html lang="ar" dir="rtl">  
-<head>  
-  <meta charset="utf-8" />  
-  <meta name="viewport" content="width=device-width, initial-scale=1" />  
-  <title>تحدي 21 يوم - SaaS Dashboard Ultimate</title>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <!-- ✨ تمت إضافة مكتبة السحب والإفلات -->
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-  <style>  
-    :root{  
-      --bg:#070A0E;  
-      --panel:#0B1220;  
-      --text:#EAF2FF;  
-      --muted:#9BB0CC;  
-      --stroke:rgba(86,255,140,.18);  
-      --neon:#39FF88;  
-      --neon-2:#00E5FF;  
-      --danger:#FF4D6D;  
-      --radius:16px;  
-    }  
-    \*{box-sizing:border-box}  
-    body{  
-      margin:0; font-family: system-ui, -apple-system, "Noto Sans Arabic", sans-serif;  
-      background: radial-gradient(900px 420px at 90% 5%, rgba(57,255,136,.1), transparent 55%), var(--bg);  
-      color:var(--text); line-height:1.55; overflow-x: hidden;
-    }  
-    .container{max-width:1120px; margin:0 auto; padding:20px}  
-    
-    /* Animations */
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .task { animation: fadeIn 0.3s ease; }
+<!doctype html>
+<html lang="ar" dir="rtl">
 
-    /* ✨ تمت إضافة ستايل للسحب */
-    .task.sortable-ghost { background: rgba(57,255,136,0.2); border-style: dashed; }
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>تحدي 21 يوم - الإصدار الجديد</title>
+  
+  <!-- أيقونات -->
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  
+  <style>
+    :root {
+      --bg: #0A0C1E;
+      --panel: rgba(22, 26, 51, 0.6);
+      --panel-solid: #161A33;
+      --text: #EAF2FF;
+      --muted: #8A98B5;
+      --stroke: rgba(77, 127, 255, 0.2);
+      --glow: rgba(77, 127, 255, 0.1);
+      --neon: #4D7FFF;
+      --neon-2: #C77EFF;
+      --danger: #FF4D6D;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Noto Sans Arabic", sans-serif;
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(circle at 10% 10%, var(--glow) 0%, transparent 30%),
+        radial-gradient(circle at 90% 80%, rgba(200, 120, 255, 0.1) 0%, transparent 40%),
+        linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
+      color: var(--text);
+      line-height: 1.55;
+      overflow-x: hidden;
+    }
+
+    .container { max-width: 1120px; margin: 0 auto; padding: 20px }
+
+    /* Animations & Transitions */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .task, .card, .kpi { animation: fadeIn 0.5s ease backwards; }
+    .task { cursor: grab; }
+    .task.sortable-ghost { background: rgba(77, 127, 255, 0.3); border-style: dashed; }
     .task.sortable-chosen { cursor: grabbing; }
 
-    .topbar{  
-      display:flex; align-items:center; justify-content:space-between;  
-      padding:15px; background: rgba(11,18,32,.8); border:1px solid var(--stroke);  
-      border-radius: var(--radius); backdrop-filter: blur(12px); position: sticky; top: 15px; z-index: 100;  
-    }  
+    /* Glassmorphism Card */
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      backdrop-filter: blur(12px);
+      overflow: hidden;
+    }
     
-    .grid{ margin-top:20px; display:grid; gap:20px; grid-template-columns: 1.2fr 0.8fr; }  
-    @media (max-width: 980px){ .grid{grid-template-columns: 1fr} }  
-    .card{ background: rgba(11,18,32,0.7); border: 1px solid var(--stroke); border-radius: var(--radius); overflow:hidden; }  
-    .card header{ padding:16px; border-bottom: 1px solid var(--stroke); display:flex; align-items:center; justify-content:space-between; }  
-    .card .body{padding:20px}
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      position: sticky;
+      top: 15px;
+      z-index: 100;
+    }
+    .topbar .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .topbar .logo i {
+        font-size: 28px;
+        color: var(--neon);
+    }
+    .topbar h1 {
+        margin:0; font-size:18px; color: var(--text);
+    }
+    #userEmail { font-size: 12px; }
+
+    .grid { margin-top: 20px; display: grid; gap: 20px; grid-template-columns: 1.2fr 0.8fr; }
+    @media (max-width: 980px) { .grid { grid-template-columns: 1fr } }
+
+    .card header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--stroke);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card header h2 { font-size: 16px; margin: 0; display: flex; align-items: center; gap: 8px; }
+    .card .body { padding: 20px }
+
+    /* Progress Circle */
+    .progress-circle {
+      position: relative;
+      width: 160px;
+      height: 160px;
+      margin: 20px auto;
+    }
+    .progress-circle svg {
+      transform: rotate(-90deg);
+      width: 100%; height: 100%;
+    }
+    .progress-circle circle {
+      fill: none;
+      stroke-width: 10;
+      stroke-linecap: round;
+    }
+    .progress-circle .bg-circle { stroke: var(--stroke); }
+    .progress-circle .fg-circle {
+      stroke: url(#progressGradient);
+      transition: stroke-dashoffset 1s ease;
+    }
+    .progress-center {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    .progress-center .percent {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--text);
+      display: block;
+    }
+    .progress-center .label { color: var(--muted); font-size: 12px; }
+    
     /* KPIs */
-    .kpis{display:grid; grid-template-columns: repeat(2, 1fr); gap:12px; margin-bottom: 20px;}  
-    .kpi-main{ grid-column: span 2; background: rgba(57,255,136,0.05); padding:20px; border-radius:14px; border: 1px solid rgba(57,255,136,0.2); }
-    .kpi{ padding:15px; border-radius:14px; background: rgba(10,22,40,0.5); border:1px solid var(--stroke); text-align: center; }  
-    .kpi .value{font-size:24px; font-weight:800; color: var(--neon); display:block;}
-    /* Suggestion Menu Style */
-    .suggest-box {
-      margin-top: 10px; padding: 10px; background: rgba(0,229,255,0.05); 
-      border: 1px dashed var(--neon-2); border-radius: 12px; display: none;
+    .kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 30px; }
+    .kpi {
+      background: rgba(0,0,0,0.2);
+      padding: 15px;
+      border-radius: 14px;
+      border: 1px solid var(--stroke);
+      text-align: center;
     }
-    .suggest-group { margin-bottom: 10px; }
-    .suggest-group label { font-size: 11px; color: var(--neon-2); display: block; margin-bottom: 5px; }
-    .suggest-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-    .tag { 
-      font-size: 11px; padding: 4px 10px; background: rgba(255,255,255,0.05); 
-      border: 1px solid var(--stroke); border-radius: 20px; cursor: pointer; transition: 0.2s;
+    .kpi .value { font-size: 24px; font-weight: 700; color: var(--text); display: block; }
+    .kpi .value i { font-size: 20px; margin-right: 5px; vertical-align: middle; }
+    .kpi .label { color: var(--muted); font-size: 12px; }
+    .kpi .value .bx-check-double { color: var(--neon); }
+    .kpi .value .bx-calendar-star { color: var(--neon-2); }
+
+
+    /* Task List */
+    .task {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--stroke);
+      background: rgba(0, 0, 0, 0.15);
+      margin-bottom: 10px;
+      transition: all 0.2s ease;
     }
-    .tag:hover { background: var(--neon); color: var(--bg); border-color: var(--neon); }
-    /* Buttons */
-    .btn{  
-      border:1px solid rgba(57,255,136,0.3); background: rgba(57,255,136,0.1);  
-      color: var(--text); padding:10px 16px; border-radius:12px; font-weight:600;  
-      cursor:pointer; display:inline-flex; align-items:center; gap:8px; transition: 0.2s;
-    }  
-    .btn:hover:not(:disabled){ transform: translateY(-2px); border-color: var(--neon); background: rgba(57,255,136,0.2); }
-    .btn.secondary{ border-color: var(--stroke); background: rgba(255,255,255,0.05); }
-    .btn.danger{ border-color: var(--danger); background: rgba(255,77,109,0.1); }
-    .btn:disabled { opacity: 0.3; cursor: not-allowed; }
-    .task{  
-      display:flex; align-items:center; justify-content:space-between;  
-      padding:14px; border-radius:14px; border:1px solid var(--stroke); background: rgba(10,22,40,0.3); margin-bottom: 10px;
-      cursor: grab; /* ✨ تم تغيير مؤشر الماوس */
-    }  
-    .task.done { border-color: var(--neon); background: rgba(57,255,136,0.05); }
+    .task:hover {
+        transform: translateY(-2px);
+        border-color: rgba(77, 127, 255, 0.4);
+    }
+    .task.done {
+      border-color: rgba(77, 127, 255, 0.3);
+      background: rgba(77, 127, 255, 0.05);
+    }
     .task.done .title { text-decoration: line-through; color: var(--muted); }
-    .input{  
-      flex:1; background: rgba(10,22,40,0.6); border:1px solid var(--stroke);  
-      color: var(--text); padding:12px; border-radius:12px; outline:none;
+    .task .title { font-weight: 500; }
+    .task-left { display: flex; align-items: center; gap: 12px; }
+    
+    /* Custom Checkbox */
+    .task input[type="checkbox"] {
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--stroke);
+        border-radius: 6px;
+        cursor: pointer;
+        position: relative;
+        transition: 0.2s;
     }
-    .badge { 
-      text-align: center; padding: 10px; border-radius: 12px; background: rgba(255,255,255,0.02); 
-      filter: grayscale(1); opacity: 0.3; transition: 0.5s; border: 1px solid transparent;
+    .task input[type="checkbox"]:hover {
+        border-color: var(--neon);
     }
-    .badge.active { filter: grayscale(0); opacity: 1; border-color: var(--neon); background: rgba(57,255,136,0.05); }
-    .toast{  
-      position: fixed; bottom: 20px; left: 20px; padding:15px; border-radius: 12px;  
-      background: var(--panel); border:1px solid var(--neon); display:none; z-index: 1000;
+    .task input[type="checkbox"]:checked {
+        background: var(--neon);
+        border-color: var(--neon);
     }
-  </style>  
+    .task input[type="checkbox"]:checked::after {
+        content: '\ecb3'; /* boxicons check icon */
+        font-family: 'Boxicons';
+        font-size: 20px;
+        color: var(--bg);
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    /* Buttons & Inputs */
+    .input {
+      flex: 1;
+      background: var(--panel-solid);
+      border: 1px solid var(--stroke);
+      color: var(--text);
+      padding: 12px;
+      border-radius: 12px;
+      outline: none;
+      transition: 0.2s;
+    }
+    .input:focus { border-color: var(--neon); box-shadow: 0 0 15px var(--glow); }
+
+    .btn {
+      border: 1px solid var(--stroke);
+      background: var(--panel);
+      color: var(--text);
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: 0.2s;
+      backdrop-filter: blur(5px);
+    }
+    .btn i { font-size: 20px; }
+    .btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      border-color: var(--neon);
+      color: var(--neon);
+      box-shadow: 0 4px 20px var(--glow);
+    }
+    .btn.primary {
+        background: var(--neon);
+        border-color: var(--neon);
+        color: var(--bg);
+    }
+    .btn.primary:hover:not(:disabled) {
+        color: var(--bg);
+        background: #6896ff;
+    }
+    .btn.danger { border-color: var(--danger); color: var(--danger); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    
+    .badge-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap:15px; }
+    .badge {
+      text-align: center;
+      padding: 15px 10px;
+      border-radius: 12px;
+      background: rgba(0,0,0,0.2);
+      border: 1px solid var(--stroke);
+      filter: grayscale(1);
+      opacity: 0.5;
+      transition: 0.5s;
+    }
+    .badge .icon { font-size: 28px; }
+    .badge .label { font-size: 9px; display: block; }
+    .badge.active { filter: grayscale(0); opacity: 1; border-color: var(--neon-2); box-shadow: 0 0 15px rgba(200, 120, 255, 0.2); }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      padding: 15px 20px;
+      border-radius: 12px;
+      background: var(--panel-solid);
+      border: 1px solid var(--neon);
+      box-shadow: 0 5px 20px var(--glow);
+      display: none;
+      z-index: 1000;
+      animation: fadeIn 0.3s;
+    }
+  </style>
 </head>
-<body>  
-  <div class="container">  
-    <div class="topbar">  
-      <div>
-        <h1 style="margin:0; font-size:18px; color:var(--neon)">تحدي الـ 21 يوماً</h1>
-        <small id="userEmail" class="muted">بانتظار تسجيل الدخول...</small>
+
+<body>
+  <!-- SVG Gradient Definition -->
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <linearGradient id="progressGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" style="stop-color:var(--neon-2);stop-opacity:1" />
+        <stop offset="100%" style="stop-color:var(--neon);stop-opacity:1" />
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <div class="container">
+    <div class="topbar card">
+        <div class="logo">
+            <i class='bx bxs-rocket'></i>
+            <div>
+                <h1>تحدي الـ 21 يوماً</h1>
+                <small id="userEmail" class="muted">بانتظار تسجيل الدخول...</small>
+            </div>
+        </div>
+      <div class="actions">
+        <button id="btnGoogle" class="btn"><i class='bx bxl-google'></i><span>دخول</span></button>
+        <button id="btnLogout" class="btn" style="display:none;"><i class='bx bx-log-out'></i><span>خروج</span></button>
       </div>
-      <div class="actions">  
-        <button id="btnGoogle" class="btn">دخول بجوجل</button>  
-        <button id="btnLogout" class="btn secondary" disabled>خروج</button>  
-      </div>  
     </div>
-    <div class="grid">  
-      <section class="card">  
-        <header>  
-          <h2 style="font-size:15px; margin:0">لوحة الإنجازات</h2>
-          <div id="todayKey" class="btn secondary" style="font-size:12px; padding:4px 12px;">اليوم 1</div>
-        </header>
-        <div class="body">  
-          <div class="kpis">  
-            <div class="kpi-main">  
-              <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                <span>إجمالي التقدم</span>
-                <span id="kpiPercent" style="color:var(--neon); font-weight:bold;">0%</span>
+
+    <div class="grid">
+      <main>
+        <section class="card">
+          <header>
+            <h2><i class='bx bx-pie-chart-alt-2'></i> لوحة التقدم</h2>
+          </header>
+          <div class="body">
+            <div class="progress-circle">
+                <svg viewBox="0 0 36 36">
+                    <path class="bg-circle" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path id="fg-circle" class="fg-circle" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+                <div class="progress-center">
+                    <span id="kpiPercent" class="percent">0%</span>
+                    <span class="label">إجمالي التقدم</span>
+                </div>
+            </div>
+            <div class="kpis">
+              <div class="kpi">
+                <span class="value" id="kpiDay"><i class='bx bx-calendar-star'></i>1/21</span>
+                <span class="label">اليوم الحالي</span>
               </div>
-              <div style="height:8px; background:rgba(255,255,255,0.1); border-radius:10px; overflow:hidden;">
-                <div id="progressBar" style="width:0%; height:100%; background:var(--neon); transition:1s ease;"></div>
+              <div class="kpi">
+                <span class="value" id="kpiTodayProgress"><i class='bx bx-check-double'></i>0%</span>
+                <span class="label">إنجاز اليوم</span>
               </div>
-            </div>  
-            <div class="kpi">  
-              <span class="value" id="kpiDay">1/21</span>  
-              <small class="muted">اليوم الحالي</small>
-            </div>  
-            <div class="kpi">  
-              <span class="value" id="kpiTodayProgress">0%</span>  
-              <small class="muted">إنجاز اليوم</small>
-            </div>  
+            </div>
           </div>
-          <div class="taskList" id="taskList"></div>  
-          <div id="emptyState" style="text-align:center; padding:30px; color:var(--muted);">لا توجد مهام حالياً.</div>  
-        </div>  
-      </section>
-      <aside style="display:flex; flex-direction:column; gap:20px;">  
+        </section>
+
+        <section class="card" style="margin-top:20px;">
+          <header>
+            <h2 style="font-size:15px; margin:0"><i class='bx bx-list-ul'></i> مهام اليوم</h2>
+            <div id="todayKey" class="btn" style="font-size:12px; padding:4px 12px;">اليوم 1</div>
+          </header>
+          <div class="body">
+            <div class="taskList" id="taskList"></div>
+            <div id="emptyState" style="text-align:center; padding:30px; color:var(--muted);"><i class='bx bx-moon' style="font-size:30px; display:block; margin-bottom:10px;"></i>لا توجد مهام بعد.</div>
+          </div>
+        </section>
+
+      </main>
+      
+      <aside style="display:flex; flex-direction:column; gap:20px;">
         <div class="card">
-          <header><h2 style="font-size:14px; margin:0">إضافة مهمة</h2></header>
+          <header><h2><i class='bx bx-plus-circle'></i> إضافة مهمة</h2></header>
           <div class="body">
             <div style="display:flex; gap:8px;">
-              <input id="taskTitle" class="input" placeholder="اكتب مهمتك هنا..." />  
-              <button id="btnSuggest" class="btn secondary" title="اقتراح مهام">💡</button>
+              <input id="taskTitle" class="input" placeholder="اكتب مهمتك هنا..." />
             </div>
-            
-            <div id="suggestBox" class="suggest-box">
-              <div class="suggest-group">
-                <label>🌍 مهام عامة</label>
-                <div class="suggest-tags" id="tags-general"></div>
-              </div>
-              <div class="suggest-group">
-                <label>👦 للأولاد</label>
-                <div class="suggest-tags" id="tags-boys"></div>
-              </div>
-              <div class="suggest-group">
-                <label>👧 للبنات</label>
-                <div class="suggest-tags" id="tags-girls"></div>
-              </div>
-            </div>
-            <button id="btnAddTask" class="btn" style="width:100%; margin-top:10px; justify-content:center;" disabled>+ إضافة المهمة</button>  
+            <button id="btnAddTask" class="btn primary" style="width:100%; margin-top:10px;" disabled><i class='bx bx-plus'></i> إضافة المهمة</button>
           </div>
         </div>
+
         <div class="card">
-          <header><h2 style="font-size:14px; margin:0">الأوسمة</h2></header>
-          <div class="body" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px;">
-            <div class="badge" id="badge-1">🚀<br><small style="font-size:8px">بداية</small></div>
-            <div class="badge" id="badge-7">🔥<br><small style="font-size:8px">7 أيام</small></div>
-            <div class="badge" id="badge-14">💎<br><small style="font-size:8px">14 يوم</small></div>
-            <div class="badge" id="badge-21">👑<br><small style="font-size:8px">بطل</small></div>
+            <header><h2><i class='bx bxs-award'></i> الأوسمة</h2></header>
+            <div class="body badge-grid">
+              <div class="badge" id="badge-1"><span class="icon">🚀</span><small class="label">بداية</small></div>
+              <div class="badge" id="badge-7"><span class="icon">🔥</span><small class="label">7 أيام</small></div>
+              <div class="badge" id="badge-14"><span class="icon">💎</span><small class="label">14 يوم</small></div>
+              <div class="badge" id="badge-21"><span class="icon">👑</span><small class="label">البطل</small></div>
+            </div>
           </div>
-        </div>
+
         <div class="card">
+          <header><h2><i class='bx bx-slider-alt'></i> التحكم</h2></header>
           <div class="body" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <button id="btnPrevDay" class="btn secondary" disabled>السابق</button>  
-            <button id="btnNextDay" class="btn secondary" disabled>التالي</button>  
-            <button id="btnReset" class="btn danger" style="grid-column: span 2; justify-content:center;" disabled>تصفير التحدي</button>  
+            <button id="btnPrevDay" class="btn" disabled><i class='bx bx-left-arrow-alt'></i> السابق</button>
+            <button id="btnNextDay" class="btn" disabled>التالي <i class='bx bx-right-arrow-alt'></i></button>
+            <button id="btnReset" class="btn danger" style="grid-column: span 2;" disabled><i class='bx bx-reset'></i> تصفير التحدي</button>
           </div>
         </div>
-      </aside>  
-    </div>  
+      </aside>
+    </div>
   </div>
+
   <div class="toast" id="toast"></div>
-  <script type="module">  
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";  
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";  
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    // Firebase Config
-    const firebaseConfig = {  
-      apiKey: "AIzaSyD7XzFMve-N8ALJPlxaBQM_iMZtbr05dCc",  
-      authDomain: "hamo-124d8.firebaseapp.com",  
-      projectId: "hamo-124d8",  
-      storageBucket: "hamo-124d8.firebasestorage.app",  
-      messagingSenderId: "487641126653",  
-      appId: "1:487641126653:web:6378be437f6d0cb94fd094"  
+    const firebaseConfig = {
+      apiKey: "AIzaSyD7XzFMve-N8ALJPlxaBQM_iMZtbr05dCc",
+      authDomain: "hamo-124d8.firebaseapp.com",
+      projectId: "hamo-124d8",
+      storageBucket: "hamo-124d8.appspot.com",
+      messagingSenderId: "487641126653",
+      appId: "1:487641126653:web:6378be437f6d0cb94fd094"
     };
 
-    const app = initializeApp(firebaseConfig);  
-    const auth = getAuth(app);  
-    const db = getFirestore(app);  
-    const provider = new GoogleAuthProvider();  
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
     const $ = (id) => document.getElementById(id);
 
-    let currentUser = null;  
+    let currentUser = null;
     let userData = null;
-    let sortable = null; // ✨ متغير لحفظ كائن السحب
+    let sortable = null;
 
-    // --- Suggestion Data ---
-    const suggestions = {
-      general: \["شرب 8 أكواب ماء", "قراءة 5 صفحات", "مشي 15 دقيقة", "ترتيب السرير", "كتابة 3 نعم (امتنان)"\],
-      boys: \["10 تمارين ضغط", "تعلم 5 كلمات لغة", "ترتيب درج مكركب", "صلاة الفجر/استيقاظ مبكر"\],
-      girls: \["روتين عناية بالبشرة", "كتابة يوميات 5 دقايق", "مساعدة في المطبخ", "تأمل 10 دقائق"\]
-    };
-
-    function initSuggestions() {
-      \['general', 'boys', 'girls'\].forEach(cat => {
-        const container = $(\`tags-${cat}\`);
-        suggestions\[cat\].forEach(text => {
-          const span = document.createElement('span');
-          span.className = 'tag';
-          span.textContent = text;
-          span.onclick = () => { $("taskTitle").value = text; $("suggestBox").style.display = 'none'; };
-          container.appendChild(span);
-        });
-      });
-    }
-
-    // --- Core Functions ---
     function showToast(msg) {
-      $("toast").textContent = msg; $("toast").style.display = "block";
+      $("toast").textContent = msg;
+      $("toast").style.display = "block";
       setTimeout(() => $("toast").style.display = "none", 3000);
     }
 
-    async function updateDB() {
+    async function updateDB(doRender = true) {
       if (!currentUser) return;
       await updateDoc(doc(db, "users", currentUser.uid), userData);
-      render();
+      if(doRender) render();
     }
 
     function render() {
-      if (!currentUser) return;
+      if (!userData) return;
 
-      document.querySelectorAll("button:not(#btnGoogle)").forEach(b => b.disabled = false);
       $("userEmail").textContent = currentUser.email;
-
+      
       const dIdx = userData.progress.dayIndex;
       const dKey = \`day\_${String(dIdx).padStart(2, '0')}\`;
+      
+      const kpiDayValue = \`<i class='bx bx-calendar-star'></i>${dIdx}/21\`;
+      if ($("kpiDay").innerHTML !== kpiDayValue) $("kpiDay").innerHTML = kpiDayValue;
 
-      $("kpiDay").textContent = \`${dIdx}/21\`;
       $("todayKey").textContent = \`اليوم ${dIdx}\`;
 
-      const tasks = userData.tasks\[dKey\] || \[\];
+      const tasks = userData.tasks[dKey] || [];
       const doneToday = tasks.filter(t => t.done).length;
-      $("kpiTodayProgress").textContent = tasks.length ? Math.round((doneToday/tasks.length)\*100) + "%" : "0%";
+      const todayProgress = tasks.length ? Math.round((doneToday / tasks.length) * 100) : 0;
+      
+      const kpiTodayValue = \`<i class='bx bx-check-double'></i>${todayProgress}%\`
+      if ($("kpiTodayProgress").innerHTML !== kpiTodayValue) $("kpiTodayProgress").innerHTML = kpiTodayValue;
 
       let total = 0, done = 0;
-      Object.values(userData.tasks).forEach(list => { total += list.length; done += list.filter(t => t.done).length; });
-      const global = total ? Math.round((done/total)\*100) : 0;
-      $("kpiPercent").textContent = global + "%";
-      $("progressBar").style.width = global + "%";
+      Object.values(userData.tasks).forEach(list => {
+        total += list.length;
+        done += list.filter(t => t.done).length;
+      });
+      const global = total ? Math.round((done / total) * 100) : 0;
+
+      if ($("kpiPercent").textContent !== global + "%") $("kpiPercent").textContent = global + "%";
+      
+      const circle = $("fg-circle");
+      const radius = circle.r.baseVal.value;
+      const circumference = 2 * Math.PI * radius;
+      const offset = circumference - (global / 100) * circumference;
+      if(circle.style.strokeDasharray !== \`\${circumference} \${circumference}\`) circle.style.strokeDasharray = \`\${circumference} \${circumference}\`;
+      if(circle.style.strokeDashoffset !== offset) circle.style.strokeDashoffset = offset;
 
       // Badges
-      if (done >= 1) $("badge-1").classList.add("active");
-      if (dIdx >= 7 && done >= 5) $("badge-7").classList.add("active");
-      if (dIdx >= 14) $("badge-14").classList.add("active");
-      if (global === 100 && total > 5) $("badge-21").classList.add("active");
+      $("badge-1").classList.toggle("active", done >= 1);
+      $("badge-7").classList.toggle("active", dIdx >= 7 && done >= 5);
+      $("badge-14").classList.toggle("active", dIdx >= 14);
+      $("badge-21").classList.toggle("active", global === 100 && total > 5);
 
       const listEl = $("taskList");
       listEl.innerHTML = "";
@@ -276,113 +468,105 @@
       tasks.forEach(task => {
         const div = document.createElement("div");
         div.className = \`task ${task.done ? 'done' : ''}\`;
-        // ✨ تم إضافة data-id للتعرف على المهمة
-        div.setAttribute('data-id', task.id); 
+        div.setAttribute('data-id', task.id);
         div.innerHTML = \`
-          <div style="display:flex; align-items:center; gap:10px;">
+          <div class="task-left">
             <input type="checkbox" ${task.done ? 'checked' : ''}>
             <span class="title">${task.title}</span>
           </div>
-          <div>
-            <button class="btn secondary" style="padding:4px 8px; font-size:10px;">تعديل</button>
-            <button class="btn danger" style="padding:4px 8px; font-size:10px;">حذف</button>
+          <div class="task-actions">
+            <button class="btn" style="padding:4px 8px; font-size:10px;"><i class='bx bx-edit'></i></button>
+            <button class="btn danger" style="padding:4px 8px; font-size:10px;"><i class='bx bx-trash'></i></button>
           </div>
         \`;
 
-        div.querySelector("input").onchange = (e) => { 
-          task.done = e.target.checked; 
-          if (task.done) confetti({ particleCount: 100, spread: 70, origin: { y: 0.8 } });
-          updateDB(); 
+        div.querySelector("input").onchange = (e) => {
+          task.done = e.target.checked;
+          if (task.done) confetti({ particleCount: 100, spread: 70, origin: { y: 0.8 }, colors: ['#4D7FFF', '#C77EFF'] });
+          updateDB();
         };
-
-        div.querySelectorAll("button")\[0\].onclick = () => { 
-          const n = prompt("تعديل المهمة:", task.title); 
-          if(n && n.trim() !== ''){ task.title = n.trim(); updateDB(); } 
+        div.querySelectorAll("button")[0].onclick = () => {
+          const n = prompt("تعديل المهمة:", task.title);
+          if (n && n.trim() !== '') { task.title = n.trim(); updateDB(); }
         };
-        div.querySelectorAll("button")\[1\].onclick = () => { 
-          if(confirm("هل أنت متأكد من حذف المهمة؟")){ 
-            userData.tasks\[dKey\] = tasks.filter(t => t.id !== task.id); 
-            updateDB(); 
-          } 
+        div.querySelectorAll("button")[1].onclick = () => {
+          if (confirm("هل أنت متأكد من حذف المهمة؟")) {
+            userData.tasks[dKey] = tasks.filter(t => t.id !== task.id);
+            updateDB();
+          }
         };
         listEl.appendChild(div);
       });
     }
-
-    // ✨ --- دالة لتفعيل السحب والإفلات ---
+    
     function initSortable() {
-      if (sortable) { sortable.destroy(); } // تدمير النسخة القديمة قبل إنشاء واحدة جديدة
-      const listEl = $("taskList");
-      sortable = new Sortable(listEl, {
-        animation: 150, // سرعة الحركة
-        ghostClass: 'sortable-ghost', // الكلاس الذي يطبق على العنصر الوهمي أثناء السحب
-        chosenClass: 'sortable-chosen', // الكلاس الذي يطبق على العنصر عند اختياره
-        onEnd: function (evt) {
-          const dKey = \`day\_${String(userData.progress.dayIndex).padStart(2, '0')}\`;
-          const currentTasks = userData.tasks\[dKey\] || \[\];
-          
-          // إعادة ترتيب المصفوفة بناءً على الترتيب الجديد في الـ DOM
-          const newOrder = Array.from(evt.to.children).map(item => {
-            const taskId = Number(item.getAttribute('data-id'));
-            return currentTasks.find(t => t.id === taskId);
-          });
-          
-          userData.tasks\[dKey\] = newOrder;
-          // لا نเรียก render هنا، فقط نحدث قاعدة البيانات للحفاظ على الترتيب
-          updateDoc(doc(db, "users", currentUser.uid), userData); 
-        }
-      });
+        if (sortable) { sortable.destroy(); }
+        const listEl = $("taskList");
+        sortable = new Sortable(listEl, {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            onEnd: function (evt) {
+                const dKey = \`day\_${String(userData.progress.dayIndex).padStart(2, '0')}\`;
+                const currentTasks = userData.tasks[dKey] || [];
+                const newOrder = Array.from(evt.to.children).map(item => {
+                    const taskId = Number(item.getAttribute('data-id'));
+                    return currentTasks.find(t => t.id === taskId);
+                });
+                userData.tasks[dKey] = newOrder.filter(Boolean); // filter out undefined if any
+                updateDB(false); // Update DB without re-rendering
+            }
+        });
     }
 
-    // --- Events ---
-    $("btnGoogle").onclick = () => signInWithPopup(auth, provider);
-    $("btnLogout").onclick = () => { signOut(auth); location.reload(); };
-    $("btnSuggest").onclick = () => { const s = $("suggestBox"); s.style.display = s.style.display === 'block' ? 'none' : 'block'; };
-    
-    $("btnAddTask").onclick = () => {
-      const t = $("taskTitle").value.trim(); if (!t) return;
-      const dKey = \`day\_${String(userData.progress.dayIndex).padStart(2, '0')}\`;
-      if (!userData.tasks\[dKey\]) userData.tasks\[dKey\] = \[\];
-      userData.tasks\[dKey\].push({ id: Date.now(), title: t, done: false });
-      $("taskTitle").value = ""; updateDB();
-    };
-
-    $("btnNextDay").onclick = () => { if (userData.progress.dayIndex < 21) { userData.progress.dayIndex++; updateDB(); initSortable(); } };
-    $("btnPrevDay").onclick = () => { if (userData.progress.dayIndex > 1) { userData.progress.dayIndex--; updateDB(); initSortable(); } };
-
-    $("btnReset").onclick = async () => { if(confirm("هل أنت متأكد من تصفير كل شيء؟")){ userData.tasks = {}; userData.progress.dayIndex = 1; updateDB(); } };
-    
     onAuthStateChanged(auth, async user => {
       if (user) {
         currentUser = user;
         $("btnGoogle").style.display = 'none';
         $("btnLogout").style.display = 'inline-flex';
-        $("btnAddTask").disabled = false;
-        
+        document.querySelectorAll("button, input").forEach(b => b.disabled = false);
+
         const snap = await getDoc(doc(db, "users", user.uid));
-        if (snap.exists()) {
-          userData = snap.data();
-        } else {
-          userData = { tasks: {}, progress: { dayIndex: 1 }, email: user.email };
-          await setDoc(doc(db, "users", user.uid), userData);
-        }
+        userData = snap.exists() ? snap.data() : { tasks: {}, progress: { dayIndex: 1 }, email: user.email };
+        if (!snap.exists()) await setDoc(doc(db, "users", user.uid), userData);
         
+        // Ensure data structure is correct
+        if (!userData.progress) userData.progress = { dayIndex: 1 };
+        if (!userData.tasks) userData.tasks = {};
+
         render();
-        initSortable(); // ✨ تفعيل السحب والإفلات بعد تحميل البيانات
+        initSortable();
       } else {
-        // حالة عدم تسجيل الدخول
-        currentUser = null;
-        userData = null;
-        document.querySelectorAll("button:not(#btnGoogle)").forEach(b => b.disabled = true);
+        currentUser = null; userData = null;
         $("btnGoogle").style.display = 'inline-flex';
         $("btnLogout").style.display = 'none';
         $("userEmail").textContent = 'بانتظار تسجيل الدخول...';
         $("taskList").innerHTML = '';
         $("emptyState").style.display = 'block';
+        $("kpiPercent").textContent = '0%';
+        const circle = $("fg-circle");
+        circle.style.strokeDashoffset = circle.r.baseVal.value * 2 * Math.PI;
+        document.querySelectorAll("button:not(#btnGoogle), input").forEach(b => b.disabled = true);
       }
     });
 
-    initSuggestions();
+    // Event Listeners
+    $("btnGoogle").onclick = () => signInWithPopup(auth, provider);
+    $("btnLogout").onclick = () => { signOut(auth); location.reload(); };
+    $("btnAddTask").onclick = () => {
+      const t = $("taskTitle").value.trim(); if (!t) return;
+      const dKey = \`day\_${String(userData.progress.dayIndex).padStart(2, '0')}\`;
+      if (!userData.tasks[dKey]) userData.tasks[dKey] = [];
+      userData.tasks[dKey].push({ id: Date.now(), title: t, done: false });
+      $("taskTitle").value = "";
+      updateDB();
+    };
+    $("taskTitle").onkeyup = (e) => { if(e.key === 'Enter') $("btnAddTask").click() };
+
+    $("btnNextDay").onclick = () => { if (userData.progress.dayIndex < 21) { userData.progress.dayIndex++; updateDB().then(initSortable); } };
+    $("btnPrevDay").onclick = () => { if (userData.progress.dayIndex > 1) { userData.progress.dayIndex--; updateDB().then(initSortable); } };
+    $("btnReset").onclick = async () => { if (confirm("سيتم حذف جميع المهام والتقدم، هل أنت متأكد؟")) { userData.tasks = {}; userData.progress.dayIndex = 1; updateDB(); } };
+
   </script>
 </body>
 </html>
