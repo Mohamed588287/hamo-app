@@ -1,100 +1,288 @@
-<!-- 🔥 UI تحسينات -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>🔥 تحدي الانضباط</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
 <style>
-button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 10px rgba(255,255,255,0.5);
+body {
+  font-family:'Cairo';
+  background:#0f172a;
+  color:white;
+  text-align:center;
 }
-
-.card {
-  transition:0.3s;
+.light {
+  background:#f1f5f9;
+  color:black;
 }
-.card:hover {
-  transform:translateY(-3px);
-  box-shadow:0 5px 15px rgba(0,0,0,0.5);
-}
-
-/* 🏆 leaderboard */
-.leaderboard {
+.container {max-width:900px;margin:auto;padding:20px;position:relative;}
+.card {background:#1e293b;margin:10px;padding:15px;border-radius:12px;display:flex;justify-content:space-between;}
+.light .card {background:#fff;}
+button {padding:8px;border:none;border-radius:8px;cursor:pointer;margin:2px;}
+.done {background:#22c55e;}
+.not {background:#ef4444;}
+.progress {background:#334155;border-radius:10px;overflow:hidden;margin:20px;}
+.bar {height:20px;background:#22c55e;width:0%;}
+.settings {
+  display:none;
+  position:absolute;
+  top:80px;
+  right:50%;
+  transform:translateX(50%);
+  width:300px;
   background:#1e293b;
-  margin:20px;
   padding:15px;
-  border-radius:12px;
+  border-radius:10px;
+  box-shadow:0 0 15px rgba(0,0,0,0.6);
+  z-index:1000;
 }
-.light .leaderboard {background:#fff;}
+.light .settings {background:#fff;}
+.task-item {margin:5px;padding:5px;border-radius:5px;}
+.check {
+  margin-top:5px;
+  font-size:22px;
+  animation: pop 0.3s ease;
+}
 
-.leader-item {
-  display:flex;
-  justify-content:space-between;
-  padding:5px;
-  border-bottom:1px solid #444;
+@keyframes pop {
+  0% {transform: scale(0); opacity:0;}
+  50% {transform: scale(1.3);}
+  100% {transform: scale(1); opacity:1;}
+}
+
+/* 🎉 confetti */
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  background: red;
+  top: 0;
+  animation: fall 1s linear forwards;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(100vh) rotate(360deg);
+    opacity:0;
+  }
 }
 </style>
+</head>
 
-<!-- 🏆 Ranking -->
-<div class="leaderboard">
-  <h3>🏆 أفضل المستخدمين</h3>
-  <div id="leaderboard"></div>
+<body>
+
+<!-- 🔊 صوت -->
+<audio id="doneSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+
+<button onclick="toggleMode()">🌙</button>
+
+<div class="container">
+
+<h1 id="title">🔥 تحدي الانضباط</h1>
+
+<button onclick="login()">تسجيل بجوجل</button>
+<button onclick="toggleSettings()">⚙️ إعدادات</button>
+
+<div id="settings" class="settings">
+  <h3>⚙️ الإعدادات</h3>
+
+  <input id="daysInput" placeholder="عدد الأيام"><br><br>
+  <input id="titleInput" placeholder="اسم التحدي"><br><br>
+
+  <input id="taskName" placeholder="اسم المهمة">
+  <input type="color" id="taskColor">
+  <button onclick="addTask()">➕</button>
+
+  <div id="tasksList"></div><br>
+
+  <button onclick="saveSettings()">حفظ</button>
+</div>
+
+<p id="user"></p>
+<h3 id="streak">🔥 Streak: 0</h3>
+
+<div class="progress"><div id="bar" class="bar"></div></div>
+
+<div id="stats"></div>
+
+<div id="days"></div>
+
 </div>
 
 <script>
 
-/* 🏆 تحميل الرانكينج */
-async function loadLeaderboard(){
-  const snapshot = await db.collection("users").get();
+const firebaseConfig = {
+  apiKey: "AIzaSyD7XzFMve-N8ALJPlxaBQM_iMZtbr05dCc",
+  authDomain: "hamo-124d8.firebaseapp.com",
+  projectId: "hamo-124d8"
+};
 
-  let users = [];
+firebase.initializeApp(firebaseConfig);
 
-  snapshot.forEach(doc=>{
-    let data = doc.data();
-    let days = data.days || [];
-    let score = 0;
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-    days.forEach(day=>{
-      Object.values(day||{}).forEach(v=>{
-        if(v) score++;
-      });
-    });
+let userId="";
+let userData={};
+let tasksArr=[];
 
-    users.push({
-      email: data.email || "مستخدم",
-      score: score
-    });
-  });
-
-  users.sort((a,b)=>b.score-a.score);
-
-  let html="";
-  users.slice(0,5).forEach((u,i)=>{
-    html+=`
-    <div class="leader-item">
-      <span>🥇 ${i+1}</span>
-      <span>${u.email}</span>
-      <span>${u.score}</span>
-    </div>`;
-  });
-
-  document.getElementById("leaderboard").innerHTML=html;
-}
-
-/* تعديل login عشان نخزن الإيميل */
 function login(){
   const provider=new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider).then(res=>{
     userId=res.user.uid;
     document.getElementById("user").innerText=res.user.email;
-
-    db.collection("users").doc(userId).set({
-      email: res.user.email
-    },{merge:true});
-
     load();
-    loadLeaderboard();
   });
 }
 
-/* استدعاء الرانكينج بعد التحميل */
-setTimeout(()=>{
-  if(userId) loadLeaderboard();
-},2000);
+function toggleMode(){
+  document.body.classList.toggle("light");
+}
+
+function toggleSettings(){
+  let s=document.getElementById("settings");
+  s.style.display = (s.style.display=="none") ? "block" : "none";
+}
+
+function addTask(){
+  let name=document.getElementById("taskName").value;
+  let color=document.getElementById("taskColor").value;
+
+  if(!name) return;
+
+  tasksArr.push({name,color});
+  document.getElementById("taskName").value="";
+  renderTasks();
+}
+
+function renderTasks(){
+  let html="";
+  tasksArr.forEach((t,i)=>{
+    html+=`
+    <div class="task-item">
+      <span style="color:${t.color}">${t.name}</span>
+      <button onclick="removeTask(${i})">❌</button>
+    </div>`;
+  });
+  document.getElementById("tasksList").innerHTML=html;
+}
+
+function removeTask(i){
+  tasksArr.splice(i,1);
+  renderTasks();
+}
+
+/* 🎉 confetti */
+function fireConfetti(){
+  for(let i=0;i<20;i++){
+    let c=document.createElement("div");
+    c.className="confetti";
+    c.style.left=Math.random()*100+"vw";
+    c.style.background=`hsl(${Math.random()*360},100%,50%)`;
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),1000);
+  }
+}
+
+async function load(){
+  const doc=await db.collection("users").doc(userId).get();
+  userData=doc.exists?doc.data():{};
+
+  let daysCount=userData.custom?.days||21;
+  let title=userData.custom?.title||"🔥 تحدي الانضباط";
+
+  tasksArr=userData.custom?.tasks||[
+    {name:"مذاكرة",color:"#22c55e"},
+    {name:"شغل",color:"#3b82f6"}
+  ];
+
+  renderTasks();
+
+  document.getElementById("title").innerText=title;
+
+  let data=userData.days||[];
+
+  let html="";
+  let done=0;
+  let streak=0;
+  let completedTasks=0;
+
+  for(let i=0;i<daysCount;i++){
+    let d=data[i]||{};
+    html+=`<div class="card"><span>اليوم ${i+1}</span><div>`;
+
+    let complete=true;
+
+    tasksArr.forEach(t=>{
+      if(!d[t.name]) complete=false;
+      if(d[t.name]) completedTasks++;
+
+      html+=`
+      <div style="display:inline-block;text-align:center;margin:3px;">
+        <button style="background:${t.color}" class="${d[t.name]?'done':'not'}" onclick="toggle(${i},'${t.name}')">
+          ${t.name}
+        </button>
+        <div class="check">${d[t.name] ? "✔️" : ""}</div>
+      </div>`;
+    });
+
+    if(complete){done++;streak++;} else streak=0;
+
+    html+=`</div></div>`;
+  }
+
+  document.getElementById("days").innerHTML=html;
+  document.getElementById("bar").style.width=(done/daysCount*100)+"%";
+  document.getElementById("streak").innerText="🔥 Streak: "+streak;
+
+  let totalTasks=daysCount*tasksArr.length;
+  let percent=Math.round((completedTasks/totalTasks)*100);
+
+  document.getElementById("stats").innerHTML=`
+    <h3>📊 تحليل الأداء</h3>
+    <p>✅ ${completedTasks} / ${totalTasks}</p>
+    <p>🔥 ${percent}% التزام</p>
+  `;
+}
+
+async function toggle(i,task){
+  const ref=db.collection("users").doc(userId);
+  let data=userData.days||[];
+  if(!data[i]) data[i]={};
+
+  let newValue=!data[i][task];
+  data[i][task]=newValue;
+
+  await ref.set({days:data},{merge:true});
+
+  if(newValue){
+    document.getElementById("doneSound").play();
+    if(navigator.vibrate) navigator.vibrate(100);
+    fireConfetti();
+  }
+
+  load();
+}
+
+async function saveSettings(){
+  let days=document.getElementById("daysInput").value;
+  let title=document.getElementById("titleInput").value;
+
+  await db.collection("users").doc(userId).set({
+    custom:{days:+days,title,tasks:tasksArr}
+  },{merge:true});
+
+  alert("تم الحفظ ✅");
+  load();
+}
 
 </script>
+
+</body>
+</html>
