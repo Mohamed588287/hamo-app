@@ -77,13 +77,11 @@ body{
 .done{background:#22c55e;}
 .not{background:#ef4444;}
 
-/* 🔥 تكبير المهام */
 .task-btn{
   font-size:16px;
   padding:10px;
 }
 
-/* ✔ */
 .check{
   font-size:18px;
   animation:pop 0.3s;
@@ -100,6 +98,14 @@ body{
   padding:15px;
   border-radius:10px;
   margin-top:10px;
+}
+
+/* dashboard */
+#dashboard{
+  margin:15px;
+  background:#1e293b;
+  padding:15px;
+  border-radius:10px;
 }
 
 /* confetti */
@@ -154,10 +160,19 @@ body{
 <button onclick="toggleSettings()">⚙️ إعدادات</button>
 
 <div id="settings" class="settings">
-  <p>هنا تقدر تضيف إعداداتك قريبًا 🔥</p>
+  <h3>⚙️ إعدادات المهام</h3>
+
+  <input id="newTask" placeholder="اسم المهمة">
+  <button onclick="addNewTask()">➕ إضافة</button>
+
+  <div id="taskList"></div>
+
+  <button onclick="saveTasks()">💾 حفظ</button>
 </div>
 
 <p id="user"></p>
+
+<div id="dashboard"></div>
 
 <div id="days"></div>
 
@@ -177,6 +192,7 @@ const db=firebase.firestore();
 
 let userId="";
 let tasks=["مذاكرة","شغل"];
+let customTasks=[];
 
 function login(){
   const provider=new firebase.auth.GoogleAuthProvider();
@@ -184,6 +200,7 @@ function login(){
     userId=res.user.uid;
     document.getElementById("user").innerText=res.user.email;
     load();
+    loadTasks();
   });
 }
 
@@ -203,11 +220,63 @@ function fireConfetti(){
   }
 }
 
+/* ===== إعدادات ===== */
+
+async function loadTasks(){
+  const doc = await db.collection("users").doc(userId).get();
+  let data = doc.exists ? doc.data() : {};
+
+  customTasks = data.tasks || tasks;
+  tasks = customTasks;
+
+  renderTaskList();
+}
+
+function renderTaskList(){
+  let html="";
+  customTasks.forEach((t,i)=>{
+    html+=`
+      <div>
+        ${t}
+        <button onclick="deleteTask(${i})">❌</button>
+      </div>`;
+  });
+  document.getElementById("taskList").innerHTML=html;
+}
+
+function addNewTask(){
+  let t=document.getElementById("newTask").value;
+  if(!t) return;
+
+  customTasks.push(t);
+  document.getElementById("newTask").value="";
+  renderTaskList();
+}
+
+function deleteTask(i){
+  customTasks.splice(i,1);
+  renderTaskList();
+}
+
+async function saveTasks(){
+  await db.collection("users").doc(userId).set({
+    tasks:customTasks
+  },{merge:true});
+
+  tasks = customTasks;
+
+  alert("تم الحفظ ✅");
+  load();
+}
+
+/* ===== التطبيق ===== */
+
 async function load(){
   const doc=await db.collection("users").doc(userId).get();
   let data=doc.exists?doc.data().days:[];
 
   let html="";
+  let doneCount=0;
 
   for(let i=0;i<21;i++){
     let d=data[i]||{};
@@ -219,12 +288,22 @@ async function load(){
         <button class="task-btn ${d[t]?'done':'not'}" onclick="toggle(${i},'${t}')">${t}</button>
         <div class="check">${d[t]?"✔️":""}</div>
       </div>`;
+      if(d[t]) doneCount++;
     });
 
     html+=`</div></div>`;
   }
 
   document.getElementById("days").innerHTML=html;
+
+  let total=21*tasks.length;
+  let percent=Math.round((doneCount/total)*100);
+
+  document.getElementById("dashboard").innerHTML=`
+    <h3>📊 Dashboard</h3>
+    <p>✅ ${doneCount} مهمة</p>
+    <p>🔥 ${percent}% التزام</p>
+  `;
 }
 
 async function toggle(i,t){
