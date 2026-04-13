@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>تحدي 21 يوم - مع الإعدادات</title>
+  <title>تحدي 21 يوم - متعدد اللغات</title>
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -52,6 +52,7 @@
     .kpi { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 14px; border: 1px solid var(--stroke); text-align: center; }
     .kpi .value { font-size: 24px; font-weight: 700; display: block; }
     .kpi .value i { font-size: 20px; margin-right: 5px; vertical-align: middle; color: var(--neon); }
+    html[dir="ltr"] .kpi .value i { margin-right: 0; margin-left: 5px; }
     .kpi .label { color: var(--muted); font-size: 12px; }
     .kpi .value .bx-calendar-star { color: var(--neon-2); }
     .task { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--stroke); background: rgba(0,0,0,0.15); margin-bottom: 10px; transition: all 0.2s; }
@@ -78,7 +79,7 @@
     .badge .label { font-size: 9px; display: block; }
     .badge.active { filter: grayscale(0); opacity: 1; border-color: var(--neon-2); box-shadow: 0 0 15px rgba(200, 120, 255, 0.2); }
     .toast { position: fixed; bottom: 20px; left: 20px; padding: 15px 20px; border-radius: 12px; background: var(--panel-solid); border: 1px solid var(--neon); box-shadow: 0 5px 20px var(--glow); display: none; z-index: 1000; animation: fadeIn 0.3s; }
-    /* ✨ Settings Modal Styles */
+    html[dir="ltr"] .toast { left: auto; right: 20px; }
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; }
     .modal-content { background: var(--panel-solid); border-radius: var(--radius); border: 1px solid var(--stroke); padding: 25px; width: 90%; max-width: 450px; animation: fadeIn 0.3s; }
     .modal-content h2 { margin-top: 0; display: flex; align-items: center; gap: 10px; }
@@ -96,13 +97,12 @@
         <div class="logo">
             <i class='bx bxs-rocket'></i>
             <div>
-                <h2 id="displayName">تحدي الـ 21 يوماً</h2>
-                <small id="userEmail" class="muted">بانتظار تسجيل الدخول...</small>
+                <h2 id="displayName" data-translate-key="challengeTitle">تحدي الأيام</h2>
+                <small id="userEmail" class="muted" data-translate-key="waitingForLogin">بانتظار تسجيل الدخول...</small>
             </div>
         </div>
       <div class="actions" style="display: flex; gap: 10px;">
-        <button id="btnGoogle" class="btn"><i class='bx bxl-google'></i><span>دخول</span></button>
-        <!-- ✨ زر الإعدادات -->
+        <button id="btnGoogle" class="btn"><i class='bx bxl-google'></i><span data-translate-key="login">دخول</span></button>
         <button id="btnSettings" class="btn" style="display:none;"><i class='bx bx-cog'></i></button>
         <button id="btnLogout" class="btn" style="display:none;"><i class='bx bx-log-out'></i></button>
       </div>
@@ -111,48 +111,33 @@
     <div class="grid">
       <main>
         <section class="card">
-          <header><h2><i class='bx bx-pie-chart-alt-2'></i> لوحة التقدم</h2></header>
+          <header><h2 data-translate-key="progressPanel"><i class='bx bx-pie-chart-alt-2'></i> لوحة التقدم</h2></header>
           <div class="body">
-            <div class="progress-circle"><svg viewBox="0 0 36 36"><path class="bg-circle" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" /><path id="fg-circle" class="fg-circle" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" /></svg><div class="progress-center"><span id="kpiPercent" class="percent">0%</span><span class="label">إجمالي التقدم</span></div></div>
-            <div class="kpis"><div class="kpi"><span class="value" id="kpiDay"><i class='bx bx-calendar-star'></i>1/21</span><span class="label">اليوم الحالي</span></div><div class="kpi"><span class="value" id="kpiTodayProgress"><i class='bx bx-check-double'></i>0%</span><span class="label">إنجاز اليوم</span></div></div>
+            <div class="progress-circle"><svg viewBox="0 0 36 36"><path class="bg-circle" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" /><path id="fg-circle" class="fg-circle" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" /></svg><div class="progress-center"><span id="kpiPercent" class="percent">0%</span><span class="label" data-translate-key="totalProgress">إجمالي التقدم</span></div></div>
+            <div class="kpis"><div class="kpi"><span class="value" id="kpiDay"></span><span class="label" data-translate-key="currentDay">اليوم الحالي</span></div><div class="kpi"><span class="value" id="kpiTodayProgress"></span><span class="label" data-translate-key="dayProgress">إنجاز اليوم</span></div></div>
           </div>
         </section>
         <section class="card" style="margin-top:20px;">
-          <header><h2 id="tasks-header"><i class='bx bx-list-ul'></i> مهام اليوم</h2><div id="todayKey" class="btn" style="font-size:12px; padding:4px 12px;">اليوم 1</div></header>
-          <div class="body"><div id="taskList"></div><div id="emptyState" style="text-align:center; padding:30px; color:var(--muted);"><i class='bx bx-moon' style="font-size:30px; display:block; margin-bottom:10px;"></i>لا توجد مهام بعد.</div></div>
+          <header><h2 id="tasks-header"><i class='bx bx-list-ul'></i></h2><div id="todayKey" class="btn" style="font-size:12px; padding:4px 12px;"></div></header>
+          <div class="body"><div id="taskList"></div><div id="emptyState" style="text-align:center; padding:30px; color:var(--muted);"><i class='bx bx-moon' style="font-size:30px; display:block; margin-bottom:10px;"></i><span data-translate-key="noTasks">لا توجد مهام بعد.</span></div></div>
         </section>
       </main>
       <aside style="display:flex; flex-direction:column; gap:20px;">
-        <div class="card"><header><h2><i class='bx bx-plus-circle'></i> إضافة مهمة</h2></header><div class="body"><input id="taskTitle" class="input" placeholder="اكتب مهمتك هنا..." /><button id="btnAddTask" class="btn primary" style="width:100%; margin-top:10px;" disabled><i class='bx bx-plus'></i> إضافة</button></div></div>
-        <div class="card"><header><h2><i class='bx bxs-award'></i> الأوسمة</h2></header><div class="body badge-grid"><div class="badge" id="badge-1"><span class="icon">🚀</span><small class="label">بداية</small></div><div class="badge" id="badge-7"><span class="icon">🔥</span><small class="label">7 أيام</small></div><div class="badge" id="badge-14"><span class="icon">💎</span><small class="label">14 يوم</small></div><div class="badge" id="badge-21"><span class="icon">👑</span><small class="label">البطل</small></div></div></div>
-        <div class="card"><header><h2><i class='bx bx-slider-alt'></i> التحكم</h2></header><div class="body" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><button id="btnPrevDay" class="btn" disabled><i class='bx bx-left-arrow-alt'></i></button><button id="btnNextDay" class="btn" disabled><i class='bx bx-right-arrow-alt'></i></button><button id="btnReset" class="btn danger" style="grid-column: span 2;" disabled><i class='bx bx-reset'></i> تصفير</button></div></div>
+        <div class="card"><header><h2 data-translate-key="addTask"><i class='bx bx-plus-circle'></i> إضافة مهمة</h2></header><div class="body"><input id="taskTitle" class="input" /><button id="btnAddTask" class="btn primary" style="width:100%; margin-top:10px;" disabled><i class='bx bx-plus'></i><span data-translate-key="add">إضافة</span></button></div></div>
+        <div class="card"><header><h2 data-translate-key="badges"><i class='bx bxs-award'></i> الأوسمة</h2></header><div class="body badge-grid"><div class="badge" id="badge-1"><span class="icon">🚀</span><small class="label" data-translate-key="badgeStart">بداية</small></div><div class="badge" id="badge-7"><span class="icon">🔥</span><small class="label" data-translate-key="badge7Days">7 أيام</small></div><div class="badge" id="badge-14"><span class="icon">💎</span><small class="label" data-translate-key="badge14Days">14 يوم</small></div><div class="badge" id="badge-21"><span class="icon">👑</span><small class="label" data-translate-key="badgeChampion">البطل</small></div></div></div>
+        <div class="card"><header><h2 data-translate-key="controls"><i class='bx bx-slider-alt'></i> التحكم</h2></header><div class="body" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><button id="btnPrevDay" class="btn" disabled><i class='bx bx-left-arrow-alt'></i><span data-translate-key="prev"></span></button><button id="btnNextDay" class="btn" disabled><span data-translate-key="next"></span><i class='bx bx-right-arrow-alt'></i></button><button id="btnReset" class="btn danger" style="grid-column: span 2;" disabled><i class='bx bx-reset'></i><span data-translate-key="reset"></span></button></div></div>
       </aside>
     </div>
   </div>
 
-  <!-- ✨ نافذة الإعدادات -->
   <div id="settingsModal" class="modal-overlay">
     <div class="modal-content">
-      <h2><i class='bx bx-cog'></i>الإعدادات</h2>
-      <div class="form-group">
-        <label for="inputDisplayName">اسم العرض</label>
-        <input type="text" id="inputDisplayName" class="input" placeholder="اكتب اسمك هنا...">
-      </div>
-      <div class="form-group">
-        <label for="inputChallengeDuration">مدة التحدي (بالأيام)</label>
-        <input type="number" id="inputChallengeDuration" class="input" min="1" max="100">
-      </div>
-      <div class="form-group">
-          <label>خيارات إضافية</label>
-          <div class="checkbox-group">
-            <input type="checkbox" id="inputEnableConfetti">
-            <label for="inputEnableConfetti" style="margin:0; cursor:pointer;">تفعيل احتفال إنجاز المهمة</label>
-          </div>
-      </div>
-      <div style="display:flex; gap:10px; margin-top:25px;">
-        <button id="btnSaveSettings" class="btn primary" style="flex:1;">حفظ</button>
-        <button id="btnCloseSettings" class="btn">إغلاق</button>
-      </div>
+      <h2 data-translate-key="settings"><i class='bx bx-cog'></i>الإعدادات</h2>
+      <div class="form-group"><label data-translate-key="displayNameLabel">اسم العرض</label><input type="text" id="inputDisplayName" class="input"></div>
+      <div class="form-group"><label data-translate-key="challengeDurationLabel">مدة التحدي (بالأيام)</label><input type="number" id="inputChallengeDuration" class="input" min="1" max="100"></div>
+      <div class="form-group"><label data-translate-key="languageLabel">اللغة</label><select id="inputLanguage" class="input"><option value="ar">العربية</option><option value="en">English</option></select></div>
+      <div class="form-group"><label data-translate-key="optionsLabel">خيارات</label><div class="checkbox-group"><input type="checkbox" id="inputEnableConfetti"><label for="inputEnableConfetti" style="margin:0; cursor:pointer;" data-translate-key="confettiLabel">تفعيل احتفال إنجاز المهمة</label></div></div>
+      <div style="display:flex; gap:10px; margin-top:25px;"><button id="btnSaveSettings" class="btn primary" style="flex:1;" data-translate-key="save">حفظ</button><button id="btnCloseSettings" class="btn" data-translate-key="close">إغلاق</button></div>
     </div>
   </div>
 
@@ -177,27 +162,80 @@
 
     let currentUser = null, userData = null, sortable = null;
 
-    const defaultSettings = {
-        displayName: '',
-        challengeDuration: 21,
-        enableConfetti: true,
+    // ✨ --- Translation Dictionary ---
+    const translations = {
+        ar: {
+            challengeTitle: "تحدي الأيام", waitingForLogin: "بانتظار تسجيل الدخول...", login: "دخول",
+            progressPanel: "لوحة التقدم", totalProgress: "إجمالي التقدم", currentDay: "اليوم الحالي",
+            dayProgress: "إنجاز اليوم", tasksForDay: "مهام اليوم", noTasks: "لا توجد مهام بعد.",
+            addTask: "إضافة مهمة", add: "إضافة", badges: "الأوسمة", badgeStart: "بداية",
+            badge7Days: "7 أيام", badge14Days: "14 يوم", badgeChampion: "البطل", controls: "التحكم",
+            prev: "السابق", next: "التالي", reset: "تصفير", settings: "الإعدادات",
+            displayNameLabel: "اسم العرض", challengeDurationLabel: "مدة التحدي (بالأيام)",
+            languageLabel: "اللغة", optionsLabel: "خيارات", confettiLabel: "تفعيل احتفال إنجاز المهمة",
+            save: "حفظ", close: "إغلاق", editTask: "تعديل المهمة:", deleteTaskConfirm: "هل أنت متأكد من حذف المهمة؟",
+            resetConfirm: "سيتم حذف جميع المهام والتقدم، هل أنت متأكد؟", settingsSaved: "تم حفظ الإعدادات!",
+            authError: "خطأ في تحميل بيانات المستخدم.", updateError: "خطأ في تحديث البيانات.",
+            enterTask: "اكتب مهمتك هنا..."
+        },
+        en: {
+            challengeTitle: "Days Challenge", waitingForLogin: "Waiting for login...", login: "Login",
+            progressPanel: "Progress Panel", totalProgress: "Total Progress", currentDay: "Current Day",
+            dayProgress: "Day's Progress", tasksForDay: "Tasks for Day", noTasks: "No tasks yet.",
+            addTask: "Add Task", add: "Add", badges: "Badges", badgeStart: "Starter",
+            badge7Days: "7 Days", badge14Days: "14 Days", badgeChampion: "Champion", controls: "Controls",
+            prev: "Prev", next: "Next", reset: "Reset", settings: "Settings",
+            displayNameLabel: "Display Name", challengeDurationLabel: "Challenge Duration (days)",
+            languageLabel: "Language", optionsLabel: "Options", confettiLabel: "Enable task completion confetti",
+            save: "Save", close: "Close", editTask: "Edit Task:", deleteTaskConfirm: "Are you sure you want to delete the task?",
+            resetConfirm: "This will delete all tasks and progress. Are you sure?", settingsSaved: "Settings saved!",
+            authError: "Error loading user data.", updateError: "Error updating data.",
+            enterTask: "Enter your task here..."
+        }
     };
+    
+    let currentLang = 'ar';
+    const defaultSettings = { displayName: '', challengeDuration: 21, enableConfetti: true, language: 'ar' };
 
-    function showToast(msg) { $("toast").textContent = msg; $("toast").style.display = "block"; setTimeout(() => $("toast").style.display = "none", 3000); }
-    async function updateDB(doRender = true) { if (!currentUser) return; try { await updateDoc(doc(db, "users", currentUser.uid), userData); if(doRender) render(); } catch (e) { console.error("Update Error:", e); showToast("خطأ في تحديث البيانات."); } }
+    // ✨ --- Language Functions ---
+    function applyTranslations(lang) {
+        currentLang = lang;
+        document.documentElement.lang = lang;
+        document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        document.querySelectorAll('[data-translate-key]').forEach(el => {
+            const key = el.dataset.translateKey;
+            if (translations[lang][key]) {
+                // For elements like <button><span>text</span></button>
+                const childSpan = el.querySelector('span');
+                if (childSpan) {
+                    childSpan.textContent = translations[lang][key];
+                } else {
+                    el.textContent = translations[lang][key];
+                }
+            }
+        });
+        // Handle placeholders
+        $('taskTitle').placeholder = translations[lang].enterTask;
+    }
+
+    function showToast(key) { $("toast").textContent = translations[currentLang][key] || key; $("toast").style.display = "block"; setTimeout(() => $("toast").style.display = "none", 3000); }
+    async function updateDB(doRender = true) { if (!currentUser) return; try { await updateDoc(doc(db, "users", currentUser.uid), userData); if(doRender) render(); } catch (e) { console.error("Update Error:", e); showToast("updateError"); } }
 
     function render() {
       if (!userData) return;
       const settings = userData.settings || defaultSettings;
-      $("displayName").textContent = settings.displayName || `تحدي ${settings.challengeDuration} يوماً`;
+      applyTranslations(settings.language);
+
+      const challengeDuration = settings.challengeDuration || 21;
+      $("displayName").textContent = settings.displayName || `${translations[currentLang].challengeTitle} ${challengeDuration}`;
       $("userEmail").textContent = currentUser.email;
       
       const dIdx = userData.progress.dayIndex;
       const dKey = `day_${String(dIdx).padStart(2, '0')}`;
       
-      $("kpiDay").innerHTML = `<i class='bx bx-calendar-star'></i>${dIdx}/${settings.challengeDuration}`;
-      $("todayKey").textContent = `اليوم ${dIdx}`;
-      $("tasks-header").innerHTML = `<i class='bx bx-list-ul'></i> مهام اليوم ${dIdx}`;
+      $("kpiDay").innerHTML = `<i class='bx bx-calendar-star'></i>${dIdx}/${challengeDuration}`;
+      $("todayKey").textContent = `${translations[currentLang].tasksForDay} ${dIdx}`;
+      $("tasks-header").innerHTML = `<i class='bx bx-list-ul'></i> ${translations[currentLang].tasksForDay} ${dIdx}`;
       
       const tasks = userData.tasks[dKey] || [];
       const doneToday = tasks.filter(t => t.done).length;
@@ -223,54 +261,37 @@
       $("emptyState").style.display = tasks.length ? "none" : "block";
       tasks.forEach(task => {
         const div = document.createElement("div"); div.className = `task ${task.done ? 'done' : ''}`; div.setAttribute('data-id', task.id);
-        div.innerHTML = `<div class="task-left"><input type="checkbox" ${task.done ? 'checked' : ''}><span class="title">${task.title}</span></div><div class="task-actions"><button class="btn edit" style="padding:4px 8px; font-size:10px;"><i class='bx bx-edit'></i></button><button class="btn danger delete" style="padding:4px 8px; font-size:10px;"><i class='bx bx-trash'></i></button></div>`;
+        div.innerHTML = `<div class="task-left"><input type="checkbox" ${task.done ? 'checked' : ''}><span class="title">${task.title}</span></div><div class="task-actions"><button class="btn edit"><i class='bx bx-edit'></i></button><button class="btn danger delete"><i class='bx bx-trash'></i></button></div>`;
         div.querySelector("input").onchange = (e) => { task.done = e.target.checked; if (task.done && settings.enableConfetti) confetti({ particleCount: 100, spread: 70, origin: { y: 0.8 }, colors: ['#4D7FFF', '#C77EFF'] }); updateDB(); };
-        div.querySelector(".edit").onclick = () => { const n = prompt("تعديل المهمة:", task.title); if (n && n.trim()) { task.title = n.trim(); updateDB(); } };
-        div.querySelector(".delete").onclick = () => { if (confirm("متأكد من حذف المهمة؟")) { userData.tasks[dKey] = tasks.filter(t => t.id !== task.id); updateDB(); } };
+        div.querySelector(".edit").onclick = () => { const n = prompt(translations[currentLang].editTask, task.title); if (n && n.trim()) { task.title = n.trim(); updateDB(); } };
+        div.querySelector(".delete").onclick = () => { if (confirm(translations[currentLang].deleteTaskConfirm)) { userData.tasks[dKey] = tasks.filter(t => t.id !== task.id); updateDB(); } };
         listEl.appendChild(div);
       });
     }
     
-    function initSortable() {
-        if (sortable) sortable.destroy();
-        sortable = new Sortable($("taskList"), { animation: 150, ghostClass: 'sortable-ghost', onEnd: (evt) => {
-            const dKey = `day_${String(userData.progress.dayIndex).padStart(2, '0')}`;
-            const tasks = userData.tasks[dKey] || [];
-            const newOrder = Array.from(evt.to.children).map(item => tasks.find(t => t.id === Number(item.dataset.id)));
-            userData.tasks[dKey] = newOrder.filter(Boolean);
-            updateDB(false);
-        }});
-    }
+    function initSortable() { if (sortable) sortable.destroy(); sortable = new Sortable($("taskList"), { animation: 150, ghostClass: 'sortable-ghost', onEnd: (evt) => { const dKey = `day_${String(userData.progress.dayIndex).padStart(2, '0')}`; const tasks = userData.tasks[dKey] || []; const newOrder = Array.from(evt.to.children).map(item => tasks.find(t => t.id === Number(item.dataset.id))); userData.tasks[dKey] = newOrder.filter(Boolean); updateDB(false); }}); }
 
-    // ✨ --- Settings Logic ---
-    function openSettings() {
-        const settings = userData.settings || defaultSettings;
-        $("inputDisplayName").value = settings.displayName || '';
-        $("inputChallengeDuration").value = settings.challengeDuration;
-        $("inputEnableConfetti").checked = settings.enableConfetti;
-        $("settingsModal").style.display = 'flex';
-    }
+    function openSettings() { const settings = userData.settings || defaultSettings; $("inputDisplayName").value = settings.displayName || ''; $("inputChallengeDuration").value = settings.challengeDuration; $("inputEnableConfetti").checked = settings.enableConfetti; $("inputLanguage").value = settings.language; $("settingsModal").style.display = 'flex'; }
     function closeSettings() { $("settingsModal").style.display = 'none'; }
     function saveSettings() {
         userData.settings = {
             displayName: $("inputDisplayName").value.trim(),
             challengeDuration: parseInt($("inputChallengeDuration").value) || 21,
             enableConfetti: $("inputEnableConfetti").checked,
+            language: $("inputLanguage").value,
         };
-        updateDB();
-        showToast("تم حفظ الإعدادات!");
-        closeSettings();
+        updateDB(); showToast("settingsSaved"); closeSettings();
     }
     
     onAuthStateChanged(auth, async (user) => {
-      const allInteractiveElements = "button, input";
+      const allInteractiveElements = "button, input, select";
       if (user) {
         currentUser = user;
         try {
             const snap = await getDoc(doc(db, "users", user.uid));
             if (snap.exists()) {
                 userData = snap.data();
-                if (!userData.settings) userData.settings = { ...defaultSettings }; // Ensure settings exist
+                if (!userData.settings) userData.settings = { ...defaultSettings };
             } else {
                 userData = { tasks: {}, progress: { dayIndex: 1 }, email: user.email, settings: { ...defaultSettings } };
                 await setDoc(doc(db, "users", user.uid), userData);
@@ -280,14 +301,11 @@
             $("btnSettings").style.display = 'inline-flex';
             document.querySelectorAll(allInteractiveElements).forEach(el => el.disabled = false);
             render(); initSortable();
-        } catch (e) { console.error("Auth Error:", e); showToast("خطأ في تحميل بيانات المستخدم."); }
+        } catch (e) { console.error("Auth Error:", e); showToast("authError"); }
       } else {
-        currentUser = null; userData = null;
-        $("btnGoogle").style.display = 'inline-flex';
-        $("btnLogout").style.display = 'none';
-        $("btnSettings").style.display = 'none';
-        $("displayName").textContent = 'تحدي الـ 21 يوماً';
-        $("userEmail").textContent = 'بانتظار تسجيل الدخول...';
+        currentUser = null; userData = null; applyTranslations('ar');
+        $("btnGoogle").style.display = 'inline-flex'; $("btnLogout").style.display = 'none'; $("btnSettings").style.display = 'none';
+        $("userEmail").textContent = translations.ar.waitingForLogin;
         $("taskList").innerHTML = ''; $("emptyState").style.display = 'block'; $("kpiPercent").textContent = '0%';
         const circle = $("fg-circle"); const r = 15.9155; circle.style.strokeDashoffset = 2 * Math.PI * r;
         document.querySelectorAll(allInteractiveElements).forEach(el => { if(el.id !== 'btnGoogle') el.disabled = true; });
@@ -295,24 +313,17 @@
     });
 
     // Event Listeners
-    $("btnGoogle").onclick = () => signInWithPopup(auth, provider).catch(e => showToast(`خطأ: ${e.code}`));
+    $("btnGoogle").onclick = () => signInWithPopup(auth, provider).catch(e => showToast(e.code));
     $("btnLogout").onclick = () => signOut(auth);
-    $("btnAddTask").onclick = () => {
-      const t = $("taskTitle").value.trim(); if (!t) return;
-      const dKey = `day_${String(userData.progress.dayIndex).padStart(2, '0')}`;
-      if (!userData.tasks[dKey]) userData.tasks[dKey] = [];
-      userData.tasks[dKey].push({ id: Date.now(), title: t, done: false });
-      $("taskTitle").value = ""; updateDB();
-    };
+    $("btnAddTask").onclick = () => { const t = $("taskTitle").value.trim(); if (!t) return; const dKey = `day_${String(userData.progress.dayIndex).padStart(2, '0')}`; if (!userData.tasks[dKey]) userData.tasks[dKey] = []; userData.tasks[dKey].push({ id: Date.now(), title: t, done: false }); $("taskTitle").value = ""; updateDB(); };
     $("taskTitle").onkeyup = (e) => { if(e.key === 'Enter') $("btnAddTask").click() };
     $("btnNextDay").onclick = () => { if (userData.progress.dayIndex < (userData.settings.challengeDuration || 21)) { userData.progress.dayIndex++; updateDB().then(initSortable); } };
     $("btnPrevDay").onclick = () => { if (userData.progress.dayIndex > 1) { userData.progress.dayIndex--; updateDB().then(initSortable); } };
-    $("btnReset").onclick = () => { if (confirm("سيتم حذف جميع المهام والتقدم، هل أنت متأكد؟")) { userData.tasks = {}; userData.progress.dayIndex = 1; updateDB(); } };
-    
-    // ✨ Settings Listeners
+    $("btnReset").onclick = () => { if (confirm(translations[currentLang].resetConfirm)) { userData.tasks = {}; userData.progress.dayIndex = 1; updateDB(); } };
     $("btnSettings").onclick = openSettings;
     $("btnCloseSettings").onclick = closeSettings;
     $("btnSaveSettings").onclick = saveSettings;
+
   </script>
 </body>
 </html>
