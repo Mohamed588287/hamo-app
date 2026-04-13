@@ -2,83 +2,43 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>🔥 تحدي 21 يوم انضباط</title>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+  <title>تحدي 21 يوم</title>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
   <style>
-    body {
-      font-family: Arial;
-      background: linear-gradient(135deg,#0f172a,#020617);
-      color: white;
-      text-align: center;
-      padding: 20px;
-    }
-    .container {
-      max-width: 700px;
-      margin: auto;
-      background: #1e293b;
-      padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    }
-    button {
-      padding: 10px 15px;
-      border: none;
-      border-radius: 8px;
-      margin: 5px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .done { background: #22c55e; }
-    .not-done { background: #ef4444; }
-    .google-btn {
-      background: #4285F4;
-      color: white;
-      font-size: 16px;
-    }
-    .progress {
-      background: #334155;
-      border-radius: 10px;
-      overflow: hidden;
-      margin: 15px 0;
-    }
-    .progress-bar {
-      height: 20px;
-      background: #22c55e;
-      width: 0%;
-    }
+    body { background:#0f172a; color:white; text-align:center; font-family:Arial; }
+    .box { background:#1e293b; margin:10px; padding:10px; border-radius:10px; }
+    button { padding:8px; margin:5px; border:none; border-radius:6px; cursor:pointer; }
+    .done { background:green; }
+    .not { background:red; }
   </style>
 </head>
+
 <body>
 
-<div class="container">
-  <h1>🔥 تحدي 21 يوم انضباط</h1>
+<h1>🔥 تحدي 21 يوم</h1>
 
-  <button class="google-btn" onclick="login()">تسجيل بجوجل</button>
-  <p id="user"></p>
+<button onclick="login()">تسجيل بجوجل</button>
+<p id="user"></p>
 
-  <div class="progress">
-    <div id="progressBar" class="progress-bar"></div>
-  </div>
-
-  <div id="tracker"></div>
-</div>
+<div id="days"></div>
 
 <script>
-  // 🔴 حط بيانات Firebase بتاعتك هنا
   const firebaseConfig = {
-  apiKey: "AIzaSyD7XzFMve-N8ALJPlxaBQM_iMZtbr05dCc",
-  authDomain: "hamo-124d8.firebaseapp.com",
-  projectId: "hamo-124d8",
-  storageBucket: "hamo-124d8.firebasestorage.app",
-  messagingSenderId: "487641126653",
-  appId: "1:487641126653:web:6378be437f6d0cb94fd094",
-  measurementId: "G-QXJ7ECX5HH"
-};
+    apiKey: "AIzaSyD7XzFMve-N8ALJPlxaBQM_iMZtbr05dCc",
+    authDomain: "hamo-124d8.firebaseapp.com",
+    projectId: "hamo-124d8",
+    storageBucket: "hamo-124d8.firebasestorage.app",
+    messagingSenderId: "487641126653",
+    appId: "1:487641126653:web:6378be437f6d0cb94fd094"
+  };
 
+  firebase.initializeApp(firebaseConfig);
 
-  const app = firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
 
@@ -86,56 +46,45 @@
 
   function login() {
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).then(result => {
-      userId = result.user.uid;
-      document.getElementById("user").innerText = "أهلاً: " + result.user.email;
-      loadData();
+    auth.signInWithPopup(provider).then(res => {
+      userId = res.user.uid;
+      document.getElementById("user").innerText = res.user.email;
+      load();
+    }).catch(err => {
+      alert(err.message);
     });
   }
 
-  async function loadData() {
-    const docRef = db.collection("users").doc(userId);
-    const docSnap = await docRef.get();
+  async function load() {
+    const doc = await db.collection("users").doc(userId).get();
+    let data = doc.exists ? doc.data().days : [];
 
-    let data = docSnap.exists ? docSnap.data().days : [];
-    render(data);
-  }
-
-  function render(data) {
-    let tracker = document.getElementById("tracker");
-    tracker.innerHTML = "";
-
-    let completed = 0;
-
+    let html = "";
     for (let i = 0; i < 21; i++) {
-      let day = data[i] || { study: false, work: false };
+      let d = data[i] || { study:false, work:false };
 
-      if(day.study && day.work) completed++;
-
-      tracker.innerHTML += `
-        <div style="margin:10px; padding:10px; background:#334155; border-radius:10px;">
-          <h3>اليوم ${i + 1}</h3>
-          <button class="${day.study ? 'done' : 'not-done'}" onclick="toggle(${i}, 'study')">📚 مذاكرة</button>
-          <button class="${day.work ? 'done' : 'not-done'}" onclick="toggle(${i}, 'work')">💻 شغل</button>
-        </div>
-      `;
+      html += `
+      <div class="box">
+        <h3>اليوم ${i+1}</h3>
+        <button class="${d.study?'done':'not'}" onclick="toggle(${i},'study')">📚</button>
+        <button class="${d.work?'done':'not'}" onclick="toggle(${i},'work')">💻</button>
+      </div>`;
     }
 
-    let percent = (completed / 21) * 100;
-    document.getElementById("progressBar").style.width = percent + "%";
+    document.getElementById("days").innerHTML = html;
   }
 
-  async function toggle(index, type) {
-    const docRef = db.collection("users").doc(userId);
-    const docSnap = await docRef.get();
+  async function toggle(i,type){
+    const ref = db.collection("users").doc(userId);
+    const doc = await ref.get();
 
-    let data = docSnap.exists ? docSnap.data().days : [];
-    if (!data[index]) data[index] = { study: false, work: false };
+    let data = doc.exists ? doc.data().days : [];
+    if(!data[i]) data[i]={study:false,work:false};
 
-    data[index][type] = !data[index][type];
+    data[i][type] = !data[i][type];
 
-    await docRef.set({ days: data });
-    render(data);
+    await ref.set({days:data});
+    load();
   }
 </script>
 
