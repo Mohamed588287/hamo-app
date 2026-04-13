@@ -3,488 +3,800 @@
 <head>  
   <meta charset="utf-8" />  
   <meta name="viewport" content="width=device-width, initial-scale=1" />  
-  <title>موقع بسيط واحترافي</title>  
-  <meta name="description" content="قالب موقع عربي بسيط واحترافي وسريع الاستجابة." />  
+  <title>تحدي 21 يوم - SaaS Dashboard</title>  
+  <meta name="description" content="تطبيق تحدي 21 يوم بواجهة SaaS + تسجيل دخول Google + Firestore لكل مستخدم" />
+
+  <!-- Minimal modern styling (Dark + Neon Green) -->  
   <style>  
-    /* ---------------------------  
-      Minimal, professional styling  
-    ---------------------------- */  
     :root{  
-      --bg: #0b1220;  
-      --surface: #0f1a30;  
-      --card: rgba(255,255,255,.06);  
-      --border: rgba(255,255,255,.10);  
-      --text: #eaf0ff;  
-      --muted: rgba(234,240,255,.72);  
-      --primary: #5aa7ff;  
-      --primary-2: #7c5cff;  
-      --focus: #9bd1ff;  
-      --shadow: 0 20px 60px rgba(0,0,0,.35);  
-      --radius: 18px;  
-      --max: 1100px;  
-    }
-
-    *{ box-sizing: border-box; }  
-    html, body{ height: 100%; }  
+      --bg:#070A0E;  
+      --panel:#0B1220;  
+      --panel-2:#0A1628;  
+      --text:#EAF2FF;  
+      --muted:#9BB0CC;  
+      --stroke:rgba(86,255,140,.18);  
+      --neon:#39FF88;  
+      --neon-2:#00E5FF;  
+      --danger:#FF4D6D;  
+      --warn:#FFC857;  
+      --shadow: 0 18px 60px rgba(0,0,0,.55);  
+      --radius:16px;  
+    }  
+    *{box-sizing:border-box}  
+    html,body{height:100%}  
     body{  
-      margin: 0;  
-      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;  
+      margin:0;  
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans Arabic", Tahoma, Arial, sans-serif;  
       background:  
-        radial-gradient(900px 500px at 15% 10%, rgba(122,92,255,.20), transparent 60%),  
-        radial-gradient(900px 500px at 85% 0%, rgba(90,167,255,.18), transparent 55%),  
-        linear-gradient(180deg, var(--bg), #070b14 70%);  
-      color: var(--text);  
-      line-height: 1.7;  
-    }
-
-    a{ color: inherit; text-decoration: none; }  
-    a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible{  
-      outline: 3px solid var(--focus);  
-      outline-offset: 3px;  
-      border-radius: 12px;  
-    }
-
-    .container{  
-      width: min(var(--max), calc(100% - 32px));  
-      margin-inline: auto;  
-    }
-
-    /* ---------------------------  
-      Header / Nav  
-    ---------------------------- */  
-    header{  
-      position: sticky;  
-      top: 0;  
-      z-index: 10;  
-      backdrop-filter: blur(10px);  
-      background: rgba(11,18,32,.55);  
-      border-bottom: 1px solid rgba(255,255,255,.08);  
+        radial-gradient(900px 420px at 90% 5%, rgba(57,255,136,.14), transparent 55%),  
+        radial-gradient(900px 420px at 10% 0%, rgba(0,229,255,.10), transparent 55%),  
+        radial-gradient(900px 520px at 40% 100%, rgba(57,255,136,.08), transparent 60%),  
+        var(--bg);  
+      color:var(--text);  
+      line-height:1.55;  
     }  
-    .nav{  
-      display: flex;  
-      align-items: center;  
-      justify-content: space-between;  
-      gap: 16px;  
-      padding: 14px 0;  
-    }  
-    .brand{  
-      display: inline-flex;  
-      align-items: center;  
-      gap: 10px;  
-      font-weight: 700;  
-      letter-spacing: .2px;  
-    }  
-    .logo{  
-      width: 38px; height: 38px;  
-      border-radius: 12px;  
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));  
-      box-shadow: 0 10px 25px rgba(90,167,255,.25);  
-    }  
-    nav ul{  
-      list-style: none;  
-      display: flex;  
-      gap: 10px;  
-      padding: 0;  
-      margin: 0;  
-      flex-wrap: wrap;  
-      justify-content: flex-end;  
-    }  
-    nav a{  
-      display: inline-flex;  
-      padding: 10px 12px;  
-      border-radius: 12px;  
-      color: var(--muted);  
-    }  
-    nav a:hover{  
-      background: rgba(255,255,255,.06);  
-      color: var(--text);  
-    }
-
-    .nav-actions{  
-      display: inline-flex;  
-      gap: 10px;  
-      align-items: center;  
-    }  
-    .btn{  
-      border: 1px solid var(--border);  
-      background: rgba(255,255,255,.06);  
-      color: var(--text);  
-      padding: 10px 14px;  
-      border-radius: 14px;  
-      cursor: pointer;  
-      font-weight: 600;  
-    }  
-    .btn:hover{ background: rgba(255,255,255,.10); }  
-    .btn.primary{  
-      border-color: transparent;  
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));  
-      box-shadow: 0 16px 40px rgba(90,167,255,.18);  
-    }  
-    .btn.primary:hover{  
-      filter: brightness(1.05);  
-    }
-
-    /* ---------------------------  
-      Hero  
-    ---------------------------- */  
-    main{ padding: 34px 0 70px; }
-
-    .hero{  
-      display: grid;  
-      grid-template-columns: 1.2fr .8fr;  
-      gap: 22px;  
-      align-items: stretch;  
-      margin-top: 16px;  
-    }  
-    .panel{  
-      background: rgba(255,255,255,.05);  
-      border: 1px solid rgba(255,255,255,.10);  
+    a{color:inherit}  
+    .container{max-width:1120px;margin:0 auto;padding:22px}  
+    .topbar{  
+      display:flex; align-items:center; justify-content:space-between;  
+      gap:14px; padding:14px 16px;  
+      background: linear-gradient(180deg, rgba(11,18,32,.9), rgba(11,18,32,.65));  
+      border:1px solid var(--stroke);  
       border-radius: var(--radius);  
       box-shadow: var(--shadow);  
+      position: sticky; top: 14px; z-index: 10;  
+      backdrop-filter: blur(10px);  
     }  
-    .hero-copy{  
-      padding: 26px;  
-      overflow: hidden;  
-      position: relative;  
+    .brand{  
+      display:flex; align-items:center; gap:12px;  
+      min-width: 220px;  
     }  
-    .badge{  
-      display: inline-flex;  
-      gap: 8px;  
-      align-items: center;  
-      padding: 8px 12px;  
-      border-radius: 999px;  
-      border: 1px solid rgba(255,255,255,.12);  
-      background: rgba(255,255,255,.06);  
-      color: var(--muted);  
-      font-weight: 600;  
-      font-size: .92rem;  
+    .logo{  
+      width:42px;height:42px;border-radius:14px;  
+      background:  
+        radial-gradient(circle at 30% 30%, rgba(57,255,136,.95), rgba(57,255,136,.25) 42%, transparent 60%),  
+        linear-gradient(135deg, rgba(0,229,255,.35), rgba(57,255,136,.12));  
+      border:1px solid rgba(57,255,136,.35);  
+      box-shadow: 0 0 0 6px rgba(57,255,136,.06), 0 0 30px rgba(57,255,136,.12);  
     }  
-    .hero h1{  
-      margin: 14px 0 10px;  
-      font-size: clamp(28px, 4vw, 44px);  
-      line-height: 1.2;  
-      letter-spacing: .2px;  
-    }  
-    .hero p{  
-      margin: 0 0 18px;  
-      color: var(--muted);  
-      max-width: 60ch;  
-    }  
-    .cta{  
-      display: flex;  
-      gap: 10px;  
-      flex-wrap: wrap;  
-      margin-top: 14px;  
-    }  
-    .mini{  
-      color: var(--muted);  
-      font-size: .95rem;  
-      margin-top: 10px;  
-    }
+    .brand h1{font-size:15px;margin:0}  
+    .brand p{margin:0;color:var(--muted);font-size:12px}
 
-    .hero-aside{  
-      padding: 22px;  
-      display: grid;  
-      gap: 12px;  
-    }  
-    .stat{  
-      display: grid;  
-      gap: 6px;  
-      padding: 16px;  
-      border-radius: 16px;  
-      border: 1px solid rgba(255,255,255,.10);  
-      background: rgba(255,255,255,.04);  
-    }  
-    .stat strong{ font-size: 1.15rem; }  
-    .stat span{ color: var(--muted); font-size: .95rem; }
-
-    /* ---------------------------  
-      Sections / Cards  
-    ---------------------------- */  
-    section{ margin-top: 26px; }  
-    .section-title{  
-      display: flex;  
-      align-items: baseline;  
-      justify-content: space-between;  
-      gap: 12px;  
-      margin: 20px 0 12px;  
-    }  
-    .section-title h2{  
-      margin: 0;  
-      font-size: 1.25rem;  
-      letter-spacing: .2px;  
-    }  
-    .section-title p{  
-      margin: 0;  
+    .actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}  
+    .pill{  
+      display:flex; align-items:center; gap:10px;  
+      padding:10px 12px;border-radius:999px;  
+      border:1px solid var(--stroke);  
+      background: rgba(10,22,40,.55);  
       color: var(--muted);  
-      font-size: .95rem;  
-    }
-
+      max-width: 520px;  
+    }  
+    .pill strong{color:var(--text);font-weight:650}  
+    .btn{  
+      appearance:none; border:1px solid rgba(57,255,136,.35);  
+      background: linear-gradient(180deg, rgba(57,255,136,.18), rgba(57,255,136,.08));  
+      color: var(--text);  
+      padding:10px 12px;border-radius:12px;  
+      cursor:pointer;  
+      transition:.15s transform ease, .15s filter ease, .15s border-color ease;  
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);  
+      font-weight:650;  
+      display:inline-flex; align-items:center; gap:8px;  
+      user-select:none;  
+    }  
+    .btn:hover{transform: translateY(-1px); filter: brightness(1.05); border-color: rgba(57,255,136,.6)}  
+    .btn:active{transform: translateY(0px); filter: brightness(.98)}  
+    .btn.secondary{  
+      border-color: rgba(155,176,204,.25);  
+      background: rgba(10,22,40,.55);  
+    }  
+    .btn.danger{  
+      border-color: rgba(255,77,109,.35);  
+      background: linear-gradient(180deg, rgba(255,77,109,.18), rgba(255,77,109,.08));  
+    }  
     .grid{  
-      display: grid;  
-      grid-template-columns: repeat(3, 1fr);  
-      gap: 14px;  
+      margin-top:18px;  
+      display:grid; gap:16px;  
+      grid-template-columns: 1.1fr .9fr;  
+    }  
+    @media (max-width: 980px){  
+      .grid{grid-template-columns: 1fr}  
+      .brand{min-width:auto}  
     }  
     .card{  
-      padding: 18px;  
-      border-radius: 16px;  
-      background: rgba(255,255,255,.04);  
-      border: 1px solid rgba(255,255,255,.10);  
-      transition: transform .15s ease, background .15s ease;  
-      min-height: 140px;  
+      background: linear-gradient(180deg, rgba(11,18,32,.85), rgba(11,18,32,.55));  
+      border: 1px solid var(--stroke);  
+      border-radius: var(--radius);  
+      box-shadow: var(--shadow);  
+      overflow:hidden;  
     }  
-    .card:hover{  
-      transform: translateY(-2px);  
-      background: rgba(255,255,255,.06);  
+    .card header{  
+      padding:14px 16px;  
+      border-bottom: 1px solid rgba(86,255,140,.12);  
+      display:flex; align-items:center; justify-content:space-between; gap:12px;  
     }  
-    .card h3{ margin: 0 0 8px; font-size: 1.05rem; }  
-    .card p{ margin: 0; color: var(--muted); }
+    .card header h2{margin:0;font-size:14px}  
+    .card header small{color:var(--muted)}  
+    .card .body{padding:16px}
 
-    /* ---------------------------  
-      Contact  
-    ---------------------------- */  
-    .contact{  
-      display: grid;  
-      grid-template-columns: 1fr 1fr;  
-      gap: 14px;  
-      align-items: start;  
+    .kpis{display:grid; grid-template-columns: repeat(3, 1fr); gap:12px}  
+    @media (max-width: 720px){ .kpis{grid-template-columns: 1fr} }  
+    .kpi{  
+      padding:14px;border-radius:14px;  
+      border:1px solid rgba(86,255,140,.14);  
+      background: rgba(10,22,40,.35);  
     }  
-    form{  
-      padding: 18px;  
-      border-radius: 16px;  
-      background: rgba(255,255,255,.04);  
-      border: 1px solid rgba(255,255,255,.10);  
+    .kpi .label{color:var(--muted);font-size:12px}  
+    .kpi .value{font-size:22px;margin-top:6px;font-weight:800;letter-spacing:.2px}  
+    .kpi .hint{margin-top:6px;color:var(--muted);font-size:12px}
+
+    .progressWrap{margin-top:14px}  
+    .bar{  
+      height:12px; border-radius:999px; overflow:hidden;  
+      background: rgba(155,176,204,.12);  
+      border:1px solid rgba(155,176,204,.14);  
     }  
-    label{ display: block; margin-bottom: 6px; color: var(--muted); font-size: .95rem; }  
-    input, textarea{  
-      width: 100%;  
-      border-radius: 14px;  
-      padding: 12px 12px;  
-      border: 1px solid rgba(255,255,255,.12);  
-      background: rgba(15,26,48,.55);  
+    .bar > div{  
+      height:100%;  
+      width:0%;  
+      background: linear-gradient(90deg, rgba(57,255,136,.95), rgba(0,229,255,.65));  
+      box-shadow: 0 0 22px rgba(57,255,136,.22);  
+      transition: width .25s ease;  
+    }  
+    .barMeta{display:flex;justify-content:space-between;gap:10px;margin-top:8px;color:var(--muted);font-size:12px}
+
+    .taskList{display:flex;flex-direction:column;gap:10px}  
+    .task{  
+      display:flex; align-items:center; justify-content:space-between; gap:12px;  
+      padding:12px 12px;  
+      border-radius:14px;  
+      border:1px solid rgba(86,255,140,.14);  
+      background: rgba(10,22,40,.30);  
+    }  
+    .task .left{display:flex; align-items:center; gap:10px; min-width: 0}  
+    .check{  
+      width:18px;height:18px;border-radius:6px;  
+      border:1px solid rgba(57,255,136,.55);  
+      background: rgba(57,255,136,.06);  
+      display:grid; place-items:center;  
+      cursor:pointer;  
+      flex: 0 0 auto;  
+    }  
+    .check input{display:none}  
+    .check span{  
+      width:10px;height:10px;border-radius:3px;  
+      background: transparent;  
+      box-shadow: inset 0 0 0 1px rgba(57,255,136,.35);  
+    }  
+    .check input:checked + span{  
+      background: var(--neon);  
+      box-shadow: 0 0 18px rgba(57,255,136,.35);  
+    }  
+    .task .title{  
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;  
+      font-weight:650;  
+    }  
+    .task .meta{color:var(--muted);font-size:12px;margin-top:2px}  
+    .task .right{display:flex; align-items:center; gap:8px; flex: 0 0 auto}  
+    .iconBtn{  
+      border:1px solid rgba(155,176,204,.18);  
+      background: rgba(10,22,40,.55);  
       color: var(--text);  
-      font: inherit;  
+      padding:8px 10px; border-radius:12px;  
+      cursor:pointer;  
     }  
-    textarea{ min-height: 120px; resize: vertical; }  
-    .form-row{ display: grid; gap: 10px; margin-bottom: 12px; }  
-    .form-actions{ display: flex; gap: 10px; flex-wrap: wrap; }
-
-    .contact-info{  
-      padding: 18px;  
-      border-radius: 16px;  
-      background: rgba(255,255,255,.04);  
-      border: 1px solid rgba(255,255,255,.10);  
+    .iconBtn:hover{border-color: rgba(57,255,136,.45)}  
+    .iconBtn.danger:hover{border-color: rgba(255,77,109,.55)}  
+    .muted{color:var(--muted)}  
+    .divider{height:1px;background:rgba(86,255,140,.12);margin:14px 0}  
+    .row{display:flex; gap:10px; flex-wrap:wrap}  
+    .input{  
+      flex:1 1 260px;  
+      background: rgba(10,22,40,.55);  
+      border:1px solid rgba(155,176,204,.18);  
+      color: var(--text);  
+      padding:11px 12px;  
+      border-radius:12px;  
+      outline:none;  
     }  
-    .contact-info ul{  
-      margin: 10px 0 0;  
-      padding: 0;  
-      list-style: none;  
-      display: grid;  
-      gap: 10px;  
+    .input:focus{border-color: rgba(57,255,136,.55); box-shadow: 0 0 0 4px rgba(57,255,136,.08)}  
+    .hintBox{  
+      border:1px dashed rgba(57,255,136,.35);  
+      background: rgba(57,255,136,.06);  
+      border-radius:14px;  
+      padding:12px;  
       color: var(--muted);  
+      font-size:13px;  
     }  
-    .contact-info li{  
-      padding: 12px;  
-      border-radius: 14px;  
-      border: 1px solid rgba(255,255,255,.10);  
-      background: rgba(255,255,255,.03);  
-    }
-
-    /* ---------------------------  
-      Footer  
-    ---------------------------- */  
-    footer{  
-      margin-top: 34px;  
-      padding: 22px 0;  
-      border-top: 1px solid rgba(255,255,255,.08);  
-      color: var(--muted);  
-      font-size: .95rem;  
+    .toast{  
+      position: fixed; bottom: 16px; left: 16px;  
+      padding:12px 14px; border-radius: 14px;  
+      border:1px solid rgba(86,255,140,.18);  
+      background: rgba(11,18,32,.85);  
+      box-shadow: var(--shadow);  
+      max-width: 420px;  
+      display:none;  
     }  
-    .footer{  
-      display: flex;  
-      gap: 12px;  
-      justify-content: space-between;  
-      flex-wrap: wrap;  
-      align-items: center;  
-    }
-
-    /* ---------------------------  
-      Responsive  
-    ---------------------------- */  
-    @media (max-width: 900px){  
-      .hero{ grid-template-columns: 1fr; }  
-      .grid{ grid-template-columns: 1fr; }  
-      .contact{ grid-template-columns: 1fr; }  
-      nav ul{ display: none; } /* keep it simple on mobile */  
-    }  
+    .toast.show{display:block}  
+    .toast strong{color:var(--text)}  
+    .toast small{color:var(--muted);display:block;margin-top:4px}  
+    code.inline{background: rgba(155,176,204,.10); border:1px solid rgba(155,176,204,.18); padding:2px 6px; border-radius:8px}  
   </style>  
 </head>
 
 <body>  
-  <!-- Header -->  
-  <header>  
-    <div class="container">  
-      <div class="nav" role="navigation" aria-label="الشريط العلوي">  
-        <a class="brand" href="#top" aria-label="العودة للرئيسية">  
-          <span class="logo" aria-hidden="true"></span>  
-          <span>اسم الموقع</span>  
-        </a>
-
-        <!-- Simple nav (hidden on mobile for simplicity) -->  
-        <nav aria-label="روابط الموقع">  
-          <ul>  
-            <li><a href="#services">الخدمات</a></li>  
-            <li><a href="#about">نبذة</a></li>  
-            <li><a href="#contact">تواصل</a></li>  
-          </ul>  
-        </nav>
-
-        <div class="nav-actions">  
-          <a class="btn" href="#contact">تواصل</a>  
-          <a class="btn primary" href="#services">ابدأ الآن</a>  
+  <div class="container">  
+    <!-- Top Bar -->  
+    <div class="topbar" role="banner">  
+      <div class="brand" aria-label="Brand">  
+        <div class="logo" aria-hidden="true"></div>  
+        <div>  
+          <h1>تحدي 21 يوم</h1>  
+          <p>Dashboard — Dark SaaS UI + Firebase</p>  
         </div>  
+      </div>
+
+      <div class="actions">  
+        <div class="pill" aria-live="polite">  
+          <span class="muted">الحساب:</span>  
+          <strong id="userEmail">غير مسجل</strong>  
+        </div>  
+        <button id="btnGoogle" class="btn" type="button">  
+          <!-- simple icon -->  
+          <span aria-hidden="true">G</span>  
+          تسجيل بجوجل  
+        </button>  
+        <button id="btnLogout" class="btn secondary" type="button" disabled>تسجيل خروج</button>  
       </div>  
-    </div>  
-  </header>
+    </div>
 
-  <!-- Main -->  
-  <main id="top">  
-    <div class="container">  
-      <!-- Hero -->  
-      <section class="hero" aria-label="مقدمة الموقع">  
-        <div class="panel hero-copy">  
-          <span class="badge">تصميم بسيط • أداء سريع • تجربة نظيفة</span>  
-          <h1>موقع احترافي وبسيط — يركز على المحتوى ويُظهره بشكل واضح</h1>  
-          <p>  
-            هذا قالب جاهز يمكنك تعديل النصوص والألوان والأقسام بسهولة.  
-            مناسب لصفحة تعريفية، خدمة، أو بروفايل شركة صغيرة.  
-          </p>
+    <div class="grid" role="main">  
+      <!-- Left: Dashboard -->  
+      <section class="card" aria-label="Dashboard">  
+        <header>  
+          <div>  
+            <h2>لوحة التحكم</h2>  
+            <small class="muted">تحدي 21 يوم + مهام يومية + تقدم</small>  
+          </div>  
+          <small class="muted">البيانات محفوظة في Firestore لكل مستخدم</small>  
+        </header>
 
-          <div class="cta">  
-            <a class="btn primary" href="#contact">اطلب عرض سعر</a>  
-            <a class="btn" href="#about">اعرف أكثر</a>  
+        <div class="body">  
+          <!-- KPIs -->  
+          <div class="kpis" aria-label="KPIs">  
+            <div class="kpi">  
+              <div class="label">اليوم الحالي</div>  
+              <div class="value" id="kpiDay">—</div>  
+              <div class="hint">من أصل 21 يوم</div>  
+            </div>  
+            <div class="kpi">  
+              <div class="label">مهام اليوم</div>  
+              <div class="value"><span id="kpiDoneToday">—</span>/<span id="kpiTotalToday">—</span></div>  
+              <div class="hint">إنجاز يومي</div>  
+            </div>  
+            <div class="kpi">  
+              <div class="label">إجمالي التقدم</div>  
+              <div class="value" id="kpiPercent">—%</div>  
+              <div class="hint">حسب المهام المنجزة</div>  
+            </div>  
           </div>
 
-          <p class="mini">بدون مكتبات خارجية • متوافق مع الجوال • قابل للتعديل بسرعة</p>  
-        </div>
-
-        <aside class="panel hero-aside" aria-label="ملخص سريع">  
-          <div class="stat">  
-            <strong>واجهة مرتّبة</strong>  
-            <span>تباين واضح ومساحات مريحة للقراءة.</span>  
-          </div>  
-          <div class="stat">  
-            <strong>استجابة للجوال</strong>  
-            <span>تخطيط مرن يعمل على الشاشات الصغيرة.</span>  
-          </div>  
-          <div class="stat">  
-            <strong>وصولية أفضل</strong>  
-            <span>عناوين واضحة + حالات تركيز للأزرار والحقول.</span>  
-          </div>  
-        </aside>  
-      </section>
-
-      <!-- Services -->  
-      <section id="services" aria-label="الخدمات">  
-        <div class="section-title">  
-          <h2>الخدمات</h2>  
-          <p>ثلاث نقاط واضحة بدل الزحمة</p>  
-        </div>
-
-        <div class="grid">  
-          <article class="card">  
-            <h3>تصميم واجهات</h3>  
-            <p>واجهة بسيطة، خطوط مناسبة، وتخطيط نظيف يبرز المحتوى.</p>  
-          </article>
-
-          <article class="card">  
-            <h3>تطوير صفحة تعريفية</h3>  
-            <p>صفحة واحدة سريعة، أقسام واضحة، وتجربة استخدام مريحة.</p>  
-          </article>
-
-          <article class="card">  
-            <h3>تحسين تجربة المستخدم</h3>  
-            <p>تنظيم المحتوى، تقليل التشتيت، وتحسين التسلسل البصري.</p>  
-          </article>  
-        </div>  
-      </section>
-
-      <!-- About -->  
-      <section id="about" aria-label="نبذة">  
-        <div class="section-title">  
-          <h2>نبذة</h2>  
-          <p>اختصار مفيد بدل نص طويل</p>  
-        </div>
-
-        <div class="panel" style="padding:18px; border-radius:16px;">  
-          <p style="margin:0; color: var(--muted);">  
-            اكتب هنا تعريفًا مختصرًا عنك/عن شركتك. ركّز على: ماذا تقدم؟ لمن؟ وما الذي يميزك؟  
-            يمكن إضافة روابط أعمالك أو شهادات العملاء لاحقًا بدون تغيير كبير في التصميم.  
-          </p>  
-        </div>  
-      </section>
-
-      <!-- Contact -->  
-      <section id="contact" aria-label="تواصل">  
-        <div class="section-title">  
-          <h2>تواصل</h2>  
-          <p>نموذج بسيط + معلومات مباشرة</p>  
-        </div>
-
-        <div class="contact">  
-          <!-- Contact form (front-end only) -->  
-          <form onsubmit="event.preventDefault(); alert('تم إرسال رسالتك (تجريبيًا).');" aria-label="نموذج التواصل">  
-            <!-- ملاحظة: النموذج تجريبي. اربطه بباك-إند/خدمة إرسال عند الحاجة -->  
-            <div class="form-row">  
-              <div>  
-                <label for="name">الاسم</label>  
-                <input id="name" name="name" type="text" autocomplete="name" required />  
-              </div>  
-              <div>  
-                <label for="email">البريد الإلكتروني</label>  
-                <input id="email" name="email" type="email" autocomplete="email" required />  
-              </div>  
-              <div>  
-                <label for="msg">رسالتك</label>  
-                <textarea id="msg" name="message" required></textarea>  
-              </div>  
-            </div>
-
-            <div class="form-actions">  
-              <button class="btn primary" type="submit">إرسال</button>  
-              <button class="btn" type="reset">مسح</button>  
+          <div class="progressWrap" aria-label="Progress">  
+            <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">  
+              <div id="progressBar"></div>  
             </div>  
-          </form>
+            <div class="barMeta">  
+              <span>نسبة التقدم</span>  
+              <span id="progressText">—</span>  
+            </div>  
+          </div>
 
-          <aside class="contact-info" aria-label="معلومات التواصل">  
-            <h3 style="margin:0 0 8px;">معلومات سريعة</h3>  
-            <p style="margin:0; color: var(--muted);">  
-              عدّل البيانات التالية حسب مشروعك:  
-            </p>  
-            <ul>  
-              <li><strong style="color:var(--text);">البريد:</strong> name@domain.com</li>  
-              <li><strong style="color:var(--text);">الهاتف:</strong> +000 000 0000</li>  
-              <li><strong style="color:var(--text);">المدينة:</strong> الرياض (مثال)</li>  
-            </ul>  
-          </aside>  
+          <div class="divider"></div>
+
+          <!-- Today's tasks -->  
+          <div style="display:flex; align-items:end; justify-content:space-between; gap:12px; flex-wrap:wrap;">  
+            <div>  
+              <h2 style="margin:0;font-size:14px;">مهام اليوم</h2>  
+              <div class="muted" style="font-size:12px;margin-top:4px;">  
+                يتم حفظ حالة الإنجاز (✔) في قاعدة البيانات.  
+              </div>  
+            </div>  
+            <div class="muted" style="font-size:12px;">  
+              اليوم: <code class="inline" id="todayKey">—</code>  
+            </div>  
+          </div>
+
+          <div style="margin-top:12px" class="taskList" id="taskList" aria-label="Task List">  
+            <!-- tasks injected -->  
+          </div>
+
+          <div id="emptyState" class="hintBox" style="margin-top:12px; display:none;">  
+            لا توجد مهام لهذا اليوم. أضف مهمة من قسم الإعدادات.  
+          </div>  
         </div>  
       </section>
 
-      <!-- Footer -->  
-      <footer>  
-        <div class="container">  
-          <div class="footer">  
-            <span>© <span id="year"></span> اسم الموقع. جميع الحقوق محفوظة.</span>  
-            <span>تصميم بسيط • HTML/CSS فقط</span>  
+      <!-- Right: Settings -->  
+      <aside class="card" aria-label="Settings">  
+        <header>  
+          <div>  
+            <h2>الإعدادات</h2>  
+            <small class="muted">إضافة/حذف مهام — محفوظة لكل مستخدم</small>  
+          </div>  
+          <small class="muted">21-Day Challenge</small>  
+        </header>
+
+        <div class="body">  
+          <div class="hintBox">  
+            <strong style="display:block;color:var(--text);margin-bottom:6px;">مهم لتشغيل تسجيل Google</strong>  
+            فعّل <b>Google Provider</b> من Firebase Console → Authentication.  
+            <div style="margin-top:6px">  
+              لو بتشغل محليًا: لازم تضيف <code class="inline">http://localhost</code> ضمن Authorized domains.  
+            </div>  
+          </div>
+
+          <div class="divider"></div>
+
+          <label for="taskTitle" class="muted" style="font-size:12px;display:block;margin-bottom:8px;">اسم المهمة</label>  
+          <div class="row">  
+            <input id="taskTitle" class="input" placeholder="مثال: 30 دقيقة رياضة" />  
+            <button id="btnAddTask" class="btn" type="button" disabled>إضافة مهمة</button>  
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="muted" style="font-size:12px;margin-bottom:8px;">إدارة اليوم داخل التحدي</div>  
+          <div class="row">  
+            <button id="btnPrevDay" class="btn secondary" type="button" disabled>اليوم السابق</button>  
+            <button id="btnNextDay" class="btn secondary" type="button" disabled>اليوم التالي</button>  
+            <button id="btnResetChallenge" class="btn danger" type="button" disabled>إعادة بدء التحدي</button>  
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="muted" style="font-size:12px;">  
+            ملاحظة: التقدم يُحسب من كل المهام في كل الأيام (21 يوم).  
           </div>  
         </div>  
-      </footer>  
+      </aside>  
     </div>  
-  </main>
+  </div>
 
-  <script>  
-    // تحديث سنة الفوتر تلقائيًا  
-    document.getElementById('year').textContent = new Date().getFullYear();  
+  <div class="toast" id="toast" role="status" aria-live="polite">  
+    <strong id="toastTitle">—</strong>  
+    <small id="toastMsg">—</small>  
+  </div>
+
+  <!-- Firebase + App Logic -->  
+  <script type="module">  
+    /******************************************************************  
+     * Firebase Web SDK (Modular) via gstatic CDN  
+     * Docs: https://firebase.google.com/docs/web/setup  
+     ******************************************************************/  
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";  
+    import {  
+      getAuth,  
+      GoogleAuthProvider,  
+      signInWithPopup,  
+      onAuthStateChanged,  
+      signOut  
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";  
+    import {  
+      getFirestore,  
+      doc,  
+      getDoc,  
+      setDoc,  
+      updateDoc,  
+      serverTimestamp  
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    // ✅ Using YOUR Firebase config exactly  
+    const firebaseConfig = {  
+      apiKey: "AIzaSyD7XzFMve-N8ALJPlxaBQM_iMZtbr05dCc",  
+      authDomain: "hamo-124d8.firebaseapp.com",  
+      projectId: "hamo-124d8",  
+      storageBucket: "hamo-124d8.firebasestorage.app",  
+      messagingSenderId: "487641126653",  
+      appId: "1:487641126653:web:6378be437f6d0cb94fd094"  
+    };
+
+    // Init  
+    const app = initializeApp(firebaseConfig);  
+    const auth = getAuth(app);  
+    const db = getFirestore(app);  
+    const provider = new GoogleAuthProvider();  
+    provider.setCustomParameters({ prompt: "select_account" });
+
+    /******************************************************************  
+     * Data model (Firestore)  
+     * Collection: users  
+     * Document: users/{uid}  
+     *  
+     * Fields:  
+     *  - email: string  
+     *  - tasks: { [dayKey]: Array<{id,title,done,createdAt}> }  
+     *  - progress: { dayIndex, startDateISO, updatedAt }  
+     ******************************************************************/
+
+    // UI refs  
+    const $ = (id) => document.getElementById(id);
+
+    const userEmail = $("userEmail");  
+    const btnGoogle = $("btnGoogle");  
+    const btnLogout = $("btnLogout");
+
+    const taskTitle = $("taskTitle");  
+    const btnAddTask = $("btnAddTask");  
+    const btnPrevDay = $("btnPrevDay");  
+    const btnNextDay = $("btnNextDay");  
+    const btnResetChallenge = $("btnResetChallenge");
+
+    const taskList = $("taskList");  
+    const emptyState = $("emptyState");
+
+    const kpiDay = $("kpiDay");  
+    const kpiDoneToday = $("kpiDoneToday");  
+    const kpiTotalToday = $("kpiTotalToday");  
+    const kpiPercent = $("kpiPercent");
+
+    const progressBar = $("progressBar");  
+    const progressText = $("progressText");  
+    const todayKeyEl = $("todayKey");
+
+    const toast = $("toast");  
+    const toastTitle = $("toastTitle");  
+    const toastMsg = $("toastMsg");
+
+    // App state  
+    let currentUser = null;  
+    let userDocRef = null;  
+    let userData = null;
+
+    // Helpers  
+    const DAY_COUNT = 21;
+
+    function uuid(){  
+      return crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + "-" + Math.random().toString(16).slice(2);  
+    }
+
+    function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+    function showToast(title, msg){  
+      toastTitle.textContent = title;  
+      toastMsg.textContent = msg || "";  
+      toast.classList.add("show");  
+      setTimeout(() => toast.classList.remove("show"), 2600);  
+    }
+
+    function defaultUserDoc(email){  
+      // Start at day 1; store startDate for "SaaS feel" + future analytics  
+      const startDateISO = new Date().toISOString();  
+      return {  
+        email,  
+        tasks: {}, // dayKey -> array  
+        progress: {  
+          dayIndex: 1,  
+          startDateISO,  
+          updatedAt: null  
+        },  
+        createdAt: serverTimestamp(),  
+        updatedAt: serverTimestamp()  
+      };  
+    }
+
+    function dayKeyFromIndex(dayIndex){  
+      // Stable key for Firestore map fields  
+      return `day_${String(dayIndex).padStart(2,"0")}`; // day_01 .. day_21  
+    }
+
+    function ensureUserShape(data){  
+      const safe = data || {};  
+      safe.email = safe.email || (currentUser?.email ?? "");  
+      safe.tasks = safe.tasks && typeof safe.tasks === "object" ? safe.tasks : {};  
+      safe.progress = safe.progress && typeof safe.progress === "object" ? safe.progress : {};  
+      safe.progress.dayIndex = clamp(parseInt(safe.progress.dayIndex || 1, 10), 1, DAY_COUNT);  
+      safe.progress.startDateISO = safe.progress.startDateISO || new Date().toISOString();  
+      return safe;  
+    }
+
+    function getCurrentDayIndex(){  
+      return userData?.progress?.dayIndex ?? 1;  
+    }
+
+    function getCurrentDayKey(){  
+      return dayKeyFromIndex(getCurrentDayIndex());  
+    }
+
+    function getTasksForDay(dayKey){  
+      const list = userData?.tasks?.[dayKey];  
+      return Array.isArray(list) ? list : [];  
+    }
+
+    function calcOverallProgressPercent(){  
+      // Based on all tasks across all days  
+      const tasksMap = userData?.tasks || {};  
+      let total = 0;  
+      let done = 0;  
+      for (const key of Object.keys(tasksMap)){  
+        const arr = Array.isArray(tasksMap[key]) ? tasksMap[key] : [];  
+        total += arr.length;  
+        done += arr.filter(t => !!t.done).length;  
+      }  
+      if (total === 0) return 0;  
+      return Math.round((done / total) * 100);  
+    }
+
+    function render(){  
+      if (!currentUser || !userData){  
+        // logged out  
+        userEmail.textContent = "غير مسجل";  
+        btnLogout.disabled = true;  
+        btnAddTask.disabled = true;  
+        btnPrevDay.disabled = true;  
+        btnNextDay.disabled = true;  
+        btnResetChallenge.disabled = true;  
+        taskTitle.disabled = true;
+
+        kpiDay.textContent = "—";  
+        kpiDoneToday.textContent = "—";  
+        kpiTotalToday.textContent = "—";  
+        kpiPercent.textContent = "—%";  
+        progressBar.style.width = "0%";  
+        progressText.textContent = "—";  
+        todayKeyEl.textContent = "—";
+
+        taskList.innerHTML = "";  
+        emptyState.style.display = "none";  
+        return;  
+      }
+
+      // logged in  
+      userEmail.textContent = currentUser.email || "—";  
+      btnLogout.disabled = false;  
+      btnAddTask.disabled = false;  
+      btnPrevDay.disabled = false;  
+      btnNextDay.disabled = false;  
+      btnResetChallenge.disabled = false;  
+      taskTitle.disabled = false;
+
+      const dayIndex = getCurrentDayIndex();  
+      const dayKey = getCurrentDayKey();  
+      todayKeyEl.textContent = dayKey;
+
+      // KPIs  
+      kpiDay.textContent = `${dayIndex}/${DAY_COUNT}`;
+
+      const todays = getTasksForDay(dayKey);  
+      const doneToday = todays.filter(t => !!t.done).length;  
+      kpiDoneToday.textContent = String(doneToday);  
+      kpiTotalToday.textContent = String(todays.length);
+
+      const percent = calcOverallProgressPercent();  
+      kpiPercent.textContent = `${percent}%`;  
+      progressBar.style.width = `${percent}%`;  
+      document.querySelector(".bar").setAttribute("aria-valuenow", String(percent));  
+      progressText.textContent = `${percent}%`;
+
+      // Task list  
+      taskList.innerHTML = "";  
+      if (todays.length === 0){  
+        emptyState.style.display = "block";  
+      } else {  
+        emptyState.style.display = "none";  
+      }
+
+      for (const task of todays){  
+        const item = document.createElement("div");  
+        item.className = "task";  
+        item.dataset.id = task.id;
+
+        item.innerHTML = `  
+          <div class="left">  
+            <label class="check" title="إنجاز المهمة">  
+              <input type="checkbox" ${task.done ? "checked" : ""} />  
+              <span aria-hidden="true"></span>  
+            </label>  
+            <div style="min-width:0">  
+              <div class="title">${escapeHtml(task.title || "")}</div>  
+              <div class="meta">اليوم ${dayIndex} • ${task.done ? "منجزة" : "غير منجزة"}</div>  
+            </div>  
+          </div>  
+          <div class="right">  
+            <button class="iconBtn danger" type="button" title="حذف المهمة">حذف</button>  
+          </div>  
+        `;
+
+        // Toggle done  
+        const checkbox = item.querySelector('input[type="checkbox"]');  
+        checkbox.addEventListener("change", async () => {  
+          await toggleTaskDone(dayKey, task.id, checkbox.checked);  
+        });
+
+        // Delete  
+        const delBtn = item.querySelector("button");  
+        delBtn.addEventListener("click", async () => {  
+          const ok = confirm("حذف هذه المهمة؟");  
+          if (!ok) return;  
+          await deleteTask(dayKey, task.id);  
+        });
+
+        taskList.appendChild(item);  
+      }  
+    }
+
+    // Basic HTML escaping for safety  
+    function escapeHtml(str){  
+      return String(str)  
+        .replaceAll("&","&amp;")  
+        .replaceAll("<","&lt;")  
+        .replaceAll(">","&gt;")  
+        .replaceAll('"',"&quot;")  
+        .replaceAll("'","&#039;");  
+    }
+
+    async function loadUserDoc(uid){  
+      userDocRef = doc(db, "users", uid);  
+      const snap = await getDoc(userDocRef);  
+      if (!snap.exists()){  
+        // Create user in Firestore (required)  
+        const initial = defaultUserDoc(currentUser.email || "");  
+        await setDoc(userDocRef, initial);  
+        userData = ensureUserShape(initial);  
+        showToast("تم إنشاء الحساب", "تم حفظ المستخدم في Firestore.");  
+      } else {  
+        userData = ensureUserShape(snap.data());  
+      }  
+      render();  
+    }
+
+    async function persistUserData(partial){  
+      // partial merges with existing doc fields  
+      if (!userDocRef) throw new Error("No userDocRef");  
+      await updateDoc(userDocRef, {  
+        ...partial,  
+        updatedAt: serverTimestamp(),  
+        "progress.updatedAt": serverTimestamp()  
+      });  
+    }
+
+    async function addTask(){  
+      const title = (taskTitle.value || "").trim();  
+      if (!title){  
+        showToast("خطأ", "اكتب اسم المهمة أولاً.");  
+        return;  
+      }  
+      const dayKey = getCurrentDayKey();  
+      const tasks = getTasksForDay(dayKey);
+
+      const newTask = {  
+        id: uuid(),  
+        title,  
+        done: false,  
+        createdAt: new Date().toISOString()  
+      };
+
+      const updated = [...tasks, newTask];  
+      // Update local  
+      userData.tasks[dayKey] = updated;  
+      render();
+
+      // Persist to Firestore (overwrite that day's array inside map)  
+      await persistUserData({  
+        [`tasks.${dayKey}`]: updated  
+      });
+
+      taskTitle.value = "";  
+      showToast("تمت الإضافة", "تم حفظ المهمة لهذا اليوم.");  
+    }
+
+    async function deleteTask(dayKey, taskId){  
+      const tasks = getTasksForDay(dayKey);  
+      const updated = tasks.filter(t => t.id !== taskId);
+
+      userData.tasks[dayKey] = updated;  
+      render();
+
+      await persistUserData({  
+        [`tasks.${dayKey}`]: updated  
+      });
+
+      showToast("تم الحذف", "تم حذف المهمة وحفظ التعديل.");  
+    }
+
+    async function toggleTaskDone(dayKey, taskId, done){  
+      const tasks = getTasksForDay(dayKey);  
+      const updated = tasks.map(t => (t.id === taskId ? { ...t, done: !!done } : t));
+
+      userData.tasks[dayKey] = updated;  
+      render();
+
+      await persistUserData({  
+        [`tasks.${dayKey}`]: updated  
+      });  
+    }
+
+    async function setDayIndex(nextIndex){  
+      const n = clamp(nextIndex, 1, DAY_COUNT);  
+      userData.progress.dayIndex = n;  
+      render();  
+      await persistUserData({  
+        "progress.dayIndex": n  
+      });  
+    }
+
+    async function resetChallenge(){  
+      const ok = confirm("إعادة بدء التحدي؟ سيتم تصفير اليوم الحالي فقط إلى 1 (لن نحذف المهام تلقائيًا).");  
+      if (!ok) return;  
+      await setDayIndex(1);  
+      showToast("تم", "تمت إعادة اليوم إلى 1.");  
+    }
+
+    // Auth UI events  
+    btnGoogle.addEventListener("click", async () => {  
+      try{  
+        // IMPORTANT: This requires running from a real origin (localhost/https), not file://  
+        const result = await signInWithPopup(auth, provider);  
+        currentUser = result.user;  
+        showToast("تم تسجيل الدخول", currentUser.email || "");  
+        await loadUserDoc(currentUser.uid);  
+      } catch (e){  
+        console.error(e);  
+        showToast("فشل تسجيل الدخول", e?.message || "تحقق من إعدادات Google Provider وAuthorized domains.");  
+      }  
+    });
+
+    btnLogout.addEventListener("click", async () => {  
+      try{  
+        await signOut(auth);  
+        currentUser = null;  
+        userDocRef = null;  
+        userData = null;  
+        render();  
+        showToast("تم تسجيل الخروج", "إلى اللقاء.");  
+      } catch (e){  
+        console.error(e);  
+        showToast("خطأ", e?.message || "تعذر تسجيل الخروج.");  
+      }  
+    });
+
+    // Settings events  
+    btnAddTask.addEventListener("click", addTask);  
+    taskTitle.addEventListener("keydown", (e) => {  
+      if (e.key === "Enter") addTask();  
+    });
+
+    btnPrevDay.addEventListener("click", async () => {  
+      await setDayIndex(getCurrentDayIndex() - 1);  
+    });  
+    btnNextDay.addEventListener("click", async () => {  
+      await setDayIndex(getCurrentDayIndex() + 1);  
+    });  
+    btnResetChallenge.addEventListener("click", resetChallenge);
+
+    // Keep session  
+    onAuthStateChanged(auth, async (user) => {  
+      currentUser = user || null;  
+      if (!currentUser){  
+        userDocRef = null;  
+        userData = null;  
+        render();  
+        return;  
+      }  
+      userEmail.textContent = currentUser.email || "—";  
+      await loadUserDoc(currentUser.uid);  
+    });
+
+    // Initial paint  
+    render();
+
+    /******************************************************************  
+     * تشغيل صحيح (مهم):  
+     * - لا تشغل الملف بـ file:// لأن Google popup قد يفشل.  
+     * - شغّله عبر localhost (Live Server) أو Firebase Hosting.  
+     *  
+     * Firestore Rules المقترحة (لازم تضبطها من الكونسول):  
+     * match /users/{uid} { allow read, write: if request.auth!=null && request.auth.uid==uid; }  
+     ******************************************************************/  
   </script>  
 </body>  
 </html>  
