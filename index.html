@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>🔥 تحدي 21 يوم</title>
+<title>تحدي الانضباط</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
@@ -11,89 +11,46 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <style>
-:root {
-  --bg:#0f172a;
-  --card:#1e293b;
-  --text:white;
-}
-
-.light {
-  --bg:#f1f5f9;
-  --card:#ffffff;
-  --text:#000;
-}
-
 body {
   font-family:'Cairo';
-  background:var(--bg);
-  color:var(--text);
+  background:#0f172a;
+  color:white;
   text-align:center;
-  transition:0.3s;
 }
-
-.container {
-  max-width:800px;
-  margin:auto;
-  padding:20px;
-}
-
-.card {
-  background:var(--card);
-  margin:10px;
-  padding:15px;
-  border-radius:12px;
-  display:flex;
-  justify-content:space-between;
-}
-
-button {
-  padding:8px;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-}
-
+.container {max-width:800px;margin:auto;padding:20px;}
+.card {background:#1e293b;margin:10px;padding:15px;border-radius:12px;display:flex;justify-content:space-between;}
+button {padding:8px;border:none;border-radius:8px;cursor:pointer;}
 .done {background:#22c55e;}
 .not {background:#ef4444;}
-
-.progress {
-  background:#334155;
-  border-radius:10px;
-  overflow:hidden;
-  margin:20px 0;
-}
-
-.bar {
-  height:20px;
-  background:#22c55e;
-  width:0%;
-}
-
-.toggle-mode {
-  position:absolute;
-  top:10px;
-  left:10px;
-}
+.progress {background:#334155;border-radius:10px;overflow:hidden;margin:20px;}
+.bar {height:20px;background:#22c55e;width:0%;}
+.settings {display:none;background:#1e293b;padding:15px;border-radius:10px;}
 </style>
 </head>
 
 <body>
 
-<button class="toggle-mode" onclick="toggleMode()">🌙</button>
-
 <div class="container">
 
-<h1>🔥 تحدي 21 يوم</h1>
-<p id="motivation">ابدأ دلوقتي 💪</p>
+<h1 id="title">🔥 تحدي الانضباط</h1>
 
 <button onclick="login()">تسجيل بجوجل</button>
-<p id="user"></p>
+<button onclick="toggleSettings()">⚙️ إعدادات</button>
 
-<h3 id="streak">🔥 Streak: 0 يوم</h3>
+<p id="user"></p>
+<h3 id="streak">🔥 Streak: 0</h3>
 
 <div class="progress"><div id="bar" class="bar"></div></div>
 
 <div id="days"></div>
+
+<div id="settings" class="settings">
+  <h3>⚙️ الإعدادات</h3>
+  <input id="daysInput" placeholder="عدد الأيام"><br><br>
+  <input id="titleInput" placeholder="اسم التحدي"><br><br>
+  <input id="tasksInput" placeholder="المهام (مثال: مذاكرة,جيم)"><br><br>
+  <button onclick="saveSettings()">حفظ</button>
+</div>
 
 </div>
 
@@ -111,6 +68,7 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 let userId="";
+let userData={};
 
 function login(){
   const provider=new firebase.auth.GoogleAuthProvider();
@@ -121,54 +79,69 @@ function login(){
   });
 }
 
-function toggleMode(){
-  document.body.classList.toggle("light");
+function toggleSettings(){
+  let s=document.getElementById("settings");
+  s.style.display=s.style.display=="none"?"block":"none";
 }
 
 async function load(){
   const doc=await db.collection("users").doc(userId).get();
-  let data=doc.exists?doc.data().days:[];
+  userData=doc.exists?doc.data():{};
+
+  let daysCount=userData.custom?.days||21;
+  let title=userData.custom?.title||"🔥 تحدي الانضباط";
+  let tasks=userData.custom?.tasks||["مذاكرة","شغل"];
+
+  document.getElementById("title").innerText=title;
+
+  let data=userData.days||[];
 
   let html="";
   let done=0;
   let streak=0;
 
-  for(let i=0;i<21;i++){
-    let d=data[i]||{study:false,work:false};
+  for(let i=0;i<daysCount;i++){
+    let d=data[i]||{};
+    html+=`<div class="card"><span>اليوم ${i+1}</span><div>`;
 
-    if(d.study&&d.work){
-      done++;
-      streak++;
-    } else streak=0;
+    let complete=true;
 
-    html+=`
-    <div class="card">
-      <span>اليوم ${i+1}</span>
-      <div>
-        <button class="${d.study?'done':'not'}" onclick="toggle(${i},'study')">📚</button>
-        <button class="${d.work?'done':'not'}" onclick="toggle(${i},'work')">💻</button>
-      </div>
-    </div>`;
+    tasks.forEach(task=>{
+      if(!d[task]) complete=false;
+      html+=`<button class="${d[task]?'done':'not'}" onclick="toggle(${i},'${task}')">${task}</button>`;
+    });
+
+    if(complete){done++;streak++;} else streak=0;
+
+    html+=`</div></div>`;
   }
 
   document.getElementById("days").innerHTML=html;
-  document.getElementById("bar").style.width=(done/21*100)+"%";
-  document.getElementById("streak").innerText="🔥 Streak: "+streak+" يوم";
-
-  let msgs=["كمل يا بطل 🔥","انت جامد 💪","قربت توصل 🚀"];
-  document.getElementById("motivation").innerText=msgs[Math.floor(Math.random()*msgs.length)];
+  document.getElementById("bar").style.width=(done/daysCount*100)+"%";
+  document.getElementById("streak").innerText="🔥 Streak: "+streak;
 }
 
-async function toggle(i,type){
+async function toggle(i,task){
   const ref=db.collection("users").doc(userId);
-  const doc=await ref.get();
+  let data=userData.days||[];
+  if(!data[i]) data[i]={};
 
-  let data=doc.exists?doc.data().days:[];
-  if(!data[i])data[i]={study:false,work:false};
+  data[i][task]=!data[i][task];
 
-  data[i][type]=!data[i][type];
+  await ref.set({days:data},{merge:true});
+  load();
+}
 
-  await ref.set({days:data});
+async function saveSettings(){
+  let days=document.getElementById("daysInput").value;
+  let title=document.getElementById("titleInput").value;
+  let tasks=document.getElementById("tasksInput").value.split(",");
+
+  await db.collection("users").doc(userId).set({
+    custom:{days:+days,title,tasks}
+  },{merge:true});
+
+  alert("تم الحفظ ✅");
   load();
 }
 
