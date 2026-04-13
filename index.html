@@ -3,980 +3,488 @@
 <head>  
   <meta charset="utf-8" />  
   <meta name="viewport" content="width=device-width, initial-scale=1" />  
-  <title>تحدّي اليوم - مهام يومية</title>  
-  <meta name="description" content="موقع بسيط لتحدّي المستخدم يوميًا عبر مهام ونقاط وسلسلة إنجاز." />
-
+  <title>موقع بسيط واحترافي</title>  
+  <meta name="description" content="قالب موقع عربي بسيط واحترافي وسريع الاستجابة." />  
   <style>  
+    /* ---------------------------  
+      Minimal, professional styling  
+    ---------------------------- */  
     :root{  
-      --bg:#0b1220;  
-      --card:#0f1b33;  
-      --muted:#9fb0d0;  
-      --text:#eaf0ff;  
-      --primary:#5eead4;  
-      --primary2:#60a5fa;  
-      --danger:#fb7185;  
-      --warning:#fbbf24;  
+      --bg: #0b1220;  
+      --surface: #0f1a30;  
+      --card: rgba(255,255,255,.06);  
       --border: rgba(255,255,255,.10);  
-      --shadow: 0 10px 30px rgba(0,0,0,.35);  
-      --radius: 16px;  
-      --focus: 0 0 0 4px rgba(94,234,212,.18);  
-      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Tahoma, Arial, "Noto Kufi Arabic", "Noto Sans Arabic", sans-serif;  
+      --text: #eaf0ff;  
+      --muted: rgba(234,240,255,.72);  
+      --primary: #5aa7ff;  
+      --primary-2: #7c5cff;  
+      --focus: #9bd1ff;  
+      --shadow: 0 20px 60px rgba(0,0,0,.35);  
+      --radius: 18px;  
+      --max: 1100px;  
     }
 
-    *{box-sizing:border-box}  
+    *{ box-sizing: border-box; }  
+    html, body{ height: 100%; }  
     body{  
-      margin:0;  
-      font-family: var(--font);  
+      margin: 0;  
+      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;  
       background:  
-        radial-gradient(1200px 700px at 15% 10%, rgba(96,165,250,.22), transparent 55%),  
-        radial-gradient(900px 500px at 85% 30%, rgba(94,234,212,.18), transparent 55%),  
-        linear-gradient(180deg, #070b14, var(--bg));  
+        radial-gradient(900px 500px at 15% 10%, rgba(122,92,255,.20), transparent 60%),  
+        radial-gradient(900px 500px at 85% 0%, rgba(90,167,255,.18), transparent 55%),  
+        linear-gradient(180deg, var(--bg), #070b14 70%);  
       color: var(--text);  
-      min-height:100vh;  
-    }
-
-    a{color:inherit}  
-    .container{  
-      max-width: 1100px;  
-      margin: 0 auto;  
-      padding: 22px 16px 60px;  
-    }
-
-    header{  
-      display:flex;  
-      gap: 14px;  
-      align-items: center;  
-      justify-content: space-between;  
-      flex-wrap: wrap;  
-      margin-bottom: 16px;  
-    }
-
-    .brand{  
-      display:flex;  
-      align-items:center;  
-      gap:12px;  
-    }  
-    .logo{  
-      width: 44px; height: 44px;  
-      border-radius: 14px;  
-      background: linear-gradient(135deg, rgba(94,234,212,.95), rgba(96,165,250,.95));  
-      box-shadow: var(--shadow);  
-      position: relative;  
-      overflow:hidden;  
-    }  
-    .logo::after{  
-      content:"";  
-      position:absolute;  
-      inset:-30%;  
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.55), transparent 55%);  
-      transform: rotate(10deg);  
-    }
-
-    h1{  
-      font-size: 18px;  
-      margin:0;  
-      line-height:1.2;  
-      letter-spacing:.2px;  
-    }  
-    .subtitle{  
-      margin: 2px 0 0;  
-      color: var(--muted);  
-      font-size: 13px;  
-    }
-
-    .top-actions{  
-      display:flex;  
-      gap:10px;  
-      flex-wrap: wrap;  
-      align-items:center;  
-    }
-
-    .pill{  
-      border: 1px solid var(--border);  
-      background: rgba(255,255,255,.03);  
-      padding: 8px 10px;  
-      border-radius: 999px;  
-      font-size: 13px;  
-      color: var(--muted);  
-      display:flex;  
-      gap:10px;  
-      align-items:center;  
-    }
-
-    .btn{  
-      border: 1px solid var(--border);  
-      background: rgba(255,255,255,.04);  
-      color: var(--text);  
-      padding: 10px 12px;  
-      border-radius: 12px;  
-      cursor:pointer;  
-      transition: transform .05s ease, background .2s ease, border-color .2s ease;  
-      font: inherit;  
-      line-height: 1;  
-      display:inline-flex;  
-      align-items:center;  
-      gap:8px;  
-    }  
-    .btn:hover{ background: rgba(255,255,255,.07); }  
-    .btn:active{ transform: translateY(1px); }  
-    .btn:focus-visible{ outline: none; box-shadow: var(--focus); border-color: rgba(94,234,212,.55); }
-
-    .btn.primary{  
-      background: linear-gradient(135deg, rgba(94,234,212,.22), rgba(96,165,250,.18));  
-      border-color: rgba(94,234,212,.35);  
-    }  
-    .btn.danger{  
-      border-color: rgba(251,113,133,.35);  
-      background: rgba(251,113,133,.08);  
-    }
-
-    main{  
-      display:grid;  
-      grid-template-columns: 1.1fr .9fr;  
-      gap: 14px;  
-      margin-top: 14px;  
-    }
-
-    @media (max-width: 920px){  
-      main{ grid-template-columns: 1fr; }  
-    }
-
-    .card{  
-      border: 1px solid var(--border);  
-      background: rgba(15,27,51,.82);  
-      backdrop-filter: blur(8px);  
-      border-radius: var(--radius);  
-      box-shadow: var(--shadow);  
-      overflow:hidden;  
-    }
-
-    .card header{  
-      margin:0;  
-      padding: 14px 14px 10px;  
-      border-bottom: 1px solid var(--border);  
-    }  
-    .card header h2{  
-      margin:0;  
-      font-size: 15px;  
-    }  
-    .card header p{  
-      margin: 6px 0 0;  
-      font-size: 13px;  
-      color: var(--muted);  
-    }
-
-    .card .content{  
-      padding: 14px;  
-    }
-
-    .progress{  
-      display:grid;  
-      gap: 10px;  
-    }
-
-    .bar{  
-      width:100%;  
-      height: 12px;  
-      background: rgba(255,255,255,.06);  
-      border: 1px solid rgba(255,255,255,.10);  
-      border-radius: 999px;  
-      overflow:hidden;  
-    }  
-    .bar > span{  
-      display:block;  
-      height:100%;  
-      width:0%;  
-      background: linear-gradient(90deg, var(--primary), var(--primary2));  
-      transition: width .25s ease;  
-    }
-
-    .stats{  
-      display:grid;  
-      grid-template-columns: repeat(3, 1fr);  
-      gap: 10px;  
-    }  
-    @media (max-width: 520px){  
-      .stats{ grid-template-columns: 1fr; }  
-    }
-
-    .stat{  
-      border: 1px solid var(--border);  
-      background: rgba(255,255,255,.03);  
-      border-radius: 14px;  
-      padding: 10px 12px;  
-    }  
-    .stat .k{  
-      font-size: 12px;  
-      color: var(--muted);  
-      margin:0 0 6px;  
-    }  
-    .stat .v{  
-      margin:0;  
-      font-size: 18px;  
-      font-weight: 700;  
-    }
-
-    /* Tasks */  
-    .task-form{  
-      display:grid;  
-      grid-template-columns: 1fr 140px 110px;  
-      gap: 10px;  
-      margin-bottom: 12px;  
-    }  
-    @media (max-width: 700px){  
-      .task-form{ grid-template-columns: 1fr; }  
-    }
-
-    label{ font-size: 12px; color: var(--muted); display:block; margin-bottom: 6px; }  
-    .field{  
-      display:flex;  
-      flex-direction: column;  
-    }  
-    input, select, textarea{  
-      width:100%;  
-      border: 1px solid var(--border);  
-      background: rgba(255,255,255,.03);  
-      color: var(--text);  
-      padding: 10px 10px;  
-      border-radius: 12px;  
-      outline:none;  
-      font: inherit;  
-    }  
-    input:focus, select:focus, textarea:focus{  
-      box-shadow: var(--focus);  
-      border-color: rgba(94,234,212,.45);  
-    }
-
-    .task-list{  
-      list-style:none;  
-      padding:0;  
-      margin:0;  
-      display:grid;  
-      gap: 10px;  
-    }
-
-    .task{  
-      border: 1px solid var(--border);  
-      background: rgba(255,255,255,.03);  
-      border-radius: 14px;  
-      padding: 12px;  
-      display:grid;  
-      grid-template-columns: auto 1fr auto;  
-      gap: 10px;  
-      align-items: start;  
-    }
-
-    .task input[type="checkbox"]{  
-      width: 20px; height: 20px;  
-      margin-top: 2px;  
-      accent-color: #5eead4;  
-    }
-
-    .task h3{  
-      margin:0;  
-      font-size: 14px;  
-      line-height:1.4;  
-    }  
-    .meta{  
-      margin-top: 6px;  
-      display:flex;  
-      gap: 8px;  
-      flex-wrap: wrap;  
-      color: var(--muted);  
-      font-size: 12px;  
-    }  
-    .tag{  
-      border: 1px solid rgba(255,255,255,.10);  
-      background: rgba(0,0,0,.10);  
-      padding: 3px 8px;  
-      border-radius: 999px;  
-    }  
-    .tag.easy{ border-color: rgba(94,234,212,.35); }  
-    .tag.med{ border-color: rgba(251,191,36,.35); }  
-    .tag.hard{ border-color: rgba(251,113,133,.35); }
-
-    .task .actions{  
-      display:flex;  
-      gap:8px;  
-      align-items:center;  
-    }
-
-    .icon-btn{  
-      width: 38px; height: 38px;  
-      border-radius: 12px;  
-      display:inline-grid;  
-      place-items:center;  
-      border: 1px solid var(--border);  
-      background: rgba(255,255,255,.03);  
-      color: var(--text);  
-      cursor:pointer;  
-    }  
-    .icon-btn:hover{ background: rgba(255,255,255,.06); }  
-    .icon-btn:focus-visible{ outline:none; box-shadow: var(--focus); }
-
-    .muted{ color: var(--muted); }  
-    .small{ font-size: 12px; }
-
-    .notice{  
-      border: 1px dashed rgba(255,255,255,.18);  
-      background: rgba(255,255,255,.02);  
-      padding: 12px;  
-      border-radius: 14px;  
-      color: var(--muted);  
-      font-size: 13px;  
       line-height: 1.7;  
     }
 
-    footer{  
-      margin-top: 16px;  
-      color: var(--muted);  
-      font-size: 12px;  
-      text-align:center;  
+    a{ color: inherit; text-decoration: none; }  
+    a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible{  
+      outline: 3px solid var(--focus);  
+      outline-offset: 3px;  
+      border-radius: 12px;  
     }
 
-    /* Dialog */  
-    dialog{  
-      border: 1px solid var(--border);  
-      border-radius: 16px;  
-      background: rgba(10,16,30,.92);  
-      color: var(--text);  
-      box-shadow: var(--shadow);  
-      padding: 0;  
-      width: min(560px, 92vw);  
+    .container{  
+      width: min(var(--max), calc(100% - 32px));  
+      margin-inline: auto;  
+    }
+
+    /* ---------------------------  
+      Header / Nav  
+    ---------------------------- */  
+    header{  
+      position: sticky;  
+      top: 0;  
+      z-index: 10;  
+      backdrop-filter: blur(10px);  
+      background: rgba(11,18,32,.55);  
+      border-bottom: 1px solid rgba(255,255,255,.08);  
     }  
-    dialog::backdrop{  
-      background: rgba(0,0,0,.55);  
-      backdrop-filter: blur(3px);  
-    }  
-    .dlg-head{  
-      padding: 14px 14px 10px;  
-      border-bottom: 1px solid var(--border);  
-      display:flex;  
+    .nav{  
+      display: flex;  
+      align-items: center;  
       justify-content: space-between;  
-      align-items: start;  
-      gap:10px;  
+      gap: 16px;  
+      padding: 14px 0;  
     }  
-    .dlg-head h3{ margin:0; font-size: 15px; }  
-    .dlg-body{ padding: 14px; }  
-    .dlg-actions{  
-      padding: 12px 14px 14px;  
-      border-top: 1px solid var(--border);  
-      display:flex;  
-      justify-content: flex-start;  
-      gap:10px;  
+    .brand{  
+      display: inline-flex;  
+      align-items: center;  
+      gap: 10px;  
+      font-weight: 700;  
+      letter-spacing: .2px;  
+    }  
+    .logo{  
+      width: 38px; height: 38px;  
+      border-radius: 12px;  
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));  
+      box-shadow: 0 10px 25px rgba(90,167,255,.25);  
+    }  
+    nav ul{  
+      list-style: none;  
+      display: flex;  
+      gap: 10px;  
+      padding: 0;  
+      margin: 0;  
       flex-wrap: wrap;  
+      justify-content: flex-end;  
+    }  
+    nav a{  
+      display: inline-flex;  
+      padding: 10px 12px;  
+      border-radius: 12px;  
+      color: var(--muted);  
+    }  
+    nav a:hover{  
+      background: rgba(255,255,255,.06);  
+      color: var(--text);  
+    }
+
+    .nav-actions{  
+      display: inline-flex;  
+      gap: 10px;  
+      align-items: center;  
+    }  
+    .btn{  
+      border: 1px solid var(--border);  
+      background: rgba(255,255,255,.06);  
+      color: var(--text);  
+      padding: 10px 14px;  
+      border-radius: 14px;  
+      cursor: pointer;  
+      font-weight: 600;  
+    }  
+    .btn:hover{ background: rgba(255,255,255,.10); }  
+    .btn.primary{  
+      border-color: transparent;  
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));  
+      box-shadow: 0 16px 40px rgba(90,167,255,.18);  
+    }  
+    .btn.primary:hover{  
+      filter: brightness(1.05);  
+    }
+
+    /* ---------------------------  
+      Hero  
+    ---------------------------- */  
+    main{ padding: 34px 0 70px; }
+
+    .hero{  
+      display: grid;  
+      grid-template-columns: 1.2fr .8fr;  
+      gap: 22px;  
+      align-items: stretch;  
+      margin-top: 16px;  
+    }  
+    .panel{  
+      background: rgba(255,255,255,.05);  
+      border: 1px solid rgba(255,255,255,.10);  
+      border-radius: var(--radius);  
+      box-shadow: var(--shadow);  
+    }  
+    .hero-copy{  
+      padding: 26px;  
+      overflow: hidden;  
+      position: relative;  
+    }  
+    .badge{  
+      display: inline-flex;  
+      gap: 8px;  
+      align-items: center;  
+      padding: 8px 12px;  
+      border-radius: 999px;  
+      border: 1px solid rgba(255,255,255,.12);  
+      background: rgba(255,255,255,.06);  
+      color: var(--muted);  
+      font-weight: 600;  
+      font-size: .92rem;  
+    }  
+    .hero h1{  
+      margin: 14px 0 10px;  
+      font-size: clamp(28px, 4vw, 44px);  
+      line-height: 1.2;  
+      letter-spacing: .2px;  
+    }  
+    .hero p{  
+      margin: 0 0 18px;  
+      color: var(--muted);  
+      max-width: 60ch;  
+    }  
+    .cta{  
+      display: flex;  
+      gap: 10px;  
+      flex-wrap: wrap;  
+      margin-top: 14px;  
+    }  
+    .mini{  
+      color: var(--muted);  
+      font-size: .95rem;  
+      margin-top: 10px;  
+    }
+
+    .hero-aside{  
+      padding: 22px;  
+      display: grid;  
+      gap: 12px;  
+    }  
+    .stat{  
+      display: grid;  
+      gap: 6px;  
+      padding: 16px;  
+      border-radius: 16px;  
+      border: 1px solid rgba(255,255,255,.10);  
+      background: rgba(255,255,255,.04);  
+    }  
+    .stat strong{ font-size: 1.15rem; }  
+    .stat span{ color: var(--muted); font-size: .95rem; }
+
+    /* ---------------------------  
+      Sections / Cards  
+    ---------------------------- */  
+    section{ margin-top: 26px; }  
+    .section-title{  
+      display: flex;  
+      align-items: baseline;  
+      justify-content: space-between;  
+      gap: 12px;  
+      margin: 20px 0 12px;  
+    }  
+    .section-title h2{  
+      margin: 0;  
+      font-size: 1.25rem;  
+      letter-spacing: .2px;  
+    }  
+    .section-title p{  
+      margin: 0;  
+      color: var(--muted);  
+      font-size: .95rem;  
+    }
+
+    .grid{  
+      display: grid;  
+      grid-template-columns: repeat(3, 1fr);  
+      gap: 14px;  
+    }  
+    .card{  
+      padding: 18px;  
+      border-radius: 16px;  
+      background: rgba(255,255,255,.04);  
+      border: 1px solid rgba(255,255,255,.10);  
+      transition: transform .15s ease, background .15s ease;  
+      min-height: 140px;  
+    }  
+    .card:hover{  
+      transform: translateY(-2px);  
+      background: rgba(255,255,255,.06);  
+    }  
+    .card h3{ margin: 0 0 8px; font-size: 1.05rem; }  
+    .card p{ margin: 0; color: var(--muted); }
+
+    /* ---------------------------  
+      Contact  
+    ---------------------------- */  
+    .contact{  
+      display: grid;  
+      grid-template-columns: 1fr 1fr;  
+      gap: 14px;  
+      align-items: start;  
+    }  
+    form{  
+      padding: 18px;  
+      border-radius: 16px;  
+      background: rgba(255,255,255,.04);  
+      border: 1px solid rgba(255,255,255,.10);  
+    }  
+    label{ display: block; margin-bottom: 6px; color: var(--muted); font-size: .95rem; }  
+    input, textarea{  
+      width: 100%;  
+      border-radius: 14px;  
+      padding: 12px 12px;  
+      border: 1px solid rgba(255,255,255,.12);  
+      background: rgba(15,26,48,.55);  
+      color: var(--text);  
+      font: inherit;  
+    }  
+    textarea{ min-height: 120px; resize: vertical; }  
+    .form-row{ display: grid; gap: 10px; margin-bottom: 12px; }  
+    .form-actions{ display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .contact-info{  
+      padding: 18px;  
+      border-radius: 16px;  
+      background: rgba(255,255,255,.04);  
+      border: 1px solid rgba(255,255,255,.10);  
+    }  
+    .contact-info ul{  
+      margin: 10px 0 0;  
+      padding: 0;  
+      list-style: none;  
+      display: grid;  
+      gap: 10px;  
+      color: var(--muted);  
+    }  
+    .contact-info li{  
+      padding: 12px;  
+      border-radius: 14px;  
+      border: 1px solid rgba(255,255,255,.10);  
+      background: rgba(255,255,255,.03);  
+    }
+
+    /* ---------------------------  
+      Footer  
+    ---------------------------- */  
+    footer{  
+      margin-top: 34px;  
+      padding: 22px 0;  
+      border-top: 1px solid rgba(255,255,255,.08);  
+      color: var(--muted);  
+      font-size: .95rem;  
+    }  
+    .footer{  
+      display: flex;  
+      gap: 12px;  
+      justify-content: space-between;  
+      flex-wrap: wrap;  
+      align-items: center;  
+    }
+
+    /* ---------------------------  
+      Responsive  
+    ---------------------------- */  
+    @media (max-width: 900px){  
+      .hero{ grid-template-columns: 1fr; }  
+      .grid{ grid-template-columns: 1fr; }  
+      .contact{ grid-template-columns: 1fr; }  
+      nav ul{ display: none; } /* keep it simple on mobile */  
     }  
   </style>  
 </head>
 
 <body>  
-  <div class="container">  
-    <!-- Top header -->  
-    <header aria-label="شريط العنوان">  
-      <div class="brand">  
-        <div class="logo" aria-hidden="true"></div>  
-        <div>  
-          <h1>تحدّي اليوم</h1>  
-          <p class="subtitle">اعمل مهام يومية، اكسب نقاط، وحافظ على سلسلة الإنجاز</p>  
-        </div>  
-      </div>
+  <!-- Header -->  
+  <header>  
+    <div class="container">  
+      <div class="nav" role="navigation" aria-label="الشريط العلوي">  
+        <a class="brand" href="#top" aria-label="العودة للرئيسية">  
+          <span class="logo" aria-hidden="true"></span>  
+          <span>اسم الموقع</span>  
+        </a>
 
-      <div class="top-actions">  
-        <div class="pill" role="status" aria-live="polite">  
-          <span aria-hidden="true">📅</span>  
-          <span id="todayText">اليوم: —</span>  
+        <!-- Simple nav (hidden on mobile for simplicity) -->  
+        <nav aria-label="روابط الموقع">  
+          <ul>  
+            <li><a href="#services">الخدمات</a></li>  
+            <li><a href="#about">نبذة</a></li>  
+            <li><a href="#contact">تواصل</a></li>  
+          </ul>  
+        </nav>
+
+        <div class="nav-actions">  
+          <a class="btn" href="#contact">تواصل</a>  
+          <a class="btn primary" href="#services">ابدأ الآن</a>  
         </div>  
-        <button class="btn primary" id="openTemplatesBtn" type="button" aria-haspopup="dialog">  
-          اختر تحدّي جاهز  
-        </button>  
-        <button class="btn danger" id="resetDayBtn" type="button" title="تصفير إنجاز اليوم">  
-          تصفير اليوم  
-        </button>  
       </div>  
-    </header>
+    </div>  
+  </header>
 
-    <main>  
-      <!-- Left: tasks -->  
-      <section class="card" aria-label="المهام اليومية">  
-        <header>  
-          <h2>مهامك اليوم</h2>  
-          <p>أضف مهام، حدّد الصعوبة وعدد النقاط، وعلِّم عليها عند الإنجاز.</p>  
-        </header>
+  <!-- Main -->  
+  <main id="top">  
+    <div class="container">  
+      <!-- Hero -->  
+      <section class="hero" aria-label="مقدمة الموقع">  
+        <div class="panel hero-copy">  
+          <span class="badge">تصميم بسيط • أداء سريع • تجربة نظيفة</span>  
+          <h1>موقع احترافي وبسيط — يركز على المحتوى ويُظهره بشكل واضح</h1>  
+          <p>  
+            هذا قالب جاهز يمكنك تعديل النصوص والألوان والأقسام بسهولة.  
+            مناسب لصفحة تعريفية، خدمة، أو بروفايل شركة صغيرة.  
+          </p>
 
-        <div class="content">  
-          <!-- Add task form -->  
-          <form id="taskForm" class="task-form" autocomplete="off">  
-            <div class="field">  
-              <label for="taskTitle">المهمة</label>  
-              <input id="taskTitle" name="title" type="text" placeholder="مثال: 30 دقيقة رياضة" required maxlength="80" />  
-            </div>
+          <div class="cta">  
+            <a class="btn primary" href="#contact">اطلب عرض سعر</a>  
+            <a class="btn" href="#about">اعرف أكثر</a>  
+          </div>
 
-            <div class="field">  
-              <label for="taskDifficulty">الصعوبة</label>  
-              <select id="taskDifficulty" name="difficulty" required>  
-                <option value="easy">سهل</option>  
-                <option value="medium" selected>متوسط</option>  
-                <option value="hard">صعب</option>  
-              </select>  
-            </div>
+          <p class="mini">بدون مكتبات خارجية • متوافق مع الجوال • قابل للتعديل بسرعة</p>  
+        </div>
 
-            <div class="field">  
-              <label for="taskPoints">النقاط</label>  
-              <input id="taskPoints" name="points" type="number" inputmode="numeric" min="1" max="500" value="20" required />  
-            </div>
-
-            <div class="field" style="grid-column: 1 / -1;">  
-              <button class="btn primary" type="submit">إضافة المهمة</button>  
-              <span class="small muted" id="saveHint" style="margin-top:8px; display:block;">  
-                يتم الحفظ تلقائيًا على جهازك (LocalStorage).  
-              </span>  
-            </div>  
-          </form>
-
-          <!-- Task list -->  
-          <ul class="task-list" id="taskList" aria-label="قائمة المهام">  
-            <!-- populated by JS -->  
-          </ul>
-
-          <div id="emptyState" class="notice" hidden>  
-            ما في مهام لليوم. جرّب تضيف مهام بسيطة (مياه/مشي/قراءة) أو اختر تحدّي جاهز.  
+        <aside class="panel hero-aside" aria-label="ملخص سريع">  
+          <div class="stat">  
+            <strong>واجهة مرتّبة</strong>  
+            <span>تباين واضح ومساحات مريحة للقراءة.</span>  
           </div>  
+          <div class="stat">  
+            <strong>استجابة للجوال</strong>  
+            <span>تخطيط مرن يعمل على الشاشات الصغيرة.</span>  
+          </div>  
+          <div class="stat">  
+            <strong>وصولية أفضل</strong>  
+            <span>عناوين واضحة + حالات تركيز للأزرار والحقول.</span>  
+          </div>  
+        </aside>  
+      </section>
+
+      <!-- Services -->  
+      <section id="services" aria-label="الخدمات">  
+        <div class="section-title">  
+          <h2>الخدمات</h2>  
+          <p>ثلاث نقاط واضحة بدل الزحمة</p>  
+        </div>
+
+        <div class="grid">  
+          <article class="card">  
+            <h3>تصميم واجهات</h3>  
+            <p>واجهة بسيطة، خطوط مناسبة، وتخطيط نظيف يبرز المحتوى.</p>  
+          </article>
+
+          <article class="card">  
+            <h3>تطوير صفحة تعريفية</h3>  
+            <p>صفحة واحدة سريعة، أقسام واضحة، وتجربة استخدام مريحة.</p>  
+          </article>
+
+          <article class="card">  
+            <h3>تحسين تجربة المستخدم</h3>  
+            <p>تنظيم المحتوى، تقليل التشتيت، وتحسين التسلسل البصري.</p>  
+          </article>  
         </div>  
       </section>
 
-      <!-- Right: progress & gamification -->  
-      <aside class="card" aria-label="التقدّم والإنجاز">  
-        <header>  
-          <h2>لوحة التحدّي</h2>  
-          <p>تابع تقدّمك اليومي + السلسلة (Streak) وأفضل نتيجة.</p>  
-        </header>
+      <!-- About -->  
+      <section id="about" aria-label="نبذة">  
+        <div class="section-title">  
+          <h2>نبذة</h2>  
+          <p>اختصار مفيد بدل نص طويل</p>  
+        </div>
 
-        <div class="content">  
-          <section class="progress" aria-label="مؤشرات التقدّم">  
-            <div>  
-              <div style="display:flex; justify-content:space-between; align-items:baseline; gap:10px;">  
-                <strong>تقدّم اليوم</strong>  
-                <span class="small muted" id="progressText">0%</span>  
-              </div>  
-              <div class="bar" aria-hidden="true"><span id="progressBar"></span></div>  
-              <p class="small muted" id="progressDetail" style="margin:8px 0 0;">0 من 0 مهام</p>  
-            </div>
-
-            <div class="stats" aria-label="إحصائيات">  
-              <div class="stat">  
-                <p class="k">نقاط اليوم</p>  
-                <p class="v" id="todayPoints">0</p>  
-              </div>  
-              <div class="stat">  
-                <p class="k">السلسلة</p>  
-                <p class="v" id="streak">0</p>  
-              </div>  
-              <div class="stat">  
-                <p class="k">أفضل سلسلة</p>  
-                <p class="v" id="bestStreak">0</p>  
-              </div>  
-            </div>
-
-            <div class="notice" aria-label="نصائح">  
-              <strong>نصيحة:</strong>  
-              ابدأ بـ 3 مهام صغيرة يوميًا، وبعد ما تثبت العادة زوّد الصعوبة.  
-              <div class="small muted" style="margin-top:8px;">  
-                القاعدة: اليوم يُحتسب "مكتمل" لما تخلص <span style="color:var(--text)">كل</span> مهامه.  
-              </div>  
-            </div>
-
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">  
-              <button class="btn" id="completeAllBtn" type="button">تحديد الكل كمكتمل</button>  
-              <button class="btn" id="exportBtn" type="button">تصدير البيانات</button>  
-              <button class="btn" id="importBtn" type="button">استيراد البيانات</button>  
-              <input id="importFile" type="file" accept="application/json" hidden />  
-            </div>  
-          </section>  
+        <div class="panel" style="padding:18px; border-radius:16px;">  
+          <p style="margin:0; color: var(--muted);">  
+            اكتب هنا تعريفًا مختصرًا عنك/عن شركتك. ركّز على: ماذا تقدم؟ لمن؟ وما الذي يميزك؟  
+            يمكن إضافة روابط أعمالك أو شهادات العملاء لاحقًا بدون تغيير كبير في التصميم.  
+          </p>  
         </div>  
-      </aside>  
-    </main>
+      </section>
 
-    <footer>  
-      © <span id="year"></span> تحدّي اليوم — صفحة واحدة تعمل بدون سيرفر.  
-    </footer>  
-  </div>
+      <!-- Contact -->  
+      <section id="contact" aria-label="تواصل">  
+        <div class="section-title">  
+          <h2>تواصل</h2>  
+          <p>نموذج بسيط + معلومات مباشرة</p>  
+        </div>
 
-  <!-- Templates dialog -->  
-  <dialog id="templatesDialog" aria-label="اختيار تحدّي جاهز">  
-    <div class="dlg-head">  
-      <div>  
-        <h3>تحدّيات جاهزة</h3>  
-        <p class="small muted" style="margin:6px 0 0;">اختَر حزمة مهام تضاف لليوم (تقدر تعدّلها بعدين).</p>  
-      </div>  
-      <button class="icon-btn" id="closeTemplatesBtn" type="button" aria-label="إغلاق">  
-        ✕  
-      </button>  
-    </div>
+        <div class="contact">  
+          <!-- Contact form (front-end only) -->  
+          <form onsubmit="event.preventDefault(); alert('تم إرسال رسالتك (تجريبيًا).');" aria-label="نموذج التواصل">  
+            <!-- ملاحظة: النموذج تجريبي. اربطه بباك-إند/خدمة إرسال عند الحاجة -->  
+            <div class="form-row">  
+              <div>  
+                <label for="name">الاسم</label>  
+                <input id="name" name="name" type="text" autocomplete="name" required />  
+              </div>  
+              <div>  
+                <label for="email">البريد الإلكتروني</label>  
+                <input id="email" name="email" type="email" autocomplete="email" required />  
+              </div>  
+              <div>  
+                <label for="msg">رسالتك</label>  
+                <textarea id="msg" name="message" required></textarea>  
+              </div>  
+            </div>
 
-    <div class="dlg-body">  
-      <div style="display:grid; gap:10px;">  
-        <button class="btn primary" type="button" data-template="focus">تحدّي التركيز (عمل/مذاكرة)</button>  
-        <button class="btn primary" type="button" data-template="fitness">تحدّي اللياقة (صحة)</button>  
-        <button class="btn primary" type="button" data-template="mind">تحدّي الذهن (قراءة/تعلّم)</button>  
-        <button class="btn primary" type="button" data-template="clean">تحدّي البيت (تنظيم)</button>  
-      </div>
+            <div class="form-actions">  
+              <button class="btn primary" type="submit">إرسال</button>  
+              <button class="btn" type="reset">مسح</button>  
+            </div>  
+          </form>
 
-      <hr style="border:0; border-top:1px solid var(--border); margin:14px 0;" />
+          <aside class="contact-info" aria-label="معلومات التواصل">  
+            <h3 style="margin:0 0 8px;">معلومات سريعة</h3>  
+            <p style="margin:0; color: var(--muted);">  
+              عدّل البيانات التالية حسب مشروعك:  
+            </p>  
+            <ul>  
+              <li><strong style="color:var(--text);">البريد:</strong> name@domain.com</li>  
+              <li><strong style="color:var(--text);">الهاتف:</strong> +000 000 0000</li>  
+              <li><strong style="color:var(--text);">المدينة:</strong> الرياض (مثال)</li>  
+            </ul>  
+          </aside>  
+        </div>  
+      </section>
 
-      <div class="notice">  
-        <strong>ملحوظة:</strong> إضافة تحدّي جاهز لا تمسح مهامك الحالية، فقط تضيف مهام جديدة.  
-      </div>  
-    </div>
-
-    <div class="dlg-actions">  
-      <button class="btn" id="clearTasksBtn" type="button">مسح كل مهام اليوم</button>  
-      <button class="btn" id="closeTemplatesBtn2" type="button">إغلاق</button>  
+      <!-- Footer -->  
+      <footer>  
+        <div class="container">  
+          <div class="footer">  
+            <span>© <span id="year"></span> اسم الموقع. جميع الحقوق محفوظة.</span>  
+            <span>تصميم بسيط • HTML/CSS فقط</span>  
+          </div>  
+        </div>  
+      </footer>  
     </div>  
-  </dialog>
+  </main>
 
   <script>  
-    // =========================  
-    // Utilities  
-    // =========================  
-    const $ = (sel, root=document) => root.querySelector(sel);  
-    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
-
-    const STORAGE_KEY = "daily-challenge-v1";
-
-    function todayKey(d = new Date()){  
-      // Local date key: YYYY-MM-DD  
-      const yyyy = d.getFullYear();  
-      const mm = String(d.getMonth()+1).padStart(2,'0');  
-      const dd = String(d.getDate()).padStart(2,'0');  
-      return `${yyyy}-${mm}-${dd}`;  
-    }
-
-    function formatArabicDate(d = new Date()){  
-      try{  
-        return new Intl.DateTimeFormat("ar", { weekday:"long", year:"numeric", month:"long", day:"numeric" }).format(d);  
-      }catch{  
-        return d.toLocaleDateString();  
-      }  
-    }
-
-    function uid(){  
-      return Math.random().toString(16).slice(2) + Date.now().toString(16);  
-    }
-
-    function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
-
-    // =========================  
-    // Data model  
-    // =========================  
-    const defaultState = () => ({  
-      version: 1,  
-      lastDateKey: todayKey(),  
-      streak: 0,  
-      bestStreak: 0,  
-      // dayStates: { [dateKey]: { tasks: [...], completedAll: boolean, pointsEarned: number } }  
-      dayStates: {}  
-    });
-
-    function loadState(){  
-      try{  
-        const raw = localStorage.getItem(STORAGE_KEY);  
-        if(!raw) return defaultState();  
-        const parsed = JSON.parse(raw);  
-        // Basic validation  
-        if(!parsed || typeof parsed !== "object") return defaultState();  
-        if(!parsed.dayStates) parsed.dayStates = {};  
-        if(typeof parsed.streak !== "number") parsed.streak = 0;  
-        if(typeof parsed.bestStreak !== "number") parsed.bestStreak = 0;  
-        if(!parsed.lastDateKey) parsed.lastDateKey = todayKey();  
-        return parsed;  
-      }catch(e){  
-        return defaultState();  
-      }  
-    }
-
-    function saveState(){  
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));  
-    }
-
-    function getDayState(dateKey){  
-      if(!state.dayStates[dateKey]){  
-        state.dayStates[dateKey] = {  
-          tasks: [],  
-          completedAll: false,  
-          pointsEarned: 0  
-        };  
-      }  
-      return state.dayStates[dateKey];  
-    }
-
-    // =========================  
-    // Streak logic: when day changes, finalize yesterday  
-    // =========================  
-    function reconcileDayChange(){  
-      const nowKey = todayKey();  
-      const prevKey = state.lastDateKey;
-
-      if(prevKey === nowKey) return; // same day
-
-      // Determine if yesterday (prevKey) was completedAll to update streak  
-      const prev = state.dayStates[prevKey];  
-      if(prev && prev.tasks.length > 0 && prev.tasks.every(t => t.done)){  
-        state.streak = (state.streak || 0) + 1;  
-        state.bestStreak = Math.max(state.bestStreak || 0, state.streak);  
-      }else{  
-        state.streak = 0;  
-      }
-
-      state.lastDateKey = nowKey;  
-      saveState();  
-    }
-
-    // =========================  
-    // Templates  
-    // =========================  
-    const templates = {  
-      focus: [  
-        { title: "جلسة تركيز 25 دقيقة (Pomodoro)", difficulty:"easy", points: 15 },  
-        { title: "جلسة تركيز 50 دقيقة", difficulty:"medium", points: 30 },  
-        { title: "إغلاق الإشعارات لمدة ساعتين", difficulty:"hard", points: 40 },  
-        { title: "مراجعة إنجازات اليوم وكتابة 3 أولويات للغد", difficulty:"easy", points: 15 },  
-      ],  
-      fitness: [  
-        { title: "شرب 2 لتر مياه", difficulty:"medium", points: 25 },  
-        { title: "مشي 30 دقيقة", difficulty:"medium", points: 25 },  
-        { title: "تمارين مقاومة 20 دقيقة", difficulty:"hard", points: 40 },  
-        { title: "نوم 7+ ساعات (خطّة الليلة)", difficulty:"hard", points: 35 },  
-      ],  
-      mind: [  
-        { title: "قراءة 20 صفحة", difficulty:"medium", points: 25 },  
-        { title: "تعلم شيء جديد 30 دقيقة", difficulty:"medium", points: 25 },  
-        { title: "كتابة ملخص 5 نقاط مما تعلمت", difficulty:"hard", points: 40 },  
-        { title: "تأمل/تنفس 10 دقائق", difficulty:"easy", points: 15 },  
-      ],  
-      clean: [  
-        { title: "ترتيب المكتب 10 دقائق", difficulty:"easy", points: 15 },  
-        { title: "تنظيف سريع للغرفة 20 دقيقة", difficulty:"medium", points: 25 },  
-        { title: "التخلص من 10 أشياء غير ضرورية", difficulty:"hard", points: 40 },  
-        { title: "غسيل/تنظيم الملابس (دفعة واحدة)", difficulty:"medium", points: 30 },  
-      ]  
-    };
-
-    // =========================  
-    // Rendering  
-    // =========================  
-    function difficultyLabel(diff){  
-      if(diff === "easy") return "سهل";  
-      if(diff === "medium") return "متوسط";  
-      if(diff === "hard") return "صعب";  
-      return diff;  
-    }
-
-    function render(){  
-      const key = todayKey();  
-      const day = getDayState(key);  
-      const list = $("#taskList");  
-      list.innerHTML = "";
-
-      $("#todayText").textContent = "اليوم: " + formatArabicDate(new Date());  
-      $("#year").textContent = new Date().getFullYear();
-
-      // Empty state  
-      $("#emptyState").hidden = day.tasks.length !== 0;
-
-      // Tasks  
-      for(const task of day.tasks){  
-        const li = document.createElement("li");  
-        li.className = "task";  
-        li.dataset.id = task.id;
-
-        const cb = document.createElement("input");  
-        cb.type = "checkbox";  
-        cb.checked = !!task.done;  
-        cb.setAttribute("aria-label", "إنجاز المهمة: " + task.title);  
-        cb.addEventListener("change", () => {  
-          task.done = cb.checked;  
-          recalcPointsAndProgress();  
-          saveState();  
-          render(); // re-render for text/strike updates  
-        });
-
-        const center = document.createElement("div");  
-        const h3 = document.createElement("h3");  
-        h3.textContent = task.title;
-
-        // Strike-through when done  
-        if(task.done){  
-          h3.style.textDecoration = "line-through";  
-          h3.style.opacity = "0.85";  
-        }
-
-        const meta = document.createElement("div");  
-        meta.className = "meta";  
-        const tagDiff = document.createElement("span");  
-        tagDiff.className = "tag " + (task.difficulty === "easy" ? "easy" : task.difficulty === "hard" ? "hard" : "med");  
-        tagDiff.textContent = "الصعوبة: " + difficultyLabel(task.difficulty);
-
-        const tagPts = document.createElement("span");  
-        tagPts.className = "tag";  
-        tagPts.textContent = "النقاط: " + task.points;
-
-        meta.append(tagDiff, tagPts);  
-        center.append(h3, meta);
-
-        const actions = document.createElement("div");  
-        actions.className = "actions";
-
-        const editBtn = document.createElement("button");  
-        editBtn.className = "icon-btn";  
-        editBtn.type = "button";  
-        editBtn.title = "تعديل";  
-        editBtn.setAttribute("aria-label", "تعديل المهمة");  
-        editBtn.textContent = "✎";  
-        editBtn.addEventListener("click", () => openEditTask(task.id));
-
-        const delBtn = document.createElement("button");  
-        delBtn.className = "icon-btn";  
-        delBtn.type = "button";  
-        delBtn.title = "حذف";  
-        delBtn.setAttribute("aria-label", "حذف المهمة");  
-        delBtn.textContent = "🗑";  
-        delBtn.addEventListener("click", () => {  
-          if(confirm("حذف المهمة؟")){  
-            day.tasks = day.tasks.filter(t => t.id !== task.id);  
-            recalcPointsAndProgress();  
-            saveState();  
-            render();  
-          }  
-        });
-
-        actions.append(editBtn, delBtn);
-
-        li.append(cb, center, actions);  
-        list.append(li);  
-      }
-
-      // Stats  
-      $("#streak").textContent = String(state.streak || 0);  
-      $("#bestStreak").textContent = String(state.bestStreak || 0);
-
-      recalcPointsAndProgress(false); // don't re-render again  
-    }
-
-    function recalcPointsAndProgress(updateUI = true){  
-      const day = getDayState(todayKey());  
-      const total = day.tasks.length;  
-      const doneCount = day.tasks.filter(t => t.done).length;
-
-      const pointsEarned = day.tasks.reduce((sum, t) => sum + (t.done ? Number(t.points || 0) : 0), 0);  
-      day.pointsEarned = pointsEarned;
-
-      $("#todayPoints").textContent = String(pointsEarned);
-
-      const pct = total === 0 ? 0 : Math.round((doneCount / total) * 100);  
-      $("#progressText").textContent = pct + "%";  
-      $("#progressDetail").textContent = `${doneCount} من ${total} مهام`;  
-      $("#progressBar").style.width = pct + "%";
-
-      // mark completedAll  
-      day.completedAll = (total > 0 && doneCount === total);
-
-      if(updateUI){  
-        // no-op currently; kept for future  
-      }  
-    }
-
-    // =========================  
-    // Actions  
-    // =========================  
-    function addTask({title, difficulty, points}){  
-      const day = getDayState(todayKey());  
-      day.tasks.unshift({  
-        id: uid(),  
-        title: String(title).trim(),  
-        difficulty,  
-        points: clamp(Number(points || 0), 1, 500),  
-        done: false  
-      });  
-      recalcPointsAndProgress();  
-      saveState();  
-      render();  
-    }
-
-    function openEditTask(taskId){  
-      const day = getDayState(todayKey());  
-      const task = day.tasks.find(t => t.id === taskId);  
-      if(!task) return;
-
-      const newTitle = prompt("تعديل اسم المهمة:", task.title);  
-      if(newTitle === null) return;
-
-      const trimmed = newTitle.trim();  
-      if(!trimmed){  
-        alert("اسم المهمة لا يمكن أن يكون فارغًا.");  
-        return;  
-      }
-
-      const newPoints = prompt("تعديل النقاط (1 - 500):", String(task.points));  
-      if(newPoints === null) { task.title = trimmed; saveState(); render(); return; }
-
-      const p = clamp(Number(newPoints), 1, 500);  
-      if(Number.isNaN(p)){  
-        alert("النقاط غير صحيحة.");  
-        return;  
-      }
-
-      task.title = trimmed;  
-      task.points = p;
-
-      recalcPointsAndProgress();  
-      saveState();  
-      render();  
-    }
-
-    function resetToday(){  
-      const key = todayKey();  
-      const day = getDayState(key);  
-      day.tasks.forEach(t => t.done = false);  
-      day.pointsEarned = 0;  
-      day.completedAll = false;  
-      saveState();  
-      render();  
-    }
-
-    function clearTodayTasks(){  
-      const key = todayKey();  
-      state.dayStates[key] = { tasks: [], completedAll:false, pointsEarned:0 };  
-      saveState();  
-      render();  
-    }
-
-    function applyTemplate(name){  
-      const t = templates[name];  
-      if(!t) return;  
-      for(const item of t){  
-        addTask(item);  
-      }  
-      saveState();  
-      render();  
-    }
-
-    // Export/Import  
-    function exportData(){  
-      const data = {  
-        exportedAt: new Date().toISOString(),  
-        app: "daily-challenge",  
-        payload: state  
-      };  
-      const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});  
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement("a");  
-      a.href = url;  
-      a.download = "daily-challenge-backup.json";  
-      document.body.appendChild(a);  
-      a.click();  
-      a.remove();
-
-      URL.revokeObjectURL(url);  
-    }
-
-    function importDataFromFile(file){  
-      const reader = new FileReader();  
-      reader.onload = () => {  
-        try{  
-          const json = JSON.parse(reader.result);  
-          const payload = json && json.payload ? json.payload : json;  
-          if(!payload || typeof payload !== "object") throw new Error("Bad file");
-
-          // Very light validation  
-          if(!payload.dayStates) payload.dayStates = {};  
-          if(typeof payload.streak !== "number") payload.streak = 0;  
-          if(typeof payload.bestStreak !== "number") payload.bestStreak = 0;  
-          if(!payload.lastDateKey) payload.lastDateKey = todayKey();
-
-          state = payload;  
-          saveState();  
-          reconcileDayChange();  
-          render();  
-          alert("تم الاستيراد بنجاح.");  
-        }catch(e){  
-          alert("فشل الاستيراد. تأكد أن الملف صحيح.");  
-        }  
-      };  
-      reader.readAsText(file);  
-    }
-
-    // =========================  
-    // Wire up  
-    // =========================  
-    let state = loadState();  
-    reconcileDayChange();
-
-    // Initialize UI text  
-    $("#todayText").textContent = "اليوم: " + formatArabicDate(new Date());
-
-    $("#taskForm").addEventListener("submit", (e) => {  
-      e.preventDefault();  
-      const title = $("#taskTitle").value;  
-      const difficulty = $("#taskDifficulty").value;  
-      const points = $("#taskPoints").value;
-
-      addTask({title, difficulty, points});  
-      e.target.reset();  
-      $("#taskDifficulty").value = "medium";  
-      $("#taskPoints").value = 20;  
-      $("#taskTitle").focus();  
-    });
-
-    $("#resetDayBtn").addEventListener("click", () => {  
-      if(confirm("تأكيد: تصفير إنجاز اليوم (بدون حذف المهام)؟")){  
-        resetToday();  
-      }  
-    });
-
-    $("#completeAllBtn").addEventListener("click", () => {  
-      const day = getDayState(todayKey());  
-      if(day.tasks.length === 0) return;  
-      day.tasks.forEach(t => t.done = true);  
-      recalcPointsAndProgress();  
-      saveState();  
-      render();  
-    });
-
-    // Templates dialog controls  
-    const dlg = $("#templatesDialog");  
-    $("#openTemplatesBtn").addEventListener("click", () => {  
-      if(typeof dlg.showModal === "function") dlg.showModal();  
-      else alert("متصفحك لا يدعم نافذة dialog. استخدم متصفح حديث.");  
-    });
-
-    $("#closeTemplatesBtn").addEventListener("click", () => dlg.close());  
-    $("#closeTemplatesBtn2").addEventListener("click", () => dlg.close());
-
-    $$("#templatesDialog [data-template]").forEach(btn => {  
-      btn.addEventListener("click", () => {  
-        applyTemplate(btn.dataset.template);  
-        dlg.close();  
-      });  
-    });
-
-    $("#clearTasksBtn").addEventListener("click", () => {  
-      if(confirm("تأكيد: مسح كل مهام اليوم؟")){  
-        clearTodayTasks();  
-      }  
-    });
-
-    $("#exportBtn").addEventListener("click", exportData);
-
-    $("#importBtn").addEventListener("click", () => $("#importFile").click());  
-    $("#importFile").addEventListener("change", (e) => {  
-      const file = e.target.files && e.target.files[0];  
-      if(file) importDataFromFile(file);  
-      e.target.value = "";  
-    });
-
-    // First render  
-    render();  
+    // تحديث سنة الفوتر تلقائيًا  
+    document.getElementById('year').textContent = new Date().getFullYear();  
   </script>  
 </body>  
 </html>  
