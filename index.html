@@ -13,43 +13,98 @@
 <style>
 body {
   font-family:'Cairo';
-  background:#0f172a;
+  background: radial-gradient(circle at top, #0f172a, #020617);
   color:white;
   text-align:center;
 }
-.light {
-  background:#f1f5f9;
-  color:black;
+
+.container {max-width:1000px;margin:auto;padding:20px;}
+
+/* 🔥 HERO */
+.hero {
+  margin:20px;
+  padding:50px;
+  border-radius:20px;
+  background: linear-gradient(135deg,#020617,#0f172a);
+  box-shadow:0 0 40px rgba(34,197,94,0.3);
 }
-.container {max-width:900px;margin:auto;padding:20px;position:relative;}
-.card {background:#1e293b;margin:10px;padding:15px;border-radius:12px;display:flex;justify-content:space-between;}
-.light .card {background:#fff;}
-button {padding:8px;border:none;border-radius:8px;cursor:pointer;margin:2px;}
-.done {background:#22c55e;}
-.not {background:#ef4444;}
-.progress {background:#334155;border-radius:10px;overflow:hidden;margin:20px;}
-.bar {height:20px;background:#22c55e;width:0%;}
-.settings {
-  display:none;
-  position:absolute;
-  top:80px;
-  right:50%;
-  transform:translateX(50%);
-  width:300px;
+
+.hero h1 {font-size:32px;}
+.hero button {
+  background:#22c55e;
+  color:black;
+  font-weight:bold;
+}
+
+/* 📊 STATS */
+.stats {
+  display:flex;
+  justify-content:space-around;
+  margin:20px;
+  flex-wrap:wrap;
+}
+.stat {
   background:#1e293b;
   padding:15px;
-  border-radius:10px;
-  box-shadow:0 0 15px rgba(0,0,0,0.6);
-  z-index:1000;
+  border-radius:12px;
+  box-shadow:0 0 15px rgba(34,197,94,0.2);
+  margin:5px;
+  transition:0.3s;
 }
-.light .settings {background:#fff;}
-.task-item {margin:5px;padding:5px;border-radius:5px;}
+.stat:hover {
+  transform:scale(1.05);
+  box-shadow:0 0 20px #22c55e;
+}
+
+/* 🧊 CARD */
+.card {
+  background:rgba(30,41,59,0.6);
+  backdrop-filter: blur(10px);
+  border:1px solid rgba(34,197,94,0.2);
+  margin:10px;
+  padding:15px;
+  border-radius:12px;
+  display:flex;
+  justify-content:space-between;
+  transition:0.3s;
+}
+.card:hover {
+  transform:translateY(-3px);
+  box-shadow:0 5px 20px rgba(34,197,94,0.3);
+}
+
+button {
+  padding:8px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  margin:2px;
+}
+button:hover {
+  box-shadow:0 0 15px #22c55e;
+}
+
+.done {background:#22c55e;}
+.not {background:#ef4444;}
+
+.progress {
+  background:#334155;
+  border-radius:10px;
+  overflow:hidden;
+  margin:20px;
+}
+.bar {
+  height:20px;
+  background:#22c55e;
+  width:0%;
+}
+
+/* ✔ animation */
 .check {
   margin-top:5px;
   font-size:22px;
   animation: pop 0.3s ease;
 }
-
 @keyframes pop {
   0% {transform: scale(0); opacity:0;}
   50% {transform: scale(1.3);}
@@ -61,11 +116,9 @@ button {padding:8px;border:none;border-radius:8px;cursor:pointer;margin:2px;}
   position: fixed;
   width: 10px;
   height: 10px;
-  background: red;
   top: 0;
   animation: fall 1s linear forwards;
 }
-
 @keyframes fall {
   to {
     transform: translateY(100vh) rotate(360deg);
@@ -77,32 +130,27 @@ button {padding:8px;border:none;border-radius:8px;cursor:pointer;margin:2px;}
 
 <body>
 
-<!-- 🔊 صوت -->
 <audio id="doneSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
 
-<button onclick="toggleMode()">🌙</button>
+<!-- 🔥 HERO -->
+<div class="hero">
+  <h1>🚀 ابدأ انضباطك وغيّر حياتك</h1>
+  <p>نظام بسيط يخليك تلتزم كل يوم</p>
+  <button onclick="login()">ابدأ الآن</button>
+</div>
+
+<!-- 📊 STATS -->
+<div class="stats">
+  <div class="stat">🔥 التزام</div>
+  <div class="stat">📅 متابعة</div>
+  <div class="stat">💪 تطوير</div>
+</div>
 
 <div class="container">
 
 <h1 id="title">🔥 تحدي الانضباط</h1>
 
 <button onclick="login()">تسجيل بجوجل</button>
-<button onclick="toggleSettings()">⚙️ إعدادات</button>
-
-<div id="settings" class="settings">
-  <h3>⚙️ الإعدادات</h3>
-
-  <input id="daysInput" placeholder="عدد الأيام"><br><br>
-  <input id="titleInput" placeholder="اسم التحدي"><br><br>
-
-  <input id="taskName" placeholder="اسم المهمة">
-  <input type="color" id="taskColor">
-  <button onclick="addTask()">➕</button>
-
-  <div id="tasksList"></div><br>
-
-  <button onclick="saveSettings()">حفظ</button>
-</div>
 
 <p id="user"></p>
 <h3 id="streak">🔥 Streak: 0</h3>
@@ -130,7 +178,10 @@ const db = firebase.firestore();
 
 let userId="";
 let userData={};
-let tasksArr=[];
+let tasksArr=[
+  {name:"مذاكرة",color:"#22c55e"},
+  {name:"شغل",color:"#3b82f6"}
+];
 
 function login(){
   const provider=new firebase.auth.GoogleAuthProvider();
@@ -141,44 +192,6 @@ function login(){
   });
 }
 
-function toggleMode(){
-  document.body.classList.toggle("light");
-}
-
-function toggleSettings(){
-  let s=document.getElementById("settings");
-  s.style.display = (s.style.display=="none") ? "block" : "none";
-}
-
-function addTask(){
-  let name=document.getElementById("taskName").value;
-  let color=document.getElementById("taskColor").value;
-
-  if(!name) return;
-
-  tasksArr.push({name,color});
-  document.getElementById("taskName").value="";
-  renderTasks();
-}
-
-function renderTasks(){
-  let html="";
-  tasksArr.forEach((t,i)=>{
-    html+=`
-    <div class="task-item">
-      <span style="color:${t.color}">${t.name}</span>
-      <button onclick="removeTask(${i})">❌</button>
-    </div>`;
-  });
-  document.getElementById("tasksList").innerHTML=html;
-}
-
-function removeTask(i){
-  tasksArr.splice(i,1);
-  renderTasks();
-}
-
-/* 🎉 confetti */
 function fireConfetti(){
   for(let i=0;i<20;i++){
     let c=document.createElement("div");
@@ -193,62 +206,31 @@ function fireConfetti(){
 async function load(){
   const doc=await db.collection("users").doc(userId).get();
   userData=doc.exists?doc.data():{};
-
-  let daysCount=userData.custom?.days||21;
-  let title=userData.custom?.title||"🔥 تحدي الانضباط";
-
-  tasksArr=userData.custom?.tasks||[
-    {name:"مذاكرة",color:"#22c55e"},
-    {name:"شغل",color:"#3b82f6"}
-  ];
-
-  renderTasks();
-
-  document.getElementById("title").innerText=title;
-
   let data=userData.days||[];
 
   let html="";
   let done=0;
-  let streak=0;
-  let completedTasks=0;
 
-  for(let i=0;i<daysCount;i++){
+  for(let i=0;i<21;i++){
     let d=data[i]||{};
     html+=`<div class="card"><span>اليوم ${i+1}</span><div>`;
 
-    let complete=true;
-
     tasksArr.forEach(t=>{
-      if(!d[t.name]) complete=false;
-      if(d[t.name]) completedTasks++;
-
       html+=`
-      <div style="display:inline-block;text-align:center;margin:3px;">
-        <button style="background:${t.color}" class="${d[t.name]?'done':'not'}" onclick="toggle(${i},'${t.name}')">
+      <div style="display:inline-block;text-align:center;">
+        <button class="${d[t.name]?'done':'not'}" onclick="toggle(${i},'${t.name}')">
           ${t.name}
         </button>
-        <div class="check">${d[t.name] ? "✔️" : ""}</div>
+        <div class="check">${d[t.name]?"✔️":""}</div>
       </div>`;
+      if(d[t.name]) done++;
     });
-
-    if(complete){done++;streak++;} else streak=0;
 
     html+=`</div></div>`;
   }
 
   document.getElementById("days").innerHTML=html;
-  document.getElementById("bar").style.width=(done/daysCount*100)+"%";
-  document.getElementById("streak").innerText="🔥 Streak: "+streak;
-
-  let totalTasks=daysCount*tasksArr.length;
-  let percent=Math.round((completedTasks/totalTasks)*100);
-
-  document.getElementById("stats").innerHTML=`
-    <h3>📊 تحليل الأداء</h3>
-    <p>✅ ${completedTasks} / ${totalTasks}</p>
-    <p>🔥 ${percent}% التزام</p>
-  `;
+  document.getElementById("bar").style.width=(done/(21*tasksArr.length)*100)+"%";
 }
 
 async function toggle(i,task){
@@ -256,29 +238,16 @@ async function toggle(i,task){
   let data=userData.days||[];
   if(!data[i]) data[i]={};
 
-  let newValue=!data[i][task];
-  data[i][task]=newValue;
+  let val=!data[i][task];
+  data[i][task]=val;
 
   await ref.set({days:data},{merge:true});
 
-  if(newValue){
+  if(val){
     document.getElementById("doneSound").play();
-    if(navigator.vibrate) navigator.vibrate(100);
     fireConfetti();
   }
 
-  load();
-}
-
-async function saveSettings(){
-  let days=document.getElementById("daysInput").value;
-  let title=document.getElementById("titleInput").value;
-
-  await db.collection("users").doc(userId).set({
-    custom:{days:+days,title,tasks:tasksArr}
-  },{merge:true});
-
-  alert("تم الحفظ ✅");
   load();
 }
 
