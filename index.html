@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>تحدي 21 يوم - متعدد اللغات</title>
+  <title>تحدي 21 يوم</title>
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -97,7 +97,7 @@
         <div class="logo">
             <i class='bx bxs-rocket'></i>
             <div>
-                <h2 id="displayName" data-translate-key="challengeTitle">تحدي الأيام</h2>
+                <h2 id="displayName"></h2> <!-- ✨ تم إزالة data-translate-key هنا لأنه يتم تعيينه ديناميكياً -->
                 <small id="userEmail" class="muted" data-translate-key="waitingForLogin">بانتظار تسجيل الدخول...</small>
             </div>
         </div>
@@ -162,7 +162,7 @@
 
     let currentUser = null, userData = null, sortable = null;
 
-    // ✨ --- Translation Dictionary ---
+    // --- Translation Dictionary ---
     const translations = {
         ar: {
             challengeTitle: "تحدي الأيام", waitingForLogin: "بانتظار تسجيل الدخول...", login: "دخول",
@@ -176,7 +176,8 @@
             save: "حفظ", close: "إغلاق", editTask: "تعديل المهمة:", deleteTaskConfirm: "هل أنت متأكد من حذف المهمة؟",
             resetConfirm: "سيتم حذف جميع المهام والتقدم، هل أنت متأكد؟", settingsSaved: "تم حفظ الإعدادات!",
             authError: "خطأ في تحميل بيانات المستخدم.", updateError: "خطأ في تحديث البيانات.",
-            enterTask: "اكتب مهمتك هنا..."
+            enterTaskPlaceholder: "اكتب مهمتك هنا...",
+            day: "اليوم"
         },
         en: {
             challengeTitle: "Days Challenge", waitingForLogin: "Waiting for login...", login: "Login",
@@ -190,32 +191,39 @@
             save: "Save", close: "Close", editTask: "Edit Task:", deleteTaskConfirm: "Are you sure you want to delete the task?",
             resetConfirm: "This will delete all tasks and progress. Are you sure?", settingsSaved: "Settings saved!",
             authError: "Error loading user data.", updateError: "Error updating data.",
-            enterTask: "Enter your task here..."
+            enterTaskPlaceholder: "Enter your task here...",
+            day: "Day"
         }
     };
     
     let currentLang = 'ar';
     const defaultSettings = { displayName: '', challengeDuration: 21, enableConfetti: true, language: 'ar' };
 
-    // ✨ --- Language Functions ---
+    // --- Language Functions ---
     function applyTranslations(lang) {
         currentLang = lang;
         document.documentElement.lang = lang;
         document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
         document.querySelectorAll('[data-translate-key]').forEach(el => {
             const key = el.dataset.translateKey;
-            if (translations[lang][key]) {
-                // For elements like <button><span>text</span></button>
-                const childSpan = el.querySelector('span');
-                if (childSpan) {
-                    childSpan.textContent = translations[lang][key];
-                } else {
-                    el.textContent = translations[lang][key];
-                }
+            // Handle elements with child <span> for text (like buttons with icons)
+            const childSpan = el.querySelector('span');
+            if (childSpan) {
+                childSpan.textContent = translations[lang][key];
+            } else {
+                el.textContent = translations[lang][key];
             }
         });
-        // Handle placeholders
-        $('taskTitle').placeholder = translations[lang].enterTask;
+        // Handle placeholders explicitly
+        $('taskTitle').placeholder = translations[lang].enterTaskPlaceholder;
+        // Update display name explicitly
+        if (currentUser && userData && userData.settings && userData.settings.displayName) {
+             $('displayName').textContent = userData.settings.displayName;
+        } else if (currentUser && userData && userData.settings) {
+            $('displayName').textContent = `${translations[currentLang].challengeTitle} ${userData.settings.challengeDuration || 21}`;
+        } else {
+            $('displayName').textContent = translations[currentLang].challengeTitle;
+        }
     }
 
     function showToast(key) { $("toast").textContent = translations[currentLang][key] || key; $("toast").style.display = "block"; setTimeout(() => $("toast").style.display = "none", 3000); }
@@ -224,18 +232,16 @@
     function render() {
       if (!userData) return;
       const settings = userData.settings || defaultSettings;
-      applyTranslations(settings.language);
+      applyTranslations(settings.language); // Apply translations based on user's saved preference
 
       const challengeDuration = settings.challengeDuration || 21;
-      $("displayName").textContent = settings.displayName || `${translations[currentLang].challengeTitle} ${challengeDuration}`;
-      $("userEmail").textContent = currentUser.email;
+      
+      $("kpiDay").innerHTML = `<i class='bx bx-calendar-star'></i>${userData.progress.dayIndex}/${challengeDuration}`;
+      $("todayKey").textContent = `${translations[currentLang].day} ${userData.progress.dayIndex}`;
+      $('tasks-header').innerHTML = `<i class='bx bx-list-ul'></i> ${translations[currentLang].tasksForDay} ${userData.progress.dayIndex}`;
       
       const dIdx = userData.progress.dayIndex;
       const dKey = `day_${String(dIdx).padStart(2, '0')}`;
-      
-      $("kpiDay").innerHTML = `<i class='bx bx-calendar-star'></i>${dIdx}/${challengeDuration}`;
-      $("todayKey").textContent = `${translations[currentLang].tasksForDay} ${dIdx}`;
-      $("tasks-header").innerHTML = `<i class='bx bx-list-ul'></i> ${translations[currentLang].tasksForDay} ${dIdx}`;
       
       const tasks = userData.tasks[dKey] || [];
       const doneToday = tasks.filter(t => t.done).length;
@@ -255,7 +261,7 @@
       $("badge-1").classList.toggle("active", done >= 1);
       $("badge-7").classList.toggle("active", dIdx >= 7);
       $("badge-14").classList.toggle("active", dIdx >= 14);
-      $("badge-21").classList.toggle("active", dIdx >= 21 && global === 100);
+      $("badge-21").classList.toggle("active", dIdx >= challengeDuration && global === 100);
 
       const listEl = $("taskList"); listEl.innerHTML = "";
       $("emptyState").style.display = tasks.length ? "none" : "block";
@@ -271,16 +277,26 @@
     
     function initSortable() { if (sortable) sortable.destroy(); sortable = new Sortable($("taskList"), { animation: 150, ghostClass: 'sortable-ghost', onEnd: (evt) => { const dKey = `day_${String(userData.progress.dayIndex).padStart(2, '0')}`; const tasks = userData.tasks[dKey] || []; const newOrder = Array.from(evt.to.children).map(item => tasks.find(t => t.id === Number(item.dataset.id))); userData.tasks[dKey] = newOrder.filter(Boolean); updateDB(false); }}); }
 
-    function openSettings() { const settings = userData.settings || defaultSettings; $("inputDisplayName").value = settings.displayName || ''; $("inputChallengeDuration").value = settings.challengeDuration; $("inputEnableConfetti").checked = settings.enableConfetti; $("inputLanguage").value = settings.language; $("settingsModal").style.display = 'flex'; }
+    function openSettings() { 
+        const settings = userData.settings || defaultSettings; 
+        $("inputDisplayName").value = settings.displayName || ''; 
+        $("inputChallengeDuration").value = settings.challengeDuration; 
+        $("inputEnableConfetti").checked = settings.enableConfetti; 
+        $("inputLanguage").value = settings.language; 
+        $("settingsModal").style.display = 'flex'; 
+    }
     function closeSettings() { $("settingsModal").style.display = 'none'; }
     function saveSettings() {
+        const oldLanguage = (userData.settings && userData.settings.language) || defaultSettings.language;
         userData.settings = {
             displayName: $("inputDisplayName").value.trim(),
             challengeDuration: parseInt($("inputChallengeDuration").value) || 21,
             enableConfetti: $("inputEnableConfetti").checked,
             language: $("inputLanguage").value,
         };
-        updateDB(); showToast("settingsSaved"); closeSettings();
+        updateDB(); // This will trigger render() which will re-apply translations
+        showToast("settingsSaved"); 
+        closeSettings();
     }
     
     onAuthStateChanged(auth, async (user) => {
@@ -296,6 +312,11 @@
                 userData = { tasks: {}, progress: { dayIndex: 1 }, email: user.email, settings: { ...defaultSettings } };
                 await setDoc(doc(db, "users", user.uid), userData);
             }
+            
+            // Set initial language from user data or default
+            currentLang = (userData.settings && userData.settings.language) || defaultSettings.language;
+            applyTranslations(currentLang);
+
             $("btnGoogle").style.display = 'none';
             $("btnLogout").style.display = 'inline-flex';
             $("btnSettings").style.display = 'inline-flex';
@@ -303,8 +324,12 @@
             render(); initSortable();
         } catch (e) { console.error("Auth Error:", e); showToast("authError"); }
       } else {
-        currentUser = null; userData = null; applyTranslations('ar');
-        $("btnGoogle").style.display = 'inline-flex'; $("btnLogout").style.display = 'none'; $("btnSettings").style.display = 'none';
+        currentUser = null; userData = null; 
+        applyTranslations('ar'); // Default to Arabic when logged out
+        
+        $("btnGoogle").style.display = 'inline-flex'; 
+        $("btnLogout").style.display = 'none'; 
+        $("btnSettings").style.display = 'none';
         $("userEmail").textContent = translations.ar.waitingForLogin;
         $("taskList").innerHTML = ''; $("emptyState").style.display = 'block'; $("kpiPercent").textContent = '0%';
         const circle = $("fg-circle"); const r = 15.9155; circle.style.strokeDashoffset = 2 * Math.PI * r;
@@ -315,10 +340,21 @@
     // Event Listeners
     $("btnGoogle").onclick = () => signInWithPopup(auth, provider).catch(e => showToast(e.code));
     $("btnLogout").onclick = () => signOut(auth);
-    $("btnAddTask").onclick = () => { const t = $("taskTitle").value.trim(); if (!t) return; const dKey = `day_${String(userData.progress.dayIndex).padStart(2, '0')}`; if (!userData.tasks[dKey]) userData.tasks[dKey] = []; userData.tasks[dKey].push({ id: Date.now(), title: t, done: false }); $("taskTitle").value = ""; updateDB(); };
+    $("btnAddTask").onclick = () => { 
+      const t = $("taskTitle").value.trim(); if (!t) return; 
+      const dKey = `day_${String(userData.progress.dayIndex).padStart(2, '0')}`; 
+      if (!userData.tasks[dKey]) userData.tasks[dKey] = []; 
+      userData.tasks[dKey].push({ id: Date.now(), title: t, done: false }); 
+      $("taskTitle").value = ""; updateDB(); 
+    };
     $("taskTitle").onkeyup = (e) => { if(e.key === 'Enter') $("btnAddTask").click() };
-    $("btnNextDay").onclick = () => { if (userData.progress.dayIndex < (userData.settings.challengeDuration || 21)) { userData.progress.dayIndex++; updateDB().then(initSortable); } };
-    $("btnPrevDay").onclick = () => { if (userData.progress.dayIndex > 1) { userData.progress.dayIndex--; updateDB().then(initSortable); } };
+    $("btnNextDay").onclick = () => { 
+        const challengeDuration = (userData.settings && userData.settings.challengeDuration) || defaultSettings.challengeDuration;
+        if (userData.progress.dayIndex < challengeDuration) { userData.progress.dayIndex++; updateDB().then(initSortable); } 
+    };
+    $("btnPrevDay").onclick = () => { 
+        if (userData.progress.dayIndex > 1) { userData.progress.dayIndex--; updateDB().then(initSortable); } 
+    };
     $("btnReset").onclick = () => { if (confirm(translations[currentLang].resetConfirm)) { userData.tasks = {}; userData.progress.dayIndex = 1; updateDB(); } };
     $("btnSettings").onclick = openSettings;
     $("btnCloseSettings").onclick = closeSettings;
