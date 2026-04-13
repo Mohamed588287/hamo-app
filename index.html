@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>🔥 تحدي الانضباط</title>
+<title>🔥</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
@@ -18,7 +18,6 @@ body{
   color:white;
 }
 
-/* NAV */
 .nav{
   display:flex;
   justify-content:space-between;
@@ -28,7 +27,6 @@ body{
   margin:20px;
 }
 
-/* 🔥 زرار كبير */
 .start-btn{
   font-size:24px;
   padding:18px 35px;
@@ -36,14 +34,8 @@ body{
   background:#22c55e;
   color:black;
   font-weight:bold;
-  transition:0.3s;
-}
-.start-btn:hover{
-  transform:scale(1.1);
-  box-shadow:0 0 25px #22c55e;
 }
 
-/* HERO */
 .hero{
   display:flex;
   justify-content:space-between;
@@ -54,25 +46,7 @@ body{
   border-radius:30px;
   margin:20px;
 }
-.hero h1{font-size:40px;}
-.hero button{
-  background:#22c55e;
-  border:none;
-  padding:10px 20px;
-  border-radius:20px;
-}
 
-/* STATS */
-.stats{
-  display:flex;
-  justify-content:space-around;
-  background:#111827;
-  padding:20px;
-  border-radius:20px;
-  margin:20px;
-}
-
-/* APP */
 .app{
   margin:20px;
   background:#111827;
@@ -97,34 +71,13 @@ body{
   padding:10px;
 }
 
-.check{
-  font-size:18px;
-  animation:pop 0.3s;
-}
-@keyframes pop{
-  0%{transform:scale(0);}
-  100%{transform:scale(1);}
-}
-
 .settings{
   display:none;
   background:#1e293b;
   padding:15px;
   border-radius:10px;
-  margin-top:10px;
 }
 
-/* confetti */
-.confetti{
-  position:fixed;
-  width:10px;
-  height:10px;
-  top:0;
-  animation:fall 1s linear forwards;
-}
-@keyframes fall{
-  to{transform:translateY(100vh);opacity:0;}
-}
 </style>
 
 </head>
@@ -134,12 +87,7 @@ body{
 <audio id="doneSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
 
 <!-- NAV -->
-<div class="nav">
-  <div>🔥 تحدي</div>
-  <div>
-    <button id="loginBtn" onclick="login()">تسجيل دخول</button>
-  </div>
-</div>
+<div class="nav"></div>
 
 <!-- HERO -->
 <div class="hero">
@@ -147,29 +95,21 @@ body{
     <h1>ابدأ انضباطك وغيّر حياتك</h1>
     <button onclick="login()" class="start-btn">ابدأ الآن</button>
   </div>
-  <img src="https://i.imgur.com/7D7I6dI.png" width="250">
-</div>
-
-<!-- STATS -->
-<div class="stats">
-  <div>🔥 التزام</div>
-  <div>📅 متابعة</div>
-  <div>💪 تطوير</div>
 </div>
 
 <!-- APP -->
 <div class="app">
 
-<h2>لوحة التحدي</h2>
-
 <button id="settingsBtn" onclick="toggleSettings()" style="display:none;">⚙️ إعدادات</button>
 
 <div id="settings" class="settings">
-  <p>هنا الإعدادات 🔥</p>
+  <input id="taskInput" placeholder="مهمة جديدة">
+  <button onclick="addTask()">➕</button>
+  <div id="taskList"></div>
+  <button onclick="saveTasks()">💾 حفظ</button>
 </div>
 
 <p id="user"></p>
-
 <div id="days"></div>
 
 </div>
@@ -195,50 +135,66 @@ function login(){
     userId=res.user.uid;
     document.getElementById("user").innerText=res.user.email;
 
-    // 🔥 اخفاء تسجيل الدخول
-    document.getElementById("loginBtn").style.display="none";
-
-    // 🔥 اظهار الاعدادات
     document.getElementById("settingsBtn").style.display="inline-block";
 
     load();
+    loadTasks();
   });
 }
 
 function toggleSettings(){
   let s=document.getElementById("settings");
-  s.style.display = (s.style.display=="none") ? "block" : "none";
+  s.style.display = s.style.display=="none"?"block":"none";
 }
 
-function fireConfetti(){
-  for(let i=0;i<20;i++){
-    let c=document.createElement("div");
-    c.className="confetti";
-    c.style.left=Math.random()*100+"vw";
-    c.style.background=`hsl(${Math.random()*360},100%,50%)`;
-    document.body.appendChild(c);
-    setTimeout(()=>c.remove(),1000);
-  }
+let customTasks=[];
+
+function addTask(){
+  let t=document.getElementById("taskInput").value;
+  if(!t) return;
+  customTasks.push(t);
+  document.getElementById("taskInput").value="";
+  renderTasks();
+}
+
+function renderTasks(){
+  let html="";
+  customTasks.forEach((t,i)=>{
+    html+=`${t} <button onclick="deleteTask(${i})">❌</button><br>`;
+  });
+  document.getElementById("taskList").innerHTML=html;
+}
+
+function deleteTask(i){
+  customTasks.splice(i,1);
+  renderTasks();
+}
+
+async function saveTasks(){
+  await db.collection("users").doc(userId).set({tasks:customTasks},{merge:true});
+  tasks=customTasks;
+  load();
+}
+
+async function loadTasks(){
+  let doc=await db.collection("users").doc(userId).get();
+  let data=doc.exists?doc.data():{};
+  customTasks=data.tasks||tasks;
+  tasks=customTasks;
+  renderTasks();
 }
 
 async function load(){
-  const doc=await db.collection("users").doc(userId).get();
+  let doc=await db.collection("users").doc(userId).get();
   let data=doc.exists?doc.data().days:[];
 
   let html="";
-
   for(let i=0;i<21;i++){
     let d=data[i]||{};
     html+=`<div class="card"><span>اليوم ${i+1}</span><div>`;
-
     tasks.forEach(t=>{
-      html+=`
-      <div>
-        <button class="task-btn ${d[t]?'done':'not'}" onclick="toggle(${i},'${t}')">${t}</button>
-        <div class="check">${d[t]?"✔️":""}</div>
-      </div>`;
+      html+=`<button class="task-btn ${d[t]?'done':'not'}" onclick="toggle(${i},'${t}')">${t}</button>`;
     });
-
     html+=`</div></div>`;
   }
 
@@ -251,17 +207,9 @@ async function toggle(i,t){
   let data=doc.exists?doc.data().days:[];
 
   if(!data[i]) data[i]={};
-
-  let val=!data[i][t];
-  data[i][t]=val;
+  data[i][t]=!data[i][t];
 
   await ref.set({days:data});
-
-  if(val){
-    document.getElementById("doneSound").play();
-    fireConfetti();
-  }
-
   load();
 }
 
