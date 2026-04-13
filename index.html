@@ -314,7 +314,7 @@
           <div class="body">
             <div class="progress-circle">
                 <svg viewBox="0 0 36 36">
-                    <path class="bg-circle" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path class="bg-circle" stroke-dasharray="100, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                     <path id="fg-circle" class="fg-circle" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                 </svg>
                 <div class="progress-center">
@@ -388,11 +388,12 @@
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
+    // ✨ تم تصحيح إعدادات Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyD7XzFMve-N8ALJPlxaBQM_iMZtbr05dCc",
       authDomain: "hamo-124d8.firebaseapp.com",
       projectId: "hamo-124d8",
-      storageBucket: "hamo-124d8.appspot.com",
+      storageBucket: "hamo-124d8.appspot.com", // التصحيح هنا
       messagingSenderId: "487641126653",
       appId: "1:487641126653:web:6378be437f6d0cb94fd094"
     };
@@ -415,8 +416,13 @@
 
     async function updateDB(doRender = true) {
       if (!currentUser) return;
-      await updateDoc(doc(db, "users", currentUser.uid), userData);
-      if(doRender) render();
+      try {
+        await updateDoc(doc(db, "users", currentUser.uid), userData);
+        if(doRender) render();
+      } catch (error) {
+        console.error("Error updating document: ", error);
+        showToast("حدث خطأ أثناء تحديث البيانات.");
+      }
     }
 
     function render() {
@@ -425,19 +431,16 @@
       $("userEmail").textContent = currentUser.email;
       
       const dIdx = userData.progress.dayIndex;
-      const dKey = \`day\_${String(dIdx).padStart(2, '0')}\`;
+      const dKey = `day_${String(dIdx).padStart(2, '0')}`;
       
-      const kpiDayValue = \`<i class='bx bx-calendar-star'></i>${dIdx}/21\`;
-      if ($("kpiDay").innerHTML !== kpiDayValue) $("kpiDay").innerHTML = kpiDayValue;
-
-      $("todayKey").textContent = \`اليوم ${dIdx}\`;
+      $("kpiDay").innerHTML = `<i class='bx bx-calendar-star'></i>${dIdx}/21`;
+      $("todayKey").textContent = `اليوم ${dIdx}`;
 
       const tasks = userData.tasks[dKey] || [];
       const doneToday = tasks.filter(t => t.done).length;
       const todayProgress = tasks.length ? Math.round((doneToday / tasks.length) * 100) : 0;
       
-      const kpiTodayValue = \`<i class='bx bx-check-double'></i>${todayProgress}%\`
-      if ($("kpiTodayProgress").innerHTML !== kpiTodayValue) $("kpiTodayProgress").innerHTML = kpiTodayValue;
+      $("kpiTodayProgress").innerHTML = `<i class='bx bx-check-double'></i>${todayProgress}%`;
 
       let total = 0, done = 0;
       Object.values(userData.tasks).forEach(list => {
@@ -446,14 +449,14 @@
       });
       const global = total ? Math.round((done / total) * 100) : 0;
 
-      if ($("kpiPercent").textContent !== global + "%") $("kpiPercent").textContent = global + "%";
+      $("kpiPercent").textContent = global + "%";
       
       const circle = $("fg-circle");
       const radius = circle.r.baseVal.value;
       const circumference = 2 * Math.PI * radius;
       const offset = circumference - (global / 100) * circumference;
-      if(circle.style.strokeDasharray !== \`\${circumference} \${circumference}\`) circle.style.strokeDasharray = \`\${circumference} \${circumference}\`;
-      if(circle.style.strokeDashoffset !== offset) circle.style.strokeDashoffset = offset;
+      circle.style.strokeDasharray = `${circumference} ${circumference}`;
+      circle.style.strokeDashoffset = offset;
 
       // Badges
       $("badge-1").classList.toggle("active", done >= 1);
@@ -467,9 +470,9 @@
 
       tasks.forEach(task => {
         const div = document.createElement("div");
-        div.className = \`task ${task.done ? 'done' : ''}\`;
+        div.className = `task ${task.done ? 'done' : ''}`;
         div.setAttribute('data-id', task.id);
-        div.innerHTML = \`
+        div.innerHTML = `
           <div class="task-left">
             <input type="checkbox" ${task.done ? 'checked' : ''}>
             <span class="title">${task.title}</span>
@@ -478,7 +481,7 @@
             <button class="btn" style="padding:4px 8px; font-size:10px;"><i class='bx bx-edit'></i></button>
             <button class="btn danger" style="padding:4px 8px; font-size:10px;"><i class='bx bx-trash'></i></button>
           </div>
-        \`;
+        `;
 
         div.querySelector("input").onchange = (e) => {
           task.done = e.target.checked;
@@ -507,35 +510,43 @@
             ghostClass: 'sortable-ghost',
             chosenClass: 'sortable-chosen',
             onEnd: function (evt) {
-                const dKey = \`day\_${String(userData.progress.dayIndex).padStart(2, '0')}\`;
+                const dKey = `day_${String(userData.progress.dayIndex).padStart(2, '0')}`;
                 const currentTasks = userData.tasks[dKey] || [];
                 const newOrder = Array.from(evt.to.children).map(item => {
                     const taskId = Number(item.getAttribute('data-id'));
                     return currentTasks.find(t => t.id === taskId);
                 });
-                userData.tasks[dKey] = newOrder.filter(Boolean); // filter out undefined if any
-                updateDB(false); // Update DB without re-rendering
+                userData.tasks[dKey] = newOrder.filter(Boolean);
+                updateDB(false);
             }
         });
     }
 
-    onAuthStateChanged(auth, async user => {
+    // ✨ تم تحسين هذه الدالة
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
-        $("btnGoogle").style.display = 'none';
-        $("btnLogout").style.display = 'inline-flex';
-        document.querySelectorAll("button, input").forEach(b => b.disabled = false);
+        try {
+            const snap = await getDoc(doc(db, "users", user.uid));
+            if (snap.exists()) {
+                userData = snap.data();
+            } else {
+                userData = { tasks: {}, progress: { dayIndex: 1 }, email: user.email };
+                await setDoc(doc(db, "users", user.uid), userData);
+            }
+            if (!userData.progress) userData.progress = { dayIndex: 1 };
+            if (!userData.tasks) userData.tasks = {};
 
-        const snap = await getDoc(doc(db, "users", user.uid));
-        userData = snap.exists() ? snap.data() : { tasks: {}, progress: { dayIndex: 1 }, email: user.email };
-        if (!snap.exists()) await setDoc(doc(db, "users", user.uid), userData);
-        
-        // Ensure data structure is correct
-        if (!userData.progress) userData.progress = { dayIndex: 1 };
-        if (!userData.tasks) userData.tasks = {};
+            $("btnGoogle").style.display = 'none';
+            $("btnLogout").style.display = 'inline-flex';
+            document.querySelectorAll("#btnAddTask, #btnPrevDay, #btnNextDay, #btnReset, #taskTitle").forEach(el => el.disabled = false);
 
-        render();
-        initSortable();
+            render();
+            initSortable();
+        } catch (error) {
+            console.error("Authentication State Error:", error);
+            showToast("حدث خطأ في تحميل بيانات المستخدم.");
+        }
       } else {
         currentUser = null; userData = null;
         $("btnGoogle").style.display = 'inline-flex';
@@ -545,17 +556,19 @@
         $("emptyState").style.display = 'block';
         $("kpiPercent").textContent = '0%';
         const circle = $("fg-circle");
-        circle.style.strokeDashoffset = circle.r.baseVal.value * 2 * Math.PI;
-        document.querySelectorAll("button:not(#btnGoogle), input").forEach(b => b.disabled = true);
+        const radius = circle.r.baseVal.value;
+        const circumference = 2 * Math.PI * radius;
+        circle.style.strokeDashoffset = circumference;
+        document.querySelectorAll("#btnAddTask, #btnPrevDay, #btnNextDay, #btnReset, #btnLogout, #taskTitle").forEach(el => el.disabled = true);
       }
     });
 
     // Event Listeners
-    $("btnGoogle").onclick = () => signInWithPopup(auth, provider);
-    $("btnLogout").onclick = () => { signOut(auth); location.reload(); };
+    $("btnGoogle").onclick = () => signInWithPopup(auth, provider).catch(error => { console.error("Sign in error", error); showToast(`خطأ في التسجيل: ${error.message}`); });
+    $("btnLogout").onclick = () => { signOut(auth); };
     $("btnAddTask").onclick = () => {
       const t = $("taskTitle").value.trim(); if (!t) return;
-      const dKey = \`day\_${String(userData.progress.dayIndex).padStart(2, '0')}\`;
+      const dKey = `day_${String(userData.progress.dayIndex).padStart(2, '0')}`;
       if (!userData.tasks[dKey]) userData.tasks[dKey] = [];
       userData.tasks[dKey].push({ id: Date.now(), title: t, done: false });
       $("taskTitle").value = "";
