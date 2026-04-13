@@ -21,7 +21,7 @@ body {
   background:#f1f5f9;
   color:black;
 }
-.container {max-width:900px;margin:auto;padding:20px;}
+.container {max-width:900px;margin:auto;padding:20px;position:relative;}
 .card {background:#1e293b;margin:10px;padding:15px;border-radius:12px;display:flex;justify-content:space-between;}
 .light .card {background:#fff;}
 button {padding:8px;border:none;border-radius:8px;cursor:pointer;margin:2px;}
@@ -29,9 +29,22 @@ button {padding:8px;border:none;border-radius:8px;cursor:pointer;margin:2px;}
 .not {background:#ef4444;}
 .progress {background:#334155;border-radius:10px;overflow:hidden;margin:20px;}
 .bar {height:20px;background:#22c55e;width:0%;}
-.settings {display:none;background:#1e293b;padding:15px;border-radius:10px;}
+.settings {
+  display:none;
+  position:absolute;
+  top:80px;
+  right:50%;
+  transform:translateX(50%);
+  width:300px;
+  background:#1e293b;
+  padding:15px;
+  border-radius:10px;
+  box-shadow:0 0 15px rgba(0,0,0,0.6);
+  z-index:1000;
+}
 .light .settings {background:#fff;}
-.task-item {margin:5px;padding:5px;border-radius:5px;cursor:grab;}
+.task-item {margin:5px;padding:5px;border-radius:5px;}
+.check {margin-top:3px;font-size:18px;}
 </style>
 </head>
 
@@ -45,13 +58,6 @@ button {padding:8px;border:none;border-radius:8px;cursor:pointer;margin:2px;}
 
 <button onclick="login()">تسجيل بجوجل</button>
 <button onclick="toggleSettings()">⚙️ إعدادات</button>
-
-<p id="user"></p>
-<h3 id="streak">🔥 Streak: 0</h3>
-
-<div class="progress"><div id="bar" class="bar"></div></div>
-
-<div id="days"></div>
 
 <div id="settings" class="settings">
   <h3>⚙️ الإعدادات</h3>
@@ -67,6 +73,15 @@ button {padding:8px;border:none;border-radius:8px;cursor:pointer;margin:2px;}
 
   <button onclick="saveSettings()">حفظ</button>
 </div>
+
+<p id="user"></p>
+<h3 id="streak">🔥 Streak: 0</h3>
+
+<div class="progress"><div id="bar" class="bar"></div></div>
+
+<div id="stats"></div>
+
+<div id="days"></div>
 
 </div>
 
@@ -102,7 +117,7 @@ function toggleMode(){
 
 function toggleSettings(){
   let s=document.getElementById("settings");
-  s.style.display=s.style.display=="none"?"block":"none";
+  s.style.display = (s.style.display=="none") ? "block" : "none";
 }
 
 function addTask(){
@@ -120,7 +135,7 @@ function renderTasks(){
   let html="";
   tasksArr.forEach((t,i)=>{
     html+=`
-    <div class="task-item" draggable="true" ondragstart="drag(${i})">
+    <div class="task-item">
       <span style="color:${t.color}">${t.name}</span>
       <button onclick="removeTask(${i})">❌</button>
     </div>`;
@@ -130,17 +145,6 @@ function renderTasks(){
 
 function removeTask(i){
   tasksArr.splice(i,1);
-  renderTasks();
-}
-
-let dragIndex;
-
-function drag(i){ dragIndex=i; }
-
-function drop(i){
-  let temp=tasksArr[i];
-  tasksArr[i]=tasksArr[dragIndex];
-  tasksArr[dragIndex]=temp;
   renderTasks();
 }
 
@@ -165,6 +169,7 @@ async function load(){
   let html="";
   let done=0;
   let streak=0;
+  let completedTasks=0;
 
   for(let i=0;i<daysCount;i++){
     let d=data[i]||{};
@@ -174,7 +179,15 @@ async function load(){
 
     tasksArr.forEach(t=>{
       if(!d[t.name]) complete=false;
-      html+=`<button style="background:${t.color}" class="${d[t.name]?'done':'not'}" onclick="toggle(${i},'${t.name}')">${t.name}</button>`;
+      if(d[t.name]) completedTasks++;
+
+      html+=`
+      <div style="display:inline-block;text-align:center;margin:3px;">
+        <button style="background:${t.color}" class="${d[t.name]?'done':'not'}" onclick="toggle(${i},'${t.name}')">
+          ${t.name}
+        </button>
+        <div class="check">${d[t.name] ? "✔️" : ""}</div>
+      </div>`;
     });
 
     if(complete){done++;streak++;} else streak=0;
@@ -185,6 +198,15 @@ async function load(){
   document.getElementById("days").innerHTML=html;
   document.getElementById("bar").style.width=(done/daysCount*100)+"%";
   document.getElementById("streak").innerText="🔥 Streak: "+streak;
+
+  let totalTasks=daysCount*tasksArr.length;
+  let percent=Math.round((completedTasks/totalTasks)*100);
+
+  document.getElementById("stats").innerHTML=`
+    <h3>📊 تحليل الأداء</h3>
+    <p>✅ ${completedTasks} / ${totalTasks}</p>
+    <p>🔥 ${percent}% التزام</p>
+  `;
 }
 
 async function toggle(i,task){
