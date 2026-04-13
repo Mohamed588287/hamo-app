@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>تحدي الانضباط</title>
+<title>🔥 تحدي الانضباط</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
@@ -17,18 +17,27 @@ body {
   color:white;
   text-align:center;
 }
-.container {max-width:800px;margin:auto;padding:20px;}
+.light {
+  background:#f1f5f9;
+  color:black;
+}
+.container {max-width:900px;margin:auto;padding:20px;}
 .card {background:#1e293b;margin:10px;padding:15px;border-radius:12px;display:flex;justify-content:space-between;}
-button {padding:8px;border:none;border-radius:8px;cursor:pointer;}
+.light .card {background:#fff;}
+button {padding:8px;border:none;border-radius:8px;cursor:pointer;margin:2px;}
 .done {background:#22c55e;}
 .not {background:#ef4444;}
 .progress {background:#334155;border-radius:10px;overflow:hidden;margin:20px;}
 .bar {height:20px;background:#22c55e;width:0%;}
 .settings {display:none;background:#1e293b;padding:15px;border-radius:10px;}
+.light .settings {background:#fff;}
+.task-item {margin:5px;padding:5px;border-radius:5px;cursor:grab;}
 </style>
 </head>
 
 <body>
+
+<button onclick="toggleMode()">🌙</button>
 
 <div class="container">
 
@@ -46,9 +55,16 @@ button {padding:8px;border:none;border-radius:8px;cursor:pointer;}
 
 <div id="settings" class="settings">
   <h3>⚙️ الإعدادات</h3>
+
   <input id="daysInput" placeholder="عدد الأيام"><br><br>
   <input id="titleInput" placeholder="اسم التحدي"><br><br>
-  <input id="tasksInput" placeholder="المهام (مثال: مذاكرة,جيم)"><br><br>
+
+  <input id="taskName" placeholder="اسم المهمة">
+  <input type="color" id="taskColor">
+  <button onclick="addTask()">➕</button>
+
+  <div id="tasksList"></div><br>
+
   <button onclick="saveSettings()">حفظ</button>
 </div>
 
@@ -69,6 +85,7 @@ const db = firebase.firestore();
 
 let userId="";
 let userData={};
+let tasksArr=[];
 
 function login(){
   const provider=new firebase.auth.GoogleAuthProvider();
@@ -79,9 +96,52 @@ function login(){
   });
 }
 
+function toggleMode(){
+  document.body.classList.toggle("light");
+}
+
 function toggleSettings(){
   let s=document.getElementById("settings");
   s.style.display=s.style.display=="none"?"block":"none";
+}
+
+function addTask(){
+  let name=document.getElementById("taskName").value;
+  let color=document.getElementById("taskColor").value;
+
+  if(!name) return;
+
+  tasksArr.push({name,color});
+  document.getElementById("taskName").value="";
+  renderTasks();
+}
+
+function renderTasks(){
+  let html="";
+  tasksArr.forEach((t,i)=>{
+    html+=`
+    <div class="task-item" draggable="true" ondragstart="drag(${i})">
+      <span style="color:${t.color}">${t.name}</span>
+      <button onclick="removeTask(${i})">❌</button>
+    </div>`;
+  });
+  document.getElementById("tasksList").innerHTML=html;
+}
+
+function removeTask(i){
+  tasksArr.splice(i,1);
+  renderTasks();
+}
+
+let dragIndex;
+
+function drag(i){ dragIndex=i; }
+
+function drop(i){
+  let temp=tasksArr[i];
+  tasksArr[i]=tasksArr[dragIndex];
+  tasksArr[dragIndex]=temp;
+  renderTasks();
 }
 
 async function load(){
@@ -90,7 +150,13 @@ async function load(){
 
   let daysCount=userData.custom?.days||21;
   let title=userData.custom?.title||"🔥 تحدي الانضباط";
-  let tasks=userData.custom?.tasks||["مذاكرة","شغل"];
+
+  tasksArr=userData.custom?.tasks||[
+    {name:"مذاكرة",color:"#22c55e"},
+    {name:"شغل",color:"#3b82f6"}
+  ];
+
+  renderTasks();
 
   document.getElementById("title").innerText=title;
 
@@ -106,9 +172,9 @@ async function load(){
 
     let complete=true;
 
-    tasks.forEach(task=>{
-      if(!d[task]) complete=false;
-      html+=`<button class="${d[task]?'done':'not'}" onclick="toggle(${i},'${task}')">${task}</button>`;
+    tasksArr.forEach(t=>{
+      if(!d[t.name]) complete=false;
+      html+=`<button style="background:${t.color}" class="${d[t.name]?'done':'not'}" onclick="toggle(${i},'${t.name}')">${t.name}</button>`;
     });
 
     if(complete){done++;streak++;} else streak=0;
@@ -135,10 +201,9 @@ async function toggle(i,task){
 async function saveSettings(){
   let days=document.getElementById("daysInput").value;
   let title=document.getElementById("titleInput").value;
-  let tasks=document.getElementById("tasksInput").value.split(",");
 
   await db.collection("users").doc(userId).set({
-    custom:{days:+days,title,tasks}
+    custom:{days:+days,title,tasks:tasksArr}
   },{merge:true});
 
   alert("تم الحفظ ✅");
