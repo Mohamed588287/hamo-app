@@ -3,7 +3,8 @@
 <head>  
   <meta charset="utf-8" />  
   <meta name="viewport" content="width=device-width, initial-scale=1" />  
-  <title>تحدي 21 يوم - SaaS Dashboard Ultimate</title>
+  <title>تحدي 21 يوم - SaaS Dashboard Pro</title>  
+  <meta name="description" content="تطبيق تحدي 21 يوم مطور مع أوسمة وتعديل مهام" />
 
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
@@ -11,104 +12,134 @@
     :root{  
       --bg:#070A0E;  
       --panel:#0B1220;  
+      --panel-2:#0A1628;  
       --text:#EAF2FF;  
       --muted:#9BB0CC;  
       --stroke:rgba(86,255,140,.18);  
       --neon:#39FF88;  
       --neon-2:#00E5FF;  
       --danger:#FF4D6D;  
+      --warn:#FFC857;  
+      --shadow: 0 18px 60px rgba(0,0,0,.55);  
       --radius:16px;  
     }  
     *{box-sizing:border-box}  
+    html,body{height:100%; scroll-behavior: smooth;}  
     body{  
-      margin:0; font-family: system-ui, -apple-system, "Noto Sans Arabic", sans-serif;  
-      background: radial-gradient(900px 420px at 90% 5%, rgba(57,255,136,.1), transparent 55%), var(--bg);  
-      color:var(--text); line-height:1.55; overflow-x: hidden;
+      margin:0;  
+      font-family: ui-sans-serif, system-ui, -apple-system, "Noto Sans Arabic", Tahoma, sans-serif;  
+      background:  
+        radial-gradient(900px 420px at 90% 5%, rgba(57,255,136,.14), transparent 55%),  
+        radial-gradient(900px 420px at 10% 0%, rgba(0,229,255,.10), transparent 55%),  
+        var(--bg);  
+      color:var(--text);  
+      line-height:1.55;  
     }  
-    .container{max-width:1120px; margin:0 auto; padding:20px}  
+    .container{max-width:1120px;margin:0 auto;padding:22px}  
     
-    /* Animations */
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .task { animation: fadeIn 0.3s ease; }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .task { animation: slideIn 0.3s ease forwards; }
 
     .topbar{  
       display:flex; align-items:center; justify-content:space-between;  
-      padding:15px; background: rgba(11,18,32,.8); border:1px solid var(--stroke);  
-      border-radius: var(--radius); backdrop-filter: blur(12px); position: sticky; top: 15px; z-index: 100;  
+      gap:14px; padding:14px 16px;  
+      background: rgba(11,18,32,.8);  
+      border:1px solid var(--stroke);  
+      border-radius: var(--radius);  
+      backdrop-filter: blur(12px);
+      position: sticky; top: 14px; z-index: 100;  
     }  
+    .brand h1{font-size:16px;margin:0; background: linear-gradient(90deg, var(--neon), var(--neon-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;}  
     
-    .grid{ margin-top:20px; display:grid; gap:20px; grid-template-columns: 1.2fr 0.8fr; }  
+    .grid{ margin-top:18px; display:grid; gap:20px; grid-template-columns: 1.2fr 0.8fr; }  
     @media (max-width: 980px){ .grid{grid-template-columns: 1fr} }  
 
-    .card{ background: rgba(11,18,32,0.7); border: 1px solid var(--stroke); border-radius: var(--radius); overflow:hidden; }  
-    .card header{ padding:16px; border-bottom: 1px solid var(--stroke); display:flex; align-items:center; justify-content:space-between; }  
+    .card{  
+      background: linear-gradient(180deg, rgba(11,18,32,.9), rgba(11,18,32,.6));  
+      border: 1px solid var(--stroke);  
+      border-radius: var(--radius);  
+      overflow:hidden; box-shadow: var(--shadow);
+    }  
+    .card header{ padding:16px; border-bottom: 1px solid rgba(86,255,140,.1); display:flex; align-items:center; justify-content:space-between; }  
     .card .body{padding:20px}
 
-    /* KPIs */
-    .kpis{display:grid; grid-template-columns: repeat(2, 1fr); gap:12px; margin-bottom: 20px;}  
-    .kpi-main{ grid-column: span 2; background: rgba(57,255,136,0.05); padding:20px; border-radius:14px; border: 1px solid rgba(57,255,136,0.2); }
-    .kpi{ padding:15px; border-radius:14px; background: rgba(10,22,40,0.5); border:1px solid var(--stroke); text-align: center; }  
-    .kpi .value{font-size:24px; font-weight:800; color: var(--neon); display:block;}
+    .kpis{display:grid; grid-template-columns: repeat(2, 1fr); gap:12px; margin-bottom: 15px;}  
+    .kpi-main{ grid-column: span 2; background: rgba(57,255,136,.05); border: 1px solid rgba(57,255,136,.2); }
+    .kpi{ padding:16px; border-radius:14px; border:1px solid var(--stroke); background: rgba(10,22,40,.4); transition: 0.3s; }  
+    .kpi:hover { border-color: var(--neon); }
+    .kpi .value{font-size:24px; font-weight:800; color: var(--neon);}
 
-    /* Suggestion Menu Style */
-    .suggest-box {
-      margin-top: 10px; padding: 10px; background: rgba(0,229,255,0.05); 
-      border: 1px dashed var(--neon-2); border-radius: 12px; display: none;
+    .badges-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 10px; margin-top:10px; }
+    .badge {  
+      text-align: center; padding: 10px 5px; border-radius: 12px; background: rgba(155,176,204,.05);  
+      border: 1px solid transparent; filter: grayscale(1); opacity: 0.5; transition: 0.4s;
     }
-    .suggest-group { margin-bottom: 10px; }
-    .suggest-group label { font-size: 11px; color: var(--neon-2); display: block; margin-bottom: 5px; }
+    .badge.active { filter: grayscale(0); opacity: 1; border-color: var(--neon); background: rgba(57,255,136,.1); }
+    .badge-icon { font-size: 24px; display: block; margin-bottom: 5px; }
+    .badge-label { font-size: 10px; color: var(--muted); }
+
+    .btn{  
+      appearance:none; border:1px solid rgba(57,255,136,.3);  
+      background: linear-gradient(180deg, rgba(57,255,136,.15), rgba(57,255,136,.05));  
+      color: var(--text); padding:10px 16px; border-radius:12px; font-weight:600;  
+      cursor:pointer; display:inline-flex; align-items:center; gap:8px; transition: 0.2s;
+    }  
+    .btn:hover:not(:disabled){ transform: translateY(-2px); border-color: var(--neon); box-shadow: 0 0 15px rgba(57,255,136,.2); }
+    .btn:disabled{ opacity: 0.4; cursor: not-allowed; }
+    .btn.secondary{ border-color: rgba(155,176,204,.2); background: rgba(10,22,40,.6); }
+    .btn.danger{ border-color: rgba(255,77,109,.3); background: rgba(255,77,109,.1); }
+
+    .taskList{display:flex;flex-direction:column;gap:12px}  
+    .task{  
+      display:flex; align-items:center; justify-content:space-between;  
+      padding:14px; border-radius:14px; border:1px solid var(--stroke); background: rgba(10,22,40,.3);  
+    }  
+    .task.done { border-color: rgba(57,255,136, 0.2); background: rgba(57,255,136, 0.03); }
+    .task .title{ font-weight:600; transition: 0.2s; }
+    .task.done .title { text-decoration: line-through; color: var(--muted); }
+
+    .input{  
+      flex:1; background: rgba(10,22,40,.6); border:1px solid var(--stroke);  
+      color: var(--text); padding:12px; border-radius:12px; outline:none; transition: 0.2s;
+    }  
+    .input:focus{ border-color: var(--neon); background: rgba(10,22,40,1); }
+
+    /* --- التعديلات الجديدة: بنك المهام --- */
+    .suggest-box {
+      margin-top: 10px; padding: 12px; background: rgba(0, 229, 255, 0.05);
+      border: 1px dashed var(--neon-2); border-radius: 12px; display: none;
+      animation: slideIn 0.3s ease;
+    }
+    .suggest-group { margin-bottom: 12px; }
+    .suggest-group label { font-size: 11px; color: var(--neon-2); display: block; margin-bottom: 6px; opacity: 0.8; }
     .suggest-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-    .tag { 
-      font-size: 11px; padding: 4px 10px; background: rgba(255,255,255,0.05); 
+    .tag {
+      font-size: 11px; padding: 4px 10px; background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--stroke); border-radius: 20px; cursor: pointer; transition: 0.2s;
     }
     .tag:hover { background: var(--neon); color: var(--bg); border-color: var(--neon); }
 
-    /* Buttons */
-    .btn{  
-      border:1px solid rgba(57,255,136,0.3); background: rgba(57,255,136,0.1);  
-      color: var(--text); padding:10px 16px; border-radius:12px; font-weight:600;  
-      cursor:pointer; display:inline-flex; align-items:center; gap:8px; transition: 0.2s;
-    }  
-    .btn:hover:not(:disabled){ transform: translateY(-2px); border-color: var(--neon); background: rgba(57,255,136,0.2); }
-    .btn.secondary{ border-color: var(--stroke); background: rgba(255,255,255,0.05); }
-    .btn.danger{ border-color: var(--danger); background: rgba(255,77,109,0.1); }
-    .btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-    .task{  
-      display:flex; align-items:center; justify-content:space-between;  
-      padding:14px; border-radius:14px; border:1px solid var(--stroke); background: rgba(10,22,40,0.3); margin-bottom: 10px;
-    }  
-    .task.done { border-color: var(--neon); background: rgba(57,255,136,0.05); }
-    .task.done .title { text-decoration: line-through; color: var(--muted); }
-
-    .input{  
-      flex:1; background: rgba(10,22,40,0.6); border:1px solid var(--stroke);  
-      color: var(--text); padding:12px; border-radius:12px; outline:none;
-    }
-
-    .badge { 
-      text-align: center; padding: 10px; border-radius: 12px; background: rgba(255,255,255,0.02); 
-      filter: grayscale(1); opacity: 0.3; transition: 0.5s; border: 1px solid transparent;
-    }
-    .badge.active { filter: grayscale(0); opacity: 1; border-color: var(--neon); background: rgba(57,255,136,0.05); }
-
     .toast{  
-      position: fixed; bottom: 20px; left: 20px; padding:15px; border-radius: 12px;  
-      background: var(--panel); border:1px solid var(--neon); display:none; z-index: 1000;
-    }
+      position: fixed; bottom: 20px; left: 20px; padding:16px; border-radius: 14px;  
+      background: #0B1220; border:1px solid var(--neon); box-shadow: var(--shadow); z-index: 1000;
+      display:none; animation: slideIn 0.3s ease;
+    }  
+    .toast.show{display:block}  
   </style>  
 </head>
 
 <body>  
   <div class="container">  
     <div class="topbar">  
-      <div>
-        <h1 style="margin:0; font-size:18px; color:var(--neon)">تحدي الـ 21 يوماً</h1>
-        <small id="userEmail" class="muted">بانتظار تسجيل الدخول...</small>
+      <div class="brand">  
+        <h1>تحدي الـ 21 يوماً</h1>  
+        <p style="font-size:11px; margin:0; color:var(--muted)">إصدار SaaS Pro المتطور</p>
       </div>
       <div class="actions">  
-        <button id="btnGoogle" class="btn">دخول بجوجل</button>  
+        <button id="btnGoogle" class="btn"><span>G</span> تسجيل الدخول</button>  
         <button id="btnLogout" class="btn secondary" disabled>خروج</button>  
       </div>  
     </div>
@@ -116,93 +147,105 @@
     <div class="grid">  
       <section class="card">  
         <header>  
-          <h2 style="font-size:15px; margin:0">لوحة الإنجازات</h2>
-          <div id="todayKey" class="btn secondary" style="font-size:12px; padding:4px 12px;">اليوم 1</div>
+          <div>
+            <h2 style="font-size:15px; margin:0">إنجاز اليوم</h2>
+            <small id="userEmail" class="muted">يرجى تسجيل الدخول لحفظ بياناتك</small>
+          </div>
+          <div id="todayKey" class="btn secondary" style="font-size:12px; padding:5px 10px;">اليوم —</div>
         </header>
 
         <div class="body">  
           <div class="kpis">  
-            <div class="kpi-main">  
-              <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                <span>إجمالي التقدم</span>
-                <span id="kpiPercent" style="color:var(--neon); font-weight:bold;">0%</span>
-              </div>
-              <div style="height:8px; background:rgba(255,255,255,0.1); border-radius:10px; overflow:hidden;">
-                <div id="progressBar" style="width:0%; height:100%; background:var(--neon); transition:1s ease;"></div>
+            <div class="kpi kpi-main">  
+              <div class="label">إجمالي تقدم الرحلة (21 يوم)</div>  
+              <div class="value" id="kpiPercent">0%</div>  
+              <div class="bar" style="height:6px; background:rgba(255,255,255,0.1); border-radius:10px; margin-top:10px; overflow:hidden;">
+                <div id="progressBar" style="width:0%; height:100%; background:var(--neon); box-shadow: 0 0 10px var(--neon); transition:1s;"></div>
               </div>
             </div>  
             <div class="kpi">  
-              <span class="value" id="kpiDay">1/21</span>  
-              <small class="muted">اليوم الحالي</small>
+              <div class="label">اليوم الحالي</div>  
+              <div class="value" id="kpiDay">1/21</div>  
             </div>  
             <div class="kpi">  
-              <span class="value" id="kpiTodayProgress">0%</span>  
-              <small class="muted">إنجاز اليوم</small>
+              <div class="label">إنجاز اليوم فقط</div>  
+              <div class="value" id="kpiTodayProgress">0%</div>  
             </div>  
           </div>
 
           <div class="taskList" id="taskList"></div>  
-          <div id="emptyState" style="text-align:center; padding:30px; color:var(--muted);">لا توجد مهام حالياً.</div>  
+          <div id="emptyState" style="text-align:center; padding:40px 0; color:var(--muted); display:none;">
+            لا توجد مهام مضافة اليوم. ابدأ بإضافة مهامك من اليسار!
+          </div>  
         </div>  
       </section>
 
       <aside style="display:flex; flex-direction:column; gap:20px;">  
         <div class="card">
-          <header><h2 style="font-size:14px; margin:0">إضافة مهمة</h2></header>
+          <header><h2 style="font-size:14px; margin:0">إضافة مهمة جديدة</h2></header>
           <div class="body">
-            <div style="display:flex; gap:8px;">
-              <input id="taskTitle" class="input" placeholder="اكتب مهمتك هنا..." />  
-              <button id="btnSuggest" class="btn secondary" title="اقتراح مهام">💡</button>
-            </div>
-            
-            <div id="suggestBox" class="suggest-box">
-              <div class="suggest-group">
-                <label>🌍 مهام عامة</label>
-                <div class="suggest-tags" id="tags-general"></div>
+            <div style="display:flex; gap:10px; flex-direction:column;">
+              <div style="display:flex; gap:8px;">
+                <input id="taskTitle" class="input" placeholder="ماذا ستنجز اليوم؟" />  
+                <button id="btnSuggest" class="btn secondary" title="اقتراحات">💡</button>
               </div>
-              <div class="suggest-group">
-                <label>👦 للأولاد</label>
-                <div class="suggest-tags" id="tags-boys"></div>
-              </div>
-              <div class="suggest-group">
-                <label>👧 للبنات</label>
-                <div class="suggest-tags" id="tags-girls"></div>
-              </div>
-            </div>
 
-            <button id="btnAddTask" class="btn" style="width:100%; margin-top:10px; justify-content:center;" disabled>+ إضافة المهمة</button>  
+              <div id="suggestBox" class="suggest-box">
+                <div class="suggest-group">
+                  <label>🌍 مهام عامة</label>
+                  <div class="suggest-tags" id="tags-general"></div>
+                </div>
+                <div class="suggest-group">
+                  <label>👦 للأولاد</label>
+                  <div class="suggest-tags" id="tags-boys"></div>
+                </div>
+                <div class="suggest-group">
+                  <label>👧 للبنات</label>
+                  <div class="suggest-tags" id="tags-girls"></div>
+                </div>
+              </div>
+
+              <button id="btnAddTask" class="btn" style="justify-content:center;" disabled>+ إضافة المهمة</button>  
+            </div>
           </div>
         </div>
 
         <div class="card">
-          <header><h2 style="font-size:14px; margin:0">الأوسمة</h2></header>
-          <div class="body" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px;">
-            <div class="badge" id="badge-1">🚀<br><small style="font-size:8px">بداية</small></div>
-            <div class="badge" id="badge-7">🔥<br><small style="font-size:8px">7 أيام</small></div>
-            <div class="badge" id="badge-14">💎<br><small style="font-size:8px">14 يوم</small></div>
-            <div class="badge" id="badge-21">👑<br><small style="font-size:8px">بطل</small></div>
+          <header><h2 style="font-size:14px; margin:0">الأوسمة والإنجازات</h2></header>
+          <div class="body">
+            <div class="badges-grid">
+              <div class="badge" id="badge-start"><span class="badge-icon">🚀</span><span class="badge-label">بداية</span></div>
+              <div class="badge" id="badge-week"><span class="badge-icon">🔥</span><span class="badge-label">7 أيام</span></div>
+              <div class="badge" id="badge-half"><span class="badge-icon">💎</span><span class="badge-label">المنتصف</span></div>
+              <div class="badge" id="badge-finish"><span class="badge-icon">👑</span><span class="badge-label">البطل</span></div>
+            </div>
           </div>
         </div>
 
         <div class="card">
-          <div class="body" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <button id="btnPrevDay" class="btn secondary" disabled>السابق</button>  
-            <button id="btnNextDay" class="btn secondary" disabled>التالي</button>  
-            <button id="btnReset" class="btn danger" style="grid-column: span 2; justify-content:center;" disabled>تصفير التحدي</button>  
+          <header><h2 style="font-size:14px; margin:0">التنقل عبر الأيام</h2></header>
+          <div class="body">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+              <button id="btnPrevDay" class="btn secondary" disabled>السابق</button>  
+              <button id="btnNextDay" class="btn secondary" disabled>التالي</button>  
+              <button id="btnResetChallenge" class="btn danger" style="grid-column: span 2; justify-content:center;" disabled>إعادة التحدي بالكامل</button>  
+            </div>
           </div>
         </div>
       </aside>  
     </div>  
   </div>
 
-  <div class="toast" id="toast"></div>
+  <div class="toast" id="toast">
+    <strong id="toastTitle"></strong><br/>
+    <small id="toastMsg"></small>
+  </div>
 
   <script type="module">  
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";  
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";  
-    import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    // Firebase Config
     const firebaseConfig = {  
       apiKey: "AIzaSyD7XzFMve-N8ALJPlxaBQM_iMZtbr05dCc",  
       authDomain: "hamo-124d8.firebaseapp.com",  
@@ -220,9 +263,10 @@
     const $ = (id) => document.getElementById(id);
     let currentUser = null;  
     let userData = null;
+    const DAY_COUNT = 21;
 
     // --- Suggestion Data ---
-    const suggestions = {
+    const suggestionData = {
       general: ["شرب 8 أكواب ماء", "قراءة 5 صفحات", "مشي 15 دقيقة", "ترتيب السرير", "كتابة 3 نعم (امتنان)"],
       boys: ["10 تمارين ضغط", "تعلم 5 كلمات لغة", "ترتيب درج مكركب", "صلاة الفجر/استيقاظ مبكر"],
       girls: ["روتين عناية بالبشرة", "كتابة يوميات 5 دقايق", "مساعدة في المطبخ", "تأمل 10 دقائق"]
@@ -231,52 +275,85 @@
     function initSuggestions() {
       ['general', 'boys', 'girls'].forEach(cat => {
         const container = $(`tags-${cat}`);
-        suggestions[cat].forEach(text => {
+        suggestionData[cat].forEach(text => {
           const span = document.createElement('span');
           span.className = 'tag';
           span.textContent = text;
-          span.onclick = () => { $("taskTitle").value = text; $("suggestBox").style.display = 'none'; };
+          span.onclick = () => { 
+            $("taskTitle").value = text; 
+            $("suggestBox").style.display = 'none'; 
+          };
           container.appendChild(span);
         });
       });
     }
 
-    // --- Core Functions ---
-    function showToast(msg) {
-      $("toast").textContent = msg; $("toast").style.display = "block";
-      setTimeout(() => $("toast").style.display = "none", 3000);
+    // --- Helper Functions ---
+    function showToast(title, msg) {  
+      $("toastTitle").textContent = title; $("toastMsg").textContent = msg;  
+      $("toast").classList.add("show");  
+      setTimeout(() => $("toast").classList.remove("show"), 3000);  
     }
 
-    async function updateDB() {
+    function fireConfetti() {
+      confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#39FF88', '#00E5FF', '#ffffff'] });
+    }
+
+    // --- Core Logic ---
+    async function loadUser(user) {
+      currentUser = user;
+      const docRef = doc(db, "users", user.uid);
+      const snap = await getDoc(docRef);
+      if (!snap.exists()) {
+        userData = { 
+          tasks: {}, 
+          progress: { dayIndex: 1 }, 
+          email: user.email 
+        };
+        await setDoc(docRef, userData);
+      } else {
+        userData = snap.data();
+      }
+      render();
+    }
+
+    async function updateData() {
       await updateDoc(doc(db, "users", currentUser.uid), userData);
       render();
     }
 
     function render() {
-      if (!currentUser) return;
-      document.querySelectorAll("button:not(#btnGoogle)").forEach(b => b.disabled = false);
+      if (!currentUser) {
+        document.querySelectorAll("button:not(#btnGoogle)").forEach(b => b.disabled = true);
+        return;
+      }
+
+      document.querySelectorAll("button").forEach(b => b.disabled = false);
       $("userEmail").textContent = currentUser.email;
 
-      const dIdx = userData.progress.dayIndex;
-      const dKey = `day_${String(dIdx).padStart(2, '0')}`;
-      $("kpiDay").textContent = `${dIdx}/21`;
-      $("todayKey").textContent = `اليوم ${dIdx}`;
+      const dayIdx = userData.progress.dayIndex;
+      const dayKey = `day_${String(dayIdx).padStart(2, '0')}`;
+      $("kpiDay").textContent = `${dayIdx}/${DAY_COUNT}`;
+      $("todayKey").textContent = `اليوم ${dayIdx}`;
 
-      const tasks = userData.tasks[dKey] || [];
+      const tasks = userData.tasks[dayKey] || [];
       const doneToday = tasks.filter(t => t.done).length;
-      $("kpiTodayProgress").textContent = tasks.length ? Math.round((doneToday/tasks.length)*100) + "%" : "0%";
+      const todayPercent = tasks.length ? Math.round((doneToday / tasks.length) * 100) : 0;
+      $("kpiTodayProgress").textContent = `${todayPercent}%`;
 
-      let total = 0, done = 0;
-      Object.values(userData.tasks).forEach(list => { total += list.length; done += list.filter(t => t.done).length; });
-      const global = total ? Math.round((done/total)*100) : 0;
-      $("kpiPercent").textContent = global + "%";
-      $("progressBar").style.width = global + "%";
+      let totalAll = 0, doneAll = 0;
+      Object.values(userData.tasks).forEach(list => {
+        totalAll += list.length;
+        doneAll += list.filter(t => t.done).length;
+      });
+      const globalPercent = totalAll ? Math.round((doneAll / totalAll) * 100) : 0;
+      $("kpiPercent").textContent = `${globalPercent}%`;
+      $("progressBar").style.width = `${globalPercent}%`;
 
-      // Badges
-      if (done >= 1) $("badge-1").classList.add("active");
-      if (dIdx >= 7 && done >= 5) $("badge-7").classList.add("active");
-      if (dIdx >= 14) $("badge-14").classList.add("active");
-      if (global === 100 && total > 5) $("badge-21").classList.add("active");
+      if (doneAll >= 1) $("badge-start").classList.add("active");
+      if (dayIdx >= 7 && doneAll >= 5) $("badge-week").classList.add("active");
+      if (dayIdx >= 11) $("badge-half").classList.add("active");
+      if (globalPercent === 100 && totalAll > 5) $("badge-finish").classList.add("active");
 
       const listEl = $("taskList");
       listEl.innerHTML = "";
@@ -286,54 +363,89 @@
         const div = document.createElement("div");
         div.className = `task ${task.done ? 'done' : ''}`;
         div.innerHTML = `
-          <div style="display:flex; align-items:center; gap:10px;">
-            <input type="checkbox" ${task.done ? 'checked' : ''}>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <input type="checkbox" ${task.done ? 'checked' : ''} style="cursor:pointer; width:18px; height:18px;">
             <span class="title">${task.title}</span>
           </div>
-          <div>
-            <button class="btn secondary" style="padding:4px 8px; font-size:10px;">تعديل</button>
-            <button class="btn danger" style="padding:4px 8px; font-size:10px;">حذف</button>
+          <div style="display:flex; gap:5px;">
+            <button class="btn secondary edit-btn" style="padding:5px 8px; font-size:12px;">تعديل</button>
+            <button class="btn danger del-btn" style="padding:5px 8px; font-size:12px;">حذف</button>
           </div>
         `;
-        div.querySelector("input").onchange = (e) => { 
-          task.done = e.target.checked; 
-          if (task.done) confetti({ particleCount: 100, spread: 70, origin: { y: 0.8 } });
-          updateDB(); 
+
+        div.querySelector("input").onchange = (e) => {
+          task.done = e.target.checked;
+          if (task.done) fireConfetti();
+          updateData();
         };
-        div.querySelectorAll("button")[0].onclick = () => { const n = prompt("تعديل المهمة:", task.title); if(n){task.title=n; updateDB();} };
-        div.querySelectorAll("button")[1].onclick = () => { if(confirm("حذف؟")){ userData.tasks[dKey] = tasks.filter(t => t.id !== task.id); updateDB(); } };
+
+        div.querySelector(".edit-btn").onclick = () => {
+          const newTitle = prompt("تعديل المهمة:", task.title);
+          if (newTitle) { task.title = newTitle; updateData(); }
+        };
+
+        div.querySelector(".del-btn").onclick = () => {
+          if (confirm("حذف المهمة؟")) {
+            userData.tasks[dayKey] = tasks.filter(t => t.id !== task.id);
+            updateData();
+          }
+        };
+
         listEl.appendChild(div);
       });
     }
 
     // --- Events ---
     $("btnGoogle").onclick = () => signInWithPopup(auth, provider);
-    $("btnLogout").onclick = () => { signOut(auth); location.reload(); };
-    $("btnSuggest").onclick = () => { const s = $("suggestBox"); s.style.display = s.style.display === 'block' ? 'none' : 'block'; };
+    $("btnLogout").onclick = () => signOut(auth);
+
+    // تبديل ظهور بنك المهام
+    $("btnSuggest").onclick = () => {
+      const box = $("suggestBox");
+      box.style.display = (box.style.display === 'block') ? 'none' : 'block';
+    };
     
     $("btnAddTask").onclick = () => {
-      const t = $("taskTitle").value.trim(); if (!t) return;
-      const dKey = `day_${String(userData.progress.dayIndex).padStart(2, '0')}`;
-      if (!userData.tasks[dKey]) userData.tasks[dKey] = [];
-      userData.tasks[dKey].push({ id: Date.now(), title: t, done: false });
-      $("taskTitle").value = ""; updateDB();
+      const title = $("taskTitle").value.trim();
+      if (!title) return;
+      const dayKey = `day_${String(userData.progress.dayIndex).padStart(2, '0')}`;
+      if (!userData.tasks[dayKey]) userData.tasks[dayKey] = [];
+      userData.tasks[dayKey].push({ id: Date.now(), title, done: false });
+      $("taskTitle").value = "";
+      updateData();
+      showToast("تمت الإضافة", "بالتوفيق في مهمتك الجديدة!");
     };
 
-    $("btnNextDay").onclick = () => { if (userData.progress.dayIndex < 21) { userData.progress.dayIndex++; updateDB(); } };
-    $("btnPrevDay").onclick = () => { if (userData.progress.dayIndex > 1) { userData.progress.dayIndex--; updateDB(); } };
-    $("btnReset").onclick = async () => { if(confirm("تصفير كل شيء؟")){ userData.tasks = {}; userData.progress.dayIndex = 1; updateDB(); } };
-
-    onAuthStateChanged(auth, async user => {
-      if (user) {
-        currentUser = user;
-        const snap = await getDoc(doc(db, "users", user.uid));
-        userData = snap.exists() ? snap.data() : { tasks: {}, progress: { dayIndex: 1 }, email: user.email };
-        if (!snap.exists()) await setDoc(doc(db, "users", user.uid), userData);
-        render();
+    $("btnNextDay").onclick = () => {
+      if (userData.progress.dayIndex < DAY_COUNT) {
+        userData.progress.dayIndex++;
+        updateData();
       }
+    };
+
+    $("btnPrevDay").onclick = () => {
+      if (userData.progress.dayIndex > 1) {
+        userData.progress.dayIndex--;
+        updateData();
+      }
+    };
+
+    $("btnResetChallenge").onclick = () => {
+      if (confirm("هل أنت متأكد؟ سيتم مسح جميع بيانات المهام والعودة لليوم الأول.")) {
+        userData.tasks = {};
+        userData.progress.dayIndex = 1;
+        updateData();
+      }
+    };
+
+    onAuthStateChanged(auth, user => {
+      if (user) loadUser(user);
+      else { currentUser = null; render(); }
     });
 
+    // تشغيل بنك المهام
     initSuggestions();
+
   </script>
 </body>
 </html>
