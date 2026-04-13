@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>تحدي 21 يوم - الإصدار الجديد</title>
+  <title>تحدي 21 يوم - مربوط بـ Firebase</title>
   
   <!-- أيقونات -->
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -46,14 +46,12 @@
 
     .container { max-width: 1120px; margin: 0 auto; padding: 20px }
 
-    /* Animations & Transitions */
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     .task, .card, .kpi { animation: fadeIn 0.5s ease backwards; }
     .task { cursor: grab; }
     .task.sortable-ghost { background: rgba(77, 127, 255, 0.3); border-style: dashed; }
     .task.sortable-chosen { cursor: grabbing; }
 
-    /* Glassmorphism Card */
     .card {
       background: var(--panel);
       border: 1px solid var(--stroke);
@@ -63,84 +61,40 @@
     }
     
     .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 20px;
-      position: sticky;
-      top: 15px;
-      z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 20px; position: sticky; top: 15px; z-index: 100;
     }
-    .topbar .logo {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .topbar .logo i {
-        font-size: 28px;
-        color: var(--neon);
-    }
-    .topbar h1 {
-        margin:0; font-size:18px; color: var(--text);
-    }
+    .topbar .logo { display: flex; align-items: center; gap: 10px; }
+    .topbar .logo i { font-size: 28px; color: var(--neon); }
+    .topbar h1 { margin:0; font-size:18px; color: var(--text); }
     #userEmail { font-size: 12px; }
 
     .grid { margin-top: 20px; display: grid; gap: 20px; grid-template-columns: 1.2fr 0.8fr; }
     @media (max-width: 980px) { .grid { grid-template-columns: 1fr } }
 
     .card header {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--stroke);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid var(--stroke);
+      display: flex; align-items: center; justify-content: space-between;
     }
     .card header h2 { font-size: 16px; margin: 0; display: flex; align-items: center; gap: 8px; }
     .card .body { padding: 20px }
 
-    /* Progress Circle */
-    .progress-circle {
-      position: relative;
-      width: 160px;
-      height: 160px;
-      margin: 20px auto;
-    }
-    .progress-circle svg {
-      transform: rotate(-90deg);
-      width: 100%; height: 100%;
-    }
-    .progress-circle circle {
-      fill: none;
-      stroke-width: 10;
-      stroke-linecap: round;
-    }
+    .progress-circle { position: relative; width: 160px; height: 160px; margin: 20px auto; }
+    .progress-circle svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+    .progress-circle circle { fill: none; stroke-width: 10; stroke-linecap: round; }
     .progress-circle .bg-circle { stroke: var(--stroke); }
-    .progress-circle .fg-circle {
-      stroke: url(#progressGradient);
-      transition: stroke-dashoffset 1s ease;
-    }
+    .progress-circle .fg-circle { stroke: url(#progressGradient); transition: stroke-dashoffset 1s ease; }
     .progress-center {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%); text-align: center;
     }
-    .progress-center .percent {
-      font-size: 32px;
-      font-weight: 800;
-      color: var(--text);
-      display: block;
-    }
+    .progress-center .percent { font-size: 32px; font-weight: 800; color: var(--text); display: block; }
     .progress-center .label { color: var(--muted); font-size: 12px; }
     
-    /* KPIs */
     .kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 30px; }
     .kpi {
-      background: rgba(0,0,0,0.2);
-      padding: 15px;
-      border-radius: 14px;
-      border: 1px solid var(--stroke);
-      text-align: center;
+      background: rgba(0,0,0,0.2); padding: 15px; border-radius: 14px;
+      border: 1px solid var(--stroke); text-align: center;
     }
     .kpi .value { font-size: 24px; font-weight: 700; color: var(--text); display: block; }
     .kpi .value i { font-size: 20px; margin-right: 5px; vertical-align: middle; }
@@ -148,139 +102,70 @@
     .kpi .value .bx-check-double { color: var(--neon); }
     .kpi .value .bx-calendar-star { color: var(--neon-2); }
 
-
-    /* Task List */
     .task {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      border-radius: 12px;
-      border: 1px solid var(--stroke);
-      background: rgba(0, 0, 0, 0.15);
-      margin-bottom: 10px;
-      transition: all 0.2s ease;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; border-radius: 12px; border: 1px solid var(--stroke);
+      background: rgba(0, 0, 0, 0.15); margin-bottom: 10px; transition: all 0.2s ease;
     }
-    .task:hover {
-        transform: translateY(-2px);
-        border-color: rgba(77, 127, 255, 0.4);
-    }
-    .task.done {
-      border-color: rgba(77, 127, 255, 0.3);
-      background: rgba(77, 127, 255, 0.05);
-    }
+    .task:hover { transform: translateY(-2px); border-color: rgba(77, 127, 255, 0.4); }
+    .task.done { border-color: rgba(77, 127, 255, 0.3); background: rgba(77, 127, 255, 0.05); }
     .task.done .title { text-decoration: line-through; color: var(--muted); }
     .task .title { font-weight: 500; }
     .task-left { display: flex; align-items: center; gap: 12px; }
     
-    /* Custom Checkbox */
     .task input[type="checkbox"] {
-        appearance: none;
-        width: 20px;
-        height: 20px;
-        border: 2px solid var(--stroke);
-        border-radius: 6px;
-        cursor: pointer;
-        position: relative;
-        transition: 0.2s;
+        appearance: none; width: 20px; height: 20px;
+        border: 2px solid var(--stroke); border-radius: 6px;
+        cursor: pointer; position: relative; transition: 0.2s;
     }
-    .task input[type="checkbox"]:hover {
-        border-color: var(--neon);
-    }
-    .task input[type="checkbox"]:checked {
-        background: var(--neon);
-        border-color: var(--neon);
-    }
+    .task input[type="checkbox"]:hover { border-color: var(--neon); }
+    .task input[type="checkbox"]:checked { background: var(--neon); border-color: var(--neon); }
     .task input[type="checkbox"]:checked::after {
-        content: '\ecb3'; /* boxicons check icon */
-        font-family: 'Boxicons';
-        font-size: 20px;
-        color: var(--bg);
-        position: absolute;
-        top: 50%; left: 50%;
-        transform: translate(-50%, -50%);
+        content: '\ecb3'; font-family: 'Boxicons'; font-size: 20px; color: var(--bg);
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
     }
 
-    /* Buttons & Inputs */
     .input {
-      flex: 1;
-      background: var(--panel-solid);
-      border: 1px solid var(--stroke);
-      color: var(--text);
-      padding: 12px;
-      border-radius: 12px;
-      outline: none;
-      transition: 0.2s;
+      flex: 1; background: var(--panel-solid); border: 1px solid var(--stroke);
+      color: var(--text); padding: 12px; border-radius: 12px; outline: none; transition: 0.2s;
     }
     .input:focus { border-color: var(--neon); box-shadow: 0 0 15px var(--glow); }
 
     .btn {
-      border: 1px solid var(--stroke);
-      background: var(--panel);
-      color: var(--text);
-      padding: 10px 16px;
-      border-radius: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: 0.2s;
-      backdrop-filter: blur(5px);
+      border: 1px solid var(--stroke); background: var(--panel); color: var(--text);
+      padding: 10px 16px; border-radius: 12px; font-weight: 600; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 8px; transition: 0.2s; backdrop-filter: blur(5px);
     }
     .btn i { font-size: 20px; }
     .btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-      border-color: var(--neon);
-      color: var(--neon);
-      box-shadow: 0 4px 20px var(--glow);
+      transform: translateY(-2px); border-color: var(--neon);
+      color: var(--neon); box-shadow: 0 4px 20px var(--glow);
     }
-    .btn.primary {
-        background: var(--neon);
-        border-color: var(--neon);
-        color: var(--bg);
-    }
-    .btn.primary:hover:not(:disabled) {
-        color: var(--bg);
-        background: #6896ff;
-    }
+    .btn.primary { background: var(--neon); border-color: var(--neon); color: var(--bg); }
+    .btn.primary:hover:not(:disabled) { color: var(--bg); background: #6896ff; }
     .btn.danger { border-color: var(--danger); color: var(--danger); }
     .btn:disabled { opacity: 0.4; cursor: not-allowed; }
     
     .badge-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap:15px; }
     .badge {
-      text-align: center;
-      padding: 15px 10px;
-      border-radius: 12px;
-      background: rgba(0,0,0,0.2);
-      border: 1px solid var(--stroke);
-      filter: grayscale(1);
-      opacity: 0.5;
-      transition: 0.5s;
+      text-align: center; padding: 15px 10px; border-radius: 12px;
+      background: rgba(0,0,0,0.2); border: 1px solid var(--stroke);
+      filter: grayscale(1); opacity: 0.5; transition: 0.5s;
     }
     .badge .icon { font-size: 28px; }
     .badge .label { font-size: 9px; display: block; }
     .badge.active { filter: grayscale(0); opacity: 1; border-color: var(--neon-2); box-shadow: 0 0 15px rgba(200, 120, 255, 0.2); }
 
     .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      padding: 15px 20px;
-      border-radius: 12px;
-      background: var(--panel-solid);
-      border: 1px solid var(--neon);
-      box-shadow: 0 5px 20px var(--glow);
-      display: none;
-      z-index: 1000;
-      animation: fadeIn 0.3s;
+      position: fixed; bottom: 20px; left: 20px; padding: 15px 20px;
+      border-radius: 12px; background: var(--panel-solid); border: 1px solid var(--neon);
+      box-shadow: 0 5px 20px var(--glow); display: none; z-index: 1000; animation: fadeIn 0.3s;
     }
   </style>
 </head>
 
 <body>
-  <!-- SVG Gradient Definition -->
   <svg width="0" height="0" style="position:absolute">
     <defs>
       <linearGradient id="progressGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -345,16 +230,13 @@
             <div id="emptyState" style="text-align:center; padding:30px; color:var(--muted);"><i class='bx bx-moon' style="font-size:30px; display:block; margin-bottom:10px;"></i>لا توجد مهام بعد.</div>
           </div>
         </section>
-
       </main>
       
       <aside style="display:flex; flex-direction:column; gap:20px;">
         <div class="card">
           <header><h2><i class='bx bx-plus-circle'></i> إضافة مهمة</h2></header>
           <div class="body">
-            <div style="display:flex; gap:8px;">
-              <input id="taskTitle" class="input" placeholder="اكتب مهمتك هنا..." />
-            </div>
+            <input id="taskTitle" class="input" placeholder="اكتب مهمتك هنا..." />
             <button id="btnAddTask" class="btn primary" style="width:100%; margin-top:10px;" disabled><i class='bx bx-plus'></i> إضافة المهمة</button>
           </div>
         </div>
@@ -388,14 +270,14 @@
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    // ✨ تم تصحيح إعدادات Firebase
+    // ✨ تم استخدام إعدادات Firebase الخاصة بك
     const firebaseConfig = {
-      apiKey: "AIzaSyD7XzFMve-N8ALJPlxaBQM_iMZtbr05dCc",
-      authDomain: "hamo-124d8.firebaseapp.com",
-      projectId: "hamo-124d8",
-      storageBucket: "hamo-124d8.appspot.com", // التصحيح هنا
-      messagingSenderId: "487641126653",
-      appId: "1:487641126653:web:6378be437f6d0cb94fd094"
+        apiKey: "AIzaSyD7XzFMve-N8ALJPlxaBQM_iMZtbr05dCc",
+        authDomain: "hamo-124d8.firebaseapp.com",
+        projectId: "hamo-124d8",
+        storageBucket: "hamo-124d8.appspot.com",
+        messagingSenderId: "487641126653",
+        appId: "1:487641126653:web:6378be437f6d0cb94fd094"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -443,22 +325,18 @@
       $("kpiTodayProgress").innerHTML = `<i class='bx bx-check-double'></i>${todayProgress}%`;
 
       let total = 0, done = 0;
-      Object.values(userData.tasks).forEach(list => {
-        total += list.length;
-        done += list.filter(t => t.done).length;
-      });
+      Object.values(userData.tasks).forEach(list => { total += list.length; done += list.filter(t => t.done).length; });
       const global = total ? Math.round((done / total) * 100) : 0;
 
       $("kpiPercent").textContent = global + "%";
       
       const circle = $("fg-circle");
-      const radius = circle.r.baseVal.value;
+      const radius = 15.9155;
       const circumference = 2 * Math.PI * radius;
       const offset = circumference - (global / 100) * circumference;
       circle.style.strokeDasharray = `${circumference} ${circumference}`;
       circle.style.strokeDashoffset = offset;
 
-      // Badges
       $("badge-1").classList.toggle("active", done >= 1);
       $("badge-7").classList.toggle("active", dIdx >= 7 && done >= 5);
       $("badge-14").classList.toggle("active", dIdx >= 14);
@@ -506,9 +384,7 @@
         if (sortable) { sortable.destroy(); }
         const listEl = $("taskList");
         sortable = new Sortable(listEl, {
-            animation: 150,
-            ghostClass: 'sortable-ghost',
-            chosenClass: 'sortable-chosen',
+            animation: 150, ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen',
             onEnd: function (evt) {
                 const dKey = `day_${String(userData.progress.dayIndex).padStart(2, '0')}`;
                 const currentTasks = userData.tasks[dKey] || [];
@@ -521,25 +397,20 @@
             }
         });
     }
-
-    // ✨ تم تحسين هذه الدالة
+    
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
         try {
             const snap = await getDoc(doc(db, "users", user.uid));
-            if (snap.exists()) {
-                userData = snap.data();
-            } else {
-                userData = { tasks: {}, progress: { dayIndex: 1 }, email: user.email };
-                await setDoc(doc(db, "users", user.uid), userData);
-            }
+            userData = snap.exists() ? snap.data() : { tasks: {}, progress: { dayIndex: 1 }, email: user.email };
+            if (!snap.exists()) await setDoc(doc(db, "users", user.uid), userData);
             if (!userData.progress) userData.progress = { dayIndex: 1 };
             if (!userData.tasks) userData.tasks = {};
 
             $("btnGoogle").style.display = 'none';
             $("btnLogout").style.display = 'inline-flex';
-            document.querySelectorAll("#btnAddTask, #btnPrevDay, #btnNextDay, #btnReset, #taskTitle").forEach(el => el.disabled = false);
+            document.querySelectorAll("button, input").forEach(el => el.disabled = false);
 
             render();
             initSortable();
@@ -556,15 +427,13 @@
         $("emptyState").style.display = 'block';
         $("kpiPercent").textContent = '0%';
         const circle = $("fg-circle");
-        const radius = circle.r.baseVal.value;
-        const circumference = 2 * Math.PI * radius;
-        circle.style.strokeDashoffset = circumference;
-        document.querySelectorAll("#btnAddTask, #btnPrevDay, #btnNextDay, #btnReset, #btnLogout, #taskTitle").forEach(el => el.disabled = true);
+        const radius = 15.9155;
+        circle.style.strokeDashoffset = 2 * Math.PI * radius;
+        document.querySelectorAll("button:not(#btnGoogle), input").forEach(el => el.disabled = true);
       }
     });
 
-    // Event Listeners
-    $("btnGoogle").onclick = () => signInWithPopup(auth, provider).catch(error => { console.error("Sign in error", error); showToast(`خطأ في التسجيل: ${error.message}`); });
+    $("btnGoogle").onclick = () => signInWithPopup(auth, provider).catch(error => { console.error("Sign in error", error); showToast(`خطأ في التسجيل: ${error.code}`); });
     $("btnLogout").onclick = () => { signOut(auth); };
     $("btnAddTask").onclick = () => {
       const t = $("taskTitle").value.trim(); if (!t) return;
@@ -575,7 +444,6 @@
       updateDB();
     };
     $("taskTitle").onkeyup = (e) => { if(e.key === 'Enter') $("btnAddTask").click() };
-
     $("btnNextDay").onclick = () => { if (userData.progress.dayIndex < 21) { userData.progress.dayIndex++; updateDB().then(initSortable); } };
     $("btnPrevDay").onclick = () => { if (userData.progress.dayIndex > 1) { userData.progress.dayIndex--; updateDB().then(initSortable); } };
     $("btnReset").onclick = async () => { if (confirm("سيتم حذف جميع المهام والتقدم، هل أنت متأكد؟")) { userData.tasks = {}; userData.progress.dayIndex = 1; updateDB(); } };
