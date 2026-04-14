@@ -60,6 +60,8 @@
     .task input[type="checkbox"] { appearance: none; width: 20px; height: 20px; border: 2px solid var(--stroke); border-radius: 6px; cursor: pointer; position: relative; transition: 0.2s; }
     .task input[type="checkbox"]:checked { background: var(--neon); border-color: var(--neon); }
     .task input[type="checkbox"]:checked::after { content: '\ecb3'; font-family: 'Boxicons'; font-size: 20px; color: var(--bg); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    /* ✅ إضافة ستايل لـ checkbox المعطل */
+    .task input[type="checkbox"]:disabled { opacity: 0.5; cursor: not-allowed; }
     .input { flex: 1; background: var(--panel-solid); border: 1px solid var(--stroke); color: var(--text); padding: 12px; border-radius: 12px; outline: none; transition: 0.2s; width: 100%; }
     .btn { border: 1px solid var(--stroke); background: var(--panel); color: var(--text); padding: 10px 16px; border-radius: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
     .btn.primary { background: var(--neon); border-color: var(--neon); color: var(--bg); }
@@ -140,7 +142,6 @@
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    // ✅ إعدادات Firebase الخاصة بك كما هي تماماً لم تتغير
     const firebaseConfig = {
       apiKey: "AIzaSyD7XzFMve-N8ALJPlxaBQM_iMZtbr05dCc", authDomain: "hamo-124d8.firebaseapp.com",
       projectId: "hamo-124d8", storageBucket: "hamo-124d8.appspot.com",
@@ -162,18 +163,19 @@
     function render() {
       if (!userData) return;
       const settings = userData.settings || defaultSettings;
-      const dIdx = userData.progress.dayIndex;
-      const dKey = `day_${String(dIdx).padStart(2, '0')}`;
+      // ✅ dIdx هنا هو اليوم "المعرض" حالياً في الواجهة
+      const displayedDayIndex = userData.progress.dayIndex; 
+      const displayedDayKey = `day_${String(displayedDayIndex).padStart(2, '0')}`;
       
       $("displayName").textContent = settings.displayName || `تحدي ${settings.challengeDuration} يوماً`;
       $("userEmail").textContent = currentUser.email;
-      $("kpiDay").innerHTML = `<i class='bx bx-calendar-star'></i>${dIdx}/${settings.challengeDuration}`;
-      $("todayKey").textContent = `اليوم ${dIdx}`;
+      $("kpiDay").innerHTML = `<i class='bx bx-calendar-star'></i>${displayedDayIndex}/${settings.challengeDuration}`;
+      $("todayKey").textContent = `اليوم ${displayedDayIndex}`;
 
       const masterTasks = userData.masterTasks || [];
-      const completedToday = userData.dailyStatus?.[dKey] || [];
+      const completedTasksForDisplayedDay = userData.dailyStatus?.[displayedDayKey] || [];
 
-      const todayProgress = masterTasks.length ? Math.round((completedToday.length / masterTasks.length) * 100) : 0;
+      const todayProgress = masterTasks.length ? Math.round((completedTasksForDisplayedDay.length / masterTasks.length) * 100) : 0;
       $("kpiTodayProgress").innerHTML = `<i class='bx bx-check-double'></i>${todayProgress}%`;
 
       let totalCompletedAllDays = 0;
@@ -187,40 +189,54 @@
       circle.style.strokeDashoffset = circ - (globalPercent / 100) * circ;
 
       $("badge-1").classList.toggle("active", totalCompletedAllDays >= 1);
-      $("badge-7").classList.toggle("active", dIdx >= 7);
-      $("badge-14").classList.toggle("active", dIdx >= 14);
-      $("badge-21").classList.toggle("active", dIdx >= 21 && globalPercent === 100);
+      $("badge-7").classList.toggle("active", displayedDayIndex >= 7);
+      $("badge-14").classList.toggle("active", displayedDayIndex >= 14);
+      $("badge-21").classList.toggle("active", displayedDayIndex >= 21 && globalPercent === 100);
 
       const listEl = $("taskList"); listEl.innerHTML = "";
       $("emptyState").style.display = masterTasks.length ? "none" : "block";
 
+      // ✅ تحديد ما إذا كان اليوم المعروض "مستقبلياً"
+      const isFutureDay = displayedDayIndex > userData.progress.dayIndex;
+
       masterTasks.forEach(task => {
-        const isDone = completedToday.includes(task.id);
+        const isDone = completedTasksForDisplayedDay.includes(task.id);
         const div = document.createElement("div"); div.className = `task ${isDone ? 'done' : ''}`; div.setAttribute('data-id', task.id);
         
-        // ✅ إضافة زر التعديل بجانب زر الحذف
+        // ✅ إضافة سمة disabled للـ checkbox إذا كان يوماً مستقبلياً
         div.innerHTML = `
-          <div class="task-left"><input type="checkbox" ${isDone ? 'checked' : ''}><span class="title">${task.title}</span></div>
+          <div class="task-left">
+            <input type="checkbox" ${isDone ? 'checked' : ''} ${isFutureDay ? 'disabled' : ''}>
+            <span class="title">${task.title}</span>
+          </div>
           <div class="task-actions" style="display:flex; gap:5px;">
-            <button class="btn edit" style="padding:4px 8px; font-size:10px;"><i class='bx bx-edit'></i></button>
-            <button class="btn danger delete" style="padding:4px 8px; font-size:10px;"><i class='bx bx-trash'></i></button>
+            <button class="btn edit" style="padding:4px 8px; font-size:10px;" ${isFutureDay ? 'disabled' : ''}><i class='bx bx-edit'></i></button>
+            <button class="btn danger delete" style="padding:4px 8px; font-size:10px;" ${isFutureDay ? 'disabled' : ''}><i class='bx bx-trash'></i></button>
           </div>
         `;
         
         div.querySelector("input").onchange = (e) => {
+          // ✅ منع تغيير حالة المهمة إذا كان اليوم مستقبلياً
+          if (isFutureDay) {
+            showToast("لا يمكن تأشير مهام الأيام المستقبلية.");
+            e.target.checked = !e.target.checked; // عكس التغيير البصري
+            return; 
+          }
+
           if (!userData.dailyStatus) userData.dailyStatus = {};
-          if (!userData.dailyStatus[dKey]) userData.dailyStatus[dKey] = [];
+          if (!userData.dailyStatus[displayedDayKey]) userData.dailyStatus[displayedDayKey] = [];
+          
           if (e.target.checked) {
-            userData.dailyStatus[dKey].push(task.id);
+            userData.dailyStatus[displayedDayKey].push(task.id);
             if (settings.enableConfetti) confetti({ particleCount: 100, spread: 70, origin: { y: 0.8 } });
           } else {
-            userData.dailyStatus[dKey] = userData.dailyStatus[dKey].filter(id => id !== task.id);
+            userData.dailyStatus[displayedDayKey] = userData.dailyStatus[displayedDayKey].filter(id => id !== task.id);
           }
           updateDB();
         };
 
-        // ✅ برمجة زر التعديل
         div.querySelector(".edit").onclick = () => {
+          if (isFutureDay) { showToast("لا يمكن تعديل مهام الأيام المستقبلية."); return; }
           const newTitle = prompt("تعديل اسم العادة:", task.title);
           if (newTitle && newTitle.trim()) {
               task.title = newTitle.trim();
@@ -229,6 +245,7 @@
         };
 
         div.querySelector(".delete").onclick = () => {
+          if (isFutureDay) { showToast("لا يمكن حذف مهام الأيام المستقبلية."); return; }
           if (confirm("حذف العادة سيحذفها من كل الأيام، هل أنت متأكد؟")) {
             userData.masterTasks = userData.masterTasks.filter(t => t.id !== task.id);
             Object.keys(userData.dailyStatus).forEach(key => {
@@ -241,13 +258,26 @@
       });
     }
 
-    // ✅ برمجة خاصية الترتيب للسحب والإفلات
     function initSortable() {
+        // ✅ منع السحب والإفلات في الأيام المستقبلية
+        const displayedDayIndex = userData.progress.dayIndex;
+        const isFutureDay = displayedDayIndex > userData.progress.dayIndex; // هذا الشرط دائماً خاطئ هنا
+        // الشرط الصحيح يجب أن يقارن اليوم المعروض باليوم الفعلي
+        const currentChallengeDay = userData.progress.dayIndex; 
+        const isDraggingAllowed = (displayedDayIndex <= currentChallengeDay); // السماح فقط في اليوم الحالي أو الأيام السابقة
+
         if (sortable) sortable.destroy();
         sortable = new Sortable($("taskList"), { 
             animation: 150, 
-            ghostClass: 'sortable-ghost', 
+            ghostClass: 'sortable-ghost',
+            disabled: !isDraggingAllowed, // ✅ تعطيل السحب والإفلات للأيام المستقبلية
             onEnd: (evt) => {
+                // ✅ منع الحفظ إذا كان اليوم مستقبلياً
+                if (!isDraggingAllowed) {
+                    showToast("لا يمكن ترتيب المهام في الأيام المستقبلية.");
+                    render(); // إعادة رسم للحالة الأصلية
+                    return;
+                }
                 const newOrder = Array.from(evt.to.children).map(item => 
                     userData.masterTasks.find(t => t.id === Number(item.dataset.id))
                 );
@@ -257,7 +287,6 @@
         });
     }
 
-    // ✅ نظام تسجيل الدخول محمي تماماً ولم يتم المساس به
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
@@ -266,7 +295,6 @@
             if (snap.exists()) {
                 userData = snap.data();
                 
-                // ✅ حماية البيانات القديمة (Migration) لكي لا يتعطل التطبيق
                 if (userData.tasks && !userData.masterTasks) {
                     userData.masterTasks = [];
                     userData.dailyStatus = {};
@@ -283,7 +311,7 @@
             $("btnSettings").style.display = 'inline-flex';
             document.querySelectorAll("button:not(#btnGoogle), input").forEach(el => el.disabled = false);
             render();
-            initSortable(); // تشغيل الترتيب
+            initSortable(); 
         } catch (e) {
             console.error("Auth Error:", e);
             showToast("خطأ في تحميل البيانات.");
@@ -305,19 +333,53 @@
     $("btnLogout").onclick = () => signOut(auth);
     
     $("btnAddTask").onclick = () => {
-      const t = $("taskTitle").value.trim(); if (!t) return;
+      const t = $("taskTitle").value.trim(); 
+      if (!t) { showToast("الرجاء كتابة اسم للعادة."); return; }
       userData.masterTasks.push({ id: Date.now(), title: t });
       $("taskTitle").value = ""; updateDB();
     };
     $("taskTitle").onkeyup = (e) => { if(e.key === 'Enter') $("btnAddTask").click() };
     
-    $("btnNextDay").onclick = () => { if (userData.progress.dayIndex < (userData.settings.challengeDuration || 21)) { userData.progress.dayIndex++; updateDB(); } };
-    $("btnPrevDay").onclick = () => { if (userData.progress.dayIndex > 1) { userData.progress.dayIndex--; updateDB(); } };
-    $("btnReset").onclick = () => { if (confirm("تصفير التحدي سيمسح كل الإنجازات، هل أنت متأكد؟")) { userData.dailyStatus = {}; userData.progress.dayIndex = 1; updateDB(); } };
+    $("btnNextDay").onclick = () => { 
+      const currentChallengeDay = userData.progress.dayIndex;
+      const challengeDuration = userData.settings.challengeDuration || 21;
+      // ✅ زر اليوم التالي لا يمكن أن يتجاوز مدة التحدي
+      if (currentChallengeDay < challengeDuration) { 
+        userData.progress.dayIndex++; 
+        updateDB(); 
+      } else {
+        showToast("لقد وصلت لآخر يوم في التحدي!");
+      }
+    };
+    $("btnPrevDay").onclick = () => { 
+      // ✅ زر اليوم السابق لا يمكن أن يقل عن اليوم الأول
+      if (userData.progress.dayIndex > 1) { 
+        userData.progress.dayIndex--; 
+        updateDB(); 
+      } else {
+        showToast("أنت بالفعل في اليوم الأول من التحدي.");
+      }
+    };
+    $("btnReset").onclick = () => { if (confirm("تصفير التحدي سيمسح كل العادات والإنجازات، هل أنت متأكد؟")) { userData.dailyStatus = {}; userData.masterTasks = []; userData.progress.dayIndex = 1; updateDB(); } };
     
-    $("btnSettings").onclick = () => { $("inputDisplayName").value = userData.settings.displayName; $("inputChallengeDuration").value = userData.settings.challengeDuration; $("settingsModal").style.display='flex'; };
+    $("btnSettings").onclick = () => { 
+      $("inputDisplayName").value = userData.settings.displayName; 
+      $("inputChallengeDuration").value = userData.settings.challengeDuration; 
+      $("settingsModal").style.display='flex'; 
+    };
     $("btnCloseSettings").onclick = () => $("settingsModal").style.display='none';
-    $("btnSaveSettings").onclick = () => { userData.settings.displayName = $("inputDisplayName").value; userData.settings.challengeDuration = parseInt($("inputChallengeDuration").value); updateDB(); $("settingsModal").style.display='none'; };
+    $("btnSaveSettings").onclick = () => { 
+      const newDuration = parseInt($("inputChallengeDuration").value);
+      if (newDuration < 1) { showToast("مدة التحدي يجب أن تكون يوماً واحداً على الأقل."); return; }
+      userData.settings.displayName = $("inputDisplayName").value; 
+      userData.settings.challengeDuration = newDuration;
+      // ✅ التأكد من أن اليوم الحالي لا يتجاوز مدة التحدي الجديدة
+      if (userData.progress.dayIndex > newDuration) {
+          userData.progress.dayIndex = newDuration;
+      }
+      updateDB(); 
+      $("settingsModal").style.display='none'; 
+    };
   </script>
 </body>
 </html>
