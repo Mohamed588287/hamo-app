@@ -163,7 +163,7 @@
     function render() {
       if (!userData) return;
       const settings = userData.settings || defaultSettings;
-      // ✅ dIdx هنا هو اليوم "المعرض" حالياً في الواجهة
+      // ✅ displayedDayIndex هو اليوم "المعرض" حالياً في الواجهة
       const displayedDayIndex = userData.progress.dayIndex; 
       const displayedDayKey = `day_${String(displayedDayIndex).padStart(2, '0')}`;
       
@@ -261,7 +261,6 @@
     function initSortable() {
         // ✅ منع السحب والإفلات في الأيام المستقبلية
         const displayedDayIndex = userData.progress.dayIndex;
-        const isFutureDay = displayedDayIndex > userData.progress.dayIndex; // هذا الشرط دائماً خاطئ هنا
         // الشرط الصحيح يجب أن يقارن اليوم المعروض باليوم الفعلي
         const currentChallengeDay = userData.progress.dayIndex; 
         const isDraggingAllowed = (displayedDayIndex <= currentChallengeDay); // السماح فقط في اليوم الحالي أو الأيام السابقة
