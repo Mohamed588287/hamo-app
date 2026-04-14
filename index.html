@@ -7,6 +7,8 @@
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <!-- 📊 إضافة مكتبة Chart.js للرسوم البيانية -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
   <style>
     :root {
@@ -67,8 +69,25 @@
     .btn.primary { background: var(--neon); border-color: var(--neon); color: var(--bg); }
     .btn:disabled { opacity: 0.4; cursor: not-allowed; }
     .badge-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap:15px; }
-    .badge { text-align: center; padding: 15px 10px; border-radius: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--stroke); filter: grayscale(1); opacity: 0.5; }
-    .badge.active { filter: grayscale(0); opacity: 1; border-color: var(--neon-2); }
+    /* 🌟 تصميم الأوسمة الجديد */
+    .badge { 
+      text-align: center; padding: 15px 10px; border-radius: 12px; 
+      background: rgba(0,0,0,0.2); border: 1px solid var(--stroke); 
+      filter: grayscale(1); opacity: 0.5; transition: all 0.3s ease-in-out; 
+      position: relative; overflow: hidden; /* لإخفاء أي جزء من الظل الزائد */
+    }
+    .badge .icon { font-size: 28px; transition: transform 0.3s ease-in-out; }
+    .badge .label { font-size: 9px; display: block; color: var(--muted); transition: color 0.3s ease-in-out; }
+    .badge.active { 
+      filter: grayscale(0); opacity: 1; 
+      border-color: var(--neon-2); 
+      background: linear-gradient(45deg, rgba(77, 127, 255, 0.1), rgba(200, 120, 255, 0.15));
+      box-shadow: 0 0 20px rgba(200, 120, 255, 0.3), 0 0 10px rgba(77, 127, 255, 0.2);
+      transform: scale(1.05); /* تكبير بسيط عند التفعيل */
+    }
+    .badge.active .icon { transform: scale(1.1); text-shadow: 0 0 8px rgba(255,255,255,0.7); }
+    .badge.active .label { color: var(--text); }
+
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; }
     .modal-content { background: var(--panel-solid); border-radius: var(--radius); border: 1px solid var(--stroke); padding: 25px; width: 90%; max-width: 450px; }
     .form-group { margin-bottom: 20px; }
@@ -109,6 +128,14 @@
               <div class="kpi"><span class="value" id="kpiTodayProgress"><i class='bx bx-check-double'></i>0%</span><span class="label">إنجاز اليوم</span></div>
             </div>
           </div>
+        </section>
+
+        <!-- 📊 قسم الإحصائيات البيانية الجديد -->
+        <section class="card" style="margin-top:20px;">
+            <header><h2><i class='bx bx-chart'></i> إحصائيات التقدم اليومي</h2></header>
+            <div class="body">
+                <canvas id="progressChart"></canvas>
+            </div>
         </section>
 
         <section class="card" style="margin-top:20px;">
@@ -155,15 +182,28 @@
     const $ = (id) => document.getElementById(id);
 
     let currentUser = null, userData = null, sortable = null;
+    let progressChart = null; // 📊 متغير جديد للرسم البياني
     const defaultSettings = { displayName: '', challengeDuration: 21, enableConfetti: true };
 
     function showToast(msg) { $("toast").textContent = msg; $("toast").style.display = "block"; setTimeout(() => $("toast").style.display = "none", 3000); }
-    async function updateDB(doRender = true) { if (!currentUser) return; await updateDoc(doc(db, "users", currentUser.uid), userData); if(doRender) { render(); initSortable(); } }
+    async function updateDB(doRender = true) { 
+        if (!currentUser) return; 
+        try {
+            await updateDoc(doc(db, "users", currentUser.uid), userData); 
+            if(doRender) { 
+                render(); 
+                initSortable(); 
+                updateChart(); // 📊 تحديث الرسم البياني بعد كل حفظ
+            }
+        } catch (error) {
+            console.error("Error updating DB:", error);
+            showToast("خطأ في حفظ البيانات.");
+        }
+    }
 
     function render() {
       if (!userData) return;
       const settings = userData.settings || defaultSettings;
-      // ✅ displayedDayIndex هو اليوم "المعرض" حالياً في الواجهة
       const displayedDayIndex = userData.progress.dayIndex; 
       const displayedDayKey = `day_${String(displayedDayIndex).padStart(2, '0')}`;
       
@@ -179,16 +219,28 @@
       $("kpiTodayProgress").innerHTML = `<i class='bx bx-check-double'></i>${todayProgress}%`;
 
       let totalCompletedAllDays = 0;
-      Object.values(userData.dailyStatus || {}).forEach(list => totalCompletedAllDays += list.length);
-      const totalPossible = masterTasks.length * settings.challengeDuration;
-      const globalPercent = totalPossible ? Math.round((totalCompletedAllDays / totalPossible) * 100) : 0;
+      // 🌟 حساب التقدم الإجمالي بدقة أكبر
+      const totalMasterTasksCount = masterTasks.length;
+      let totalCompletedProgress = 0;
+
+      for (let i = 1; i <= settings.challengeDuration; i++) {
+        const dayKeyIter = `day_${String(i).padStart(2, '0')}`;
+        const completedOnDay = userData.dailyStatus?.[dayKeyIter] || [];
+        totalCompletedProgress += completedOnDay.length;
+      }
+      
+      // إذا كان لا توجد مهام، نعتبر التقدم 0% لتجنب القسمة على صفر
+      const globalPercent = (totalMasterTasksCount * settings.challengeDuration === 0) 
+                            ? 0 
+                            : Math.round((totalCompletedProgress / (totalMasterTasksCount * settings.challengeDuration)) * 100);
+
       $("kpiPercent").textContent = globalPercent + "%";
 
       const circle = $("fg-circle"); const r = 15.9155; const circ = 2 * Math.PI * r;
       circle.style.strokeDasharray = `${circ} ${circ}`;
       circle.style.strokeDashoffset = circ - (globalPercent / 100) * circ;
 
-      $("badge-1").classList.toggle("active", totalCompletedAllDays >= 1);
+      $("badge-1").classList.toggle("active", totalCompletedProgress >= 1);
       $("badge-7").classList.toggle("active", displayedDayIndex >= 7);
       $("badge-14").classList.toggle("active", displayedDayIndex >= 14);
       $("badge-21").classList.toggle("active", displayedDayIndex >= 21 && globalPercent === 100);
@@ -196,30 +248,29 @@
       const listEl = $("taskList"); listEl.innerHTML = "";
       $("emptyState").style.display = masterTasks.length ? "none" : "block";
 
-      // ✅ تحديد ما إذا كان اليوم المعروض "مستقبلياً"
       const isFutureDay = displayedDayIndex > userData.progress.dayIndex;
+      // ✅ منع الترتيب والتعديل والحذف في الأيام المستقبلية
+      const canEditTasks = !isFutureDay;
 
       masterTasks.forEach(task => {
         const isDone = completedTasksForDisplayedDay.includes(task.id);
         const div = document.createElement("div"); div.className = `task ${isDone ? 'done' : ''}`; div.setAttribute('data-id', task.id);
         
-        // ✅ إضافة سمة disabled للـ checkbox إذا كان يوماً مستقبلياً
         div.innerHTML = `
           <div class="task-left">
             <input type="checkbox" ${isDone ? 'checked' : ''} ${isFutureDay ? 'disabled' : ''}>
             <span class="title">${task.title}</span>
           </div>
           <div class="task-actions" style="display:flex; gap:5px;">
-            <button class="btn edit" style="padding:4px 8px; font-size:10px;" ${isFutureDay ? 'disabled' : ''}><i class='bx bx-edit'></i></button>
-            <button class="btn danger delete" style="padding:4px 8px; font-size:10px;" ${isFutureDay ? 'disabled' : ''}><i class='bx bx-trash'></i></button>
+            <button class="btn edit" style="padding:4px 8px; font-size:10px;" ${!canEditTasks ? 'disabled' : ''}><i class='bx bx-edit'></i></button>
+            <button class="btn danger delete" style="padding:4px 8px; font-size:10px;" ${!canEditTasks ? 'disabled' : ''}><i class='bx bx-trash'></i></button>
           </div>
         `;
         
         div.querySelector("input").onchange = (e) => {
-          // ✅ منع تغيير حالة المهمة إذا كان اليوم مستقبلياً
           if (isFutureDay) {
             showToast("لا يمكن تأشير مهام الأيام المستقبلية.");
-            e.target.checked = !e.target.checked; // عكس التغيير البصري
+            e.target.checked = !e.target.checked; 
             return; 
           }
 
@@ -228,7 +279,7 @@
           
           if (e.target.checked) {
             userData.dailyStatus[displayedDayKey].push(task.id);
-            if (settings.enableConfetti) confetti({ particleCount: 100, spread: 70, origin: { y: 0.8 } });
+            if (settings.enableConfetti) confetti({ particleCount: 100, spread: 70, origin: { y: 0.8 }, colors: ['#4D7FFF', '#C77EFF'] });
           } else {
             userData.dailyStatus[displayedDayKey] = userData.dailyStatus[displayedDayKey].filter(id => id !== task.id);
           }
@@ -236,7 +287,7 @@
         };
 
         div.querySelector(".edit").onclick = () => {
-          if (isFutureDay) { showToast("لا يمكن تعديل مهام الأيام المستقبلية."); return; }
+          if (!canEditTasks) { showToast("لا يمكن تعديل مهام هذا اليوم."); return; }
           const newTitle = prompt("تعديل اسم العادة:", task.title);
           if (newTitle && newTitle.trim()) {
               task.title = newTitle.trim();
@@ -245,7 +296,7 @@
         };
 
         div.querySelector(".delete").onclick = () => {
-          if (isFutureDay) { showToast("لا يمكن حذف مهام الأيام المستقبلية."); return; }
+          if (!canEditTasks) { showToast("لا يمكن حذف مهام هذا اليوم."); return; }
           if (confirm("حذف العادة سيحذفها من كل الأيام، هل أنت متأكد؟")) {
             userData.masterTasks = userData.masterTasks.filter(t => t.id !== task.id);
             Object.keys(userData.dailyStatus).forEach(key => {
@@ -258,23 +309,84 @@
       });
     }
 
+    // 📊 دالة جديدة لتحديث الرسم البياني
+    function updateChart() {
+        const ctx = $("progressChart").getContext('2d');
+        const labels = [];
+        const data = [];
+        const masterTasksCount = (userData.masterTasks || []).length;
+        const challengeDuration = userData.settings.challengeDuration || 21;
+
+        for (let i = 1; i <= challengeDuration; i++) {
+            labels.push(`يوم ${i}`);
+            const dayKey = `day_${String(i).padStart(2, '0')}`;
+            const completedOnDay = userData.dailyStatus?.[dayKey] || [];
+            const dailyPercentage = masterTasksCount ? Math.round((completedOnDay.length / masterTasksCount) * 100) : 0;
+            data.push(dailyPercentage);
+        }
+
+        if (progressChart) {
+            progressChart.data.labels = labels;
+            progressChart.data.datasets[0].data = data;
+            progressChart.update();
+        } else {
+            progressChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'نسبة الإنجاز اليومي',
+                        data: data,
+                        borderColor: '#4D7FFF',
+                        backgroundColor: 'rgba(77, 127, 255, 0.2)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: { color: 'rgba(77, 127, 255, 0.1)' },
+                            ticks: { color: 'var(--muted)' }
+                        },
+                        x: {
+                            grid: { color: 'rgba(77, 127, 255, 0.1)' },
+                            ticks: { color: 'var(--muted)' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { 
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.raw + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
     function initSortable() {
-        // ✅ منع السحب والإفلات في الأيام المستقبلية
         const displayedDayIndex = userData.progress.dayIndex;
-        // الشرط الصحيح يجب أن يقارن اليوم المعروض باليوم الفعلي
         const currentChallengeDay = userData.progress.dayIndex; 
-        const isDraggingAllowed = (displayedDayIndex <= currentChallengeDay); // السماح فقط في اليوم الحالي أو الأيام السابقة
+        const isDraggingAllowed = (displayedDayIndex <= currentChallengeDay); 
 
         if (sortable) sortable.destroy();
         sortable = new Sortable($("taskList"), { 
             animation: 150, 
             ghostClass: 'sortable-ghost',
-            disabled: !isDraggingAllowed, // ✅ تعطيل السحب والإفلات للأيام المستقبلية
+            disabled: !isDraggingAllowed, 
             onEnd: (evt) => {
-                // ✅ منع الحفظ إذا كان اليوم مستقبلياً
                 if (!isDraggingAllowed) {
-                    showToast("لا يمكن ترتيب المهام في الأيام المستقبلية.");
-                    render(); // إعادة رسم للحالة الأصلية
+                    showToast("لا يمكن ترتيب المهام في هذا اليوم.");
+                    render();
                     return;
                 }
                 const newOrder = Array.from(evt.to.children).map(item => 
@@ -311,6 +423,7 @@
             document.querySelectorAll("button:not(#btnGoogle), input").forEach(el => el.disabled = false);
             render();
             initSortable(); 
+            updateChart(); // 📊 تحديث الرسم البياني عند التحميل الأولي
         } catch (e) {
             console.error("Auth Error:", e);
             showToast("خطأ في تحميل البيانات.");
@@ -325,6 +438,7 @@
         $("taskList").innerHTML = ''; $("emptyState").style.display = 'block'; $("kpiPercent").textContent = '0%';
         const circle = $("fg-circle"); const r = 15.9155; circle.style.strokeDashoffset = 2 * Math.PI * r;
         document.querySelectorAll("button:not(#btnGoogle), input").forEach(el => { el.disabled = true; });
+        if (progressChart) progressChart.destroy(); // 📊 تدمير الرسم البياني عند تسجيل الخروج
       }
     });
 
@@ -342,7 +456,6 @@
     $("btnNextDay").onclick = () => { 
       const currentChallengeDay = userData.progress.dayIndex;
       const challengeDuration = userData.settings.challengeDuration || 21;
-      // ✅ زر اليوم التالي لا يمكن أن يتجاوز مدة التحدي
       if (currentChallengeDay < challengeDuration) { 
         userData.progress.dayIndex++; 
         updateDB(); 
@@ -351,7 +464,6 @@
       }
     };
     $("btnPrevDay").onclick = () => { 
-      // ✅ زر اليوم السابق لا يمكن أن يقل عن اليوم الأول
       if (userData.progress.dayIndex > 1) { 
         userData.progress.dayIndex--; 
         updateDB(); 
@@ -372,7 +484,6 @@
       if (newDuration < 1) { showToast("مدة التحدي يجب أن تكون يوماً واحداً على الأقل."); return; }
       userData.settings.displayName = $("inputDisplayName").value; 
       userData.settings.challengeDuration = newDuration;
-      // ✅ التأكد من أن اليوم الحالي لا يتجاوز مدة التحدي الجديدة
       if (userData.progress.dayIndex > newDuration) {
           userData.progress.dayIndex = newDuration;
       }
