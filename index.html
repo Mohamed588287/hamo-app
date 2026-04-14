@@ -4,17 +4,24 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>تحدي 21 يوم - الإصدار الاحترافي</title>
+  
+  <!-- 📲 تجهيز تطبيق الهاتف (PWA) -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0A0C1E">
+  
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- 📸 مكتبة التقاط الشاشة كصورة -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   
   <style>
     :root {
       --bg: #0A0C1E; --panel: rgba(22, 26, 51, 0.6); --panel-solid: #161A33;
       --text: #EAF2FF; --muted: #8A98B5; --stroke: rgba(77, 127, 255, 0.2);
       --glow: rgba(77, 127, 255, 0.1); --neon: #4D7FFF; --neon-2: #C77EFF;
-      --danger: #FF4D6D; --warning: #FFC107; --radius: 16px;
+      --danger: #FF4D6D; --warning: #FFC107; --success: #28a745; --radius: 16px;
     }
     * { box-sizing: border-box; }
     body {
@@ -59,16 +66,19 @@
     .task.done { border-color: rgba(77, 127, 255, 0.3); background: rgba(77, 127, 255, 0.05); }
     .task.done .title { text-decoration: line-through; color: var(--muted); }
     .task-left { display: flex; align-items: center; gap: 12px; }
-    .task .title { cursor: pointer; transition: color 0.2s; } /* 🔍 جعل العنوان قابلاً للضغط */
+    .task .title { cursor: pointer; transition: color 0.2s; } 
     .task .title:hover { color: var(--neon-2); }
     .task input[type="checkbox"] { appearance: none; width: 20px; height: 20px; border: 2px solid var(--stroke); border-radius: 6px; cursor: pointer; position: relative; transition: 0.2s; }
     .task input[type="checkbox"]:checked { background: var(--neon); border-color: var(--neon); }
     .task input[type="checkbox"]:checked::after { content: '\ecb3'; font-family: 'Boxicons'; font-size: 20px; color: var(--bg); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
     .task input[type="checkbox"]:disabled { opacity: 0.5; cursor: not-allowed; }
     .input { flex: 1; background: var(--panel-solid); border: 1px solid var(--stroke); color: var(--text); padding: 12px; border-radius: 12px; outline: none; transition: 0.2s; width: 100%; font-family: inherit; }
-    textarea.input { resize: vertical; min-height: 80px; } /* 📝 تنسيق صندوق المذكرات */
+    textarea.input { resize: vertical; min-height: 80px; } 
     .btn { border: 1px solid var(--stroke); background: var(--panel); color: var(--text); padding: 10px 16px; border-radius: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
     .btn.primary { background: var(--neon); border-color: var(--neon); color: var(--bg); }
+    .btn.danger { border-color: var(--danger); color: var(--danger); }
+    .btn.warning { border-color: var(--warning); color: var(--warning); } /* 💤 لون يوم الراحة */
+    .btn.success { border-color: var(--success); color: var(--success); }
     .btn:disabled { opacity: 0.4; cursor: not-allowed; }
     .badge-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap:15px; }
     .badge { text-align: center; padding: 15px 10px; border-radius: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--stroke); filter: grayscale(1); opacity: 0.5; transition: all 0.3s ease-in-out; position: relative; overflow: hidden; }
@@ -82,30 +92,34 @@
     .form-group { margin-bottom: 20px; }
     .form-group label { display: block; color: var(--muted); margin-bottom: 8px; font-size: 14px; }
     .toast { position: fixed; bottom: 20px; left: 20px; padding: 15px 20px; border-radius: 12px; background: var(--panel-solid); border: 1px solid var(--neon); display: none; z-index: 1000; }
+    
+    /* 💤 تنسيق رسالة يوم الراحة */
+    .rest-day-msg { text-align: center; padding: 30px; background: rgba(255, 193, 7, 0.1); border: 1px dashed var(--warning); border-radius: var(--radius); color: var(--warning); font-weight: bold; }
   </style>
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="progressGradient" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="var(--neon-2)"/><stop offset="100%" stop-color="var(--neon)"/></linearGradient></defs></svg>
   
   <div class="container">
-    <div class="topbar card">
+    <div class="topbar card" id="captureAreaTopbar">
         <div class="logo">
             <i class='bx bxs-rocket'></i>
             <div>
                 <h2 id="displayName">تحدي الـ 21 يوماً</h2>
-                <!-- ⭐️ عرض المستوى والنقاط -->
                 <span id="userLevelInfo" style="display:none;"><i class='bx bxs-star'></i> <span id="lvlName">مبتدئ</span> (<span id="lvlPoints">0</span> نقطة)</span>
                 <small id="userEmail" class="muted">بانتظار تسجيل الدخول...</small>
             </div>
         </div>
       <div class="actions" style="display: flex; gap: 10px;">
         <button id="btnGoogle" class="btn"><i class='bx bxl-google'></i><span>دخول</span></button>
+        <!-- 📤 زر مشاركة الإنجاز كصورة -->
+        <button id="btnShare" class="btn" style="display:none;" title="شارك إنجازك"><i class='bx bx-camera'></i></button>
         <button id="btnSettings" class="btn" style="display:none;"><i class='bx bx-cog'></i></button>
         <button id="btnLogout" class="btn" style="display:none;"><i class='bx bx-log-out'></i></button>
       </div>
     </div>
 
-    <div class="grid">
+    <div class="grid" id="captureAreaMain">
       <main>
         <section class="card">
           <header><h2><i class='bx bx-pie-chart-alt-2'></i> لوحة التقدم</h2></header>
@@ -121,44 +135,56 @@
           </div>
         </section>
 
-        <!-- 📊 قسم الإحصائيات -->
-        <section class="card" style="margin-top:20px;">
+        <section class="card" style="margin-top:20px;" data-html2canvas-ignore>
             <header><h2><i class='bx bx-chart'></i> إحصائيات التقدم اليومي</h2></header>
-            <div class="body">
-                <canvas id="progressChart"></canvas>
-            </div>
+            <div class="body"><canvas id="progressChart"></canvas></div>
         </section>
 
-        <!-- 📝 قسم العادات والمذكرات -->
         <section class="card" style="margin-top:20px;">
           <header><h2 id="tasks-header"><i class='bx bx-list-ul'></i> عادات التحدي</h2><div id="todayKey" class="btn" style="font-size:12px; padding:4px 12px;">اليوم 1</div></header>
           <div class="body">
             <div id="taskList"></div>
             <div id="emptyState" style="text-align:center; padding:30px; color:var(--muted);"><i class='bx bx-moon' style="font-size:30px; display:block; margin-bottom:10px;"></i>لا توجد عادات بعد.</div>
+            <!-- 💤 رسالة تظهر فقط في أيام الراحة -->
+            <div id="restDayMessage" class="rest-day-msg" style="display:none;">
+                <i class='bx bx-coffee' style="font-size:40px; display:block; margin-bottom:10px;"></i>
+                هذا اليوم مخصص للراحة! لن يؤثر على نسبة إنجازك. استمتع بوقتك.
+            </div>
             
-            <!-- 📝 المذكرات اليومية -->
-            <div style="margin-top: 20px; border-top: 1px solid var(--stroke); padding-top: 15px;">
+            <div style="margin-top: 20px; border-top: 1px solid var(--stroke); padding-top: 15px;" data-html2canvas-ignore>
                 <label style="display:block; color:var(--muted); font-size:12px; margin-bottom:8px;"><i class='bx bx-book-open'></i> مذكرات اليوم:</label>
-                <textarea id="dailyJournal" class="input" placeholder="كيف كان يومك؟ أو ما هي الصعوبات التي واجهتها؟..."></textarea>
+                <textarea id="dailyJournal" class="input" placeholder="كيف كان يومك؟..."></textarea>
             </div>
           </div>
         </section>
       </main>
 
-      <aside style="display:flex; flex-direction:column; gap:20px;">
-        <div class="card"><header><h2><i class='bx bx-plus-circle'></i> إضافة عادة ثابتة</h2></header><div class="body"><input id="taskTitle" class="input" placeholder="اكتب عادتك (ستظهر يومياً)..." /><button id="btnAddTask" class="btn primary" style="width:100%; margin-top:10px;" disabled><i class='bx bx-plus'></i> إضافة للتحدي</button></div></div>
+      <aside style="display:flex; flex-direction:column; gap:20px;" data-html2canvas-ignore>
+        <div class="card"><header><h2><i class='bx bx-plus-circle'></i> إضافة عادة ثابتة</h2></header><div class="body"><input id="taskTitle" class="input" placeholder="اكتب عادتك..." /><button id="btnAddTask" class="btn primary" style="width:100%; margin-top:10px;" disabled><i class='bx bx-plus'></i> إضافة</button></div></div>
+        <div class="card"><header><h2><i class='bx bx-slider-alt'></i> التحكم</h2></header>
+            <div class="body" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <button id="btnPrevDay" class="btn" disabled><i class='bx bx-left-arrow-alt'></i></button>
+                <button id="btnNextDay" class="btn" disabled><i class='bx bx-right-arrow-alt'></i></button>
+                <!-- 💤 زر تحديد يوم كراحة -->
+                <button id="btnRestDay" class="btn warning" style="grid-column: span 2;" disabled><i class='bx bx-coffee'></i> تعيين كيوم راحة</button>
+                <button id="btnReset" class="btn danger" style="grid-column: span 2;" disabled><i class='bx bx-reset'></i> تصفير التحدي</button>
+            </div>
+        </div>
         <div class="card"><header><h2><i class='bx bxs-award'></i> الأوسمة</h2></header><div class="body badge-grid"><div class="badge" id="badge-1"><span class="icon">🚀</span><small class="label">بداية</small></div><div class="badge" id="badge-7"><span class="icon">🔥</span><small class="label">7 أيام</small></div><div class="badge" id="badge-14"><span class="icon">💎</span><small class="label">14 يوم</small></div><div class="badge" id="badge-21"><span class="icon">👑</span><small class="label">البطل</small></div></div></div>
-        <div class="card"><header><h2><i class='bx bx-slider-alt'></i> التحكم</h2></header><div class="body" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><button id="btnPrevDay" class="btn" disabled><i class='bx bx-left-arrow-alt'></i></button><button id="btnNextDay" class="btn" disabled><i class='bx bx-right-arrow-alt'></i></button><button id="btnReset" class="btn danger" style="grid-column: span 2;" disabled><i class='bx bx-reset'></i> تصفير التحدي</button></div></div>
       </aside>
     </div>
   </div>
 
   <!-- نافذة الإعدادات -->
-  <div id="settingsModal" class="modal-overlay">
+  <div id="settingsModal" class="modal-overlay" data-html2canvas-ignore>
     <div class="modal-content">
       <h2><i class='bx bx-cog'></i>الإعدادات</h2>
       <div class="form-group"><label>اسم العرض</label><input type="text" id="inputDisplayName" class="input"></div>
       <div class="form-group"><label>مدة التحدي</label><input type="number" id="inputChallengeDuration" class="input" min="1"></div>
+      <!-- ⏰ تفعيل الإشعارات -->
+      <div class="form-group" style="text-align: center; margin-top: 10px;">
+          <button id="btnEnableNotif" class="btn success" style="width:100%;"><i class='bx bx-bell'></i> تفعيل التذكير اليومي</button>
+      </div>
       <div style="display:flex; gap:10px;"><button id="btnSaveSettings" class="btn primary" style="flex:1;">حفظ</button><button id="btnCloseSettings" class="btn">إغلاق</button></div>
     </div>
   </div>
@@ -185,7 +211,28 @@
     let currentUser = null, userData = null, sortable = null, progressChart = null;
     const defaultSettings = { displayName: '', challengeDuration: 21, enableConfetti: true };
 
+    // 📲 تسجيل PWA Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').then(reg => console.log('PWA SW Registered')).catch(err => console.log('PWA SW Error', err));
+      });
+    }
+
+    // ⏰ وظيفة التذكير المبدئي (الإشعارات)
+    $("btnEnableNotif").onclick = () => {
+        if (!("Notification" in window)) { showToast("متصفحك لا يدعم الإشعارات."); return; }
+        Notification.requestPermission().then(perm => {
+            if (perm === "granted") {
+                showToast("تم تفعيل الإشعارات بنجاح!");
+                new Notification("تحدي الـ 21 يوماً", { body: "رائع! سنذكرك يومياً بمهامك.", icon: "icon-192x192.png" });
+            } else {
+                showToast("لم يتم منح صلاحية الإشعارات.");
+            }
+        });
+    };
+
     function showToast(msg) { $("toast").textContent = msg; $("toast").style.display = "block"; setTimeout(() => $("toast").style.display = "none", 3000); }
+    
     async function updateDB(doRender = true) { 
         if (!currentUser) return; 
         try { await updateDoc(doc(db, "users", currentUser.uid), userData); 
@@ -193,12 +240,9 @@
         } catch (error) { console.error("DB Error:", error); showToast("خطأ في الحفظ."); }
     }
 
-    // ⭐️ دالة حساب المستوى
     function getUserLevel(points) {
-        if (points < 100) return 'مبتدئ 🌱';
-        if (points < 300) return 'متمرس ⚔️';
-        if (points < 500) return 'خبير 🛡️';
-        return 'أسطورة 👑';
+        if (points < 100) return 'مبتدئ 🌱'; if (points < 300) return 'متمرس ⚔️';
+        if (points < 500) return 'خبير 🛡️'; return 'أسطورة 👑';
     }
 
     function render() {
@@ -207,10 +251,11 @@
       const displayedDayIndex = userData.progress.dayIndex; 
       const displayedDayKey = `day_${String(displayedDayIndex).padStart(2, '0')}`;
       
+      // 💤 التحقق هل اليوم هو يوم راحة
+      const isRestDay = userData.restDays?.includes(displayedDayKey);
+
       $("displayName").textContent = settings.displayName || `تحدي ${settings.challengeDuration} يوماً`;
       $("userEmail").textContent = currentUser.email;
-      
-      // ⭐️ تحديث UI للمستويات والنقاط
       const currentPoints = userData.points || 0;
       $("userLevelInfo").style.display = "inline-block";
       $("lvlName").textContent = getUserLevel(currentPoints);
@@ -219,100 +264,150 @@
       $("kpiDay").innerHTML = `<i class='bx bx-calendar-star'></i>${displayedDayIndex}/${settings.challengeDuration}`;
       $("todayKey").textContent = `اليوم ${displayedDayIndex}`;
 
-      // 📝 تحديث المذكرات
+      // 💤 إدارة أزرار وواجهة يوم الراحة
+      if (isRestDay) {
+          $("btnRestDay").innerHTML = "<i class='bx bx-x'></i> إلغاء يوم الراحة";
+          $("taskList").style.display = "none";
+          $("emptyState").style.display = "none";
+          $("restDayMessage").style.display = "block";
+      } else {
+          $("btnRestDay").innerHTML = "<i class='bx bx-coffee'></i> تعيين كيوم راحة";
+          $("taskList").style.display = "block";
+          $("restDayMessage").style.display = "none";
+      }
+
       $("dailyJournal").value = userData.journal?.[displayedDayKey] || "";
       $("dailyJournal").onchange = (e) => {
           if (!userData.journal) userData.journal = {};
           userData.journal[displayedDayKey] = e.target.value;
-          updateDB(false); // حفظ صامت بدون إعادة رسم
-          showToast("تم حفظ المذكرات.");
+          updateDB(false); showToast("تم حفظ المذكرات.");
       };
 
       const masterTasks = userData.masterTasks || [];
       const completedTasksForDisplayedDay = userData.dailyStatus?.[displayedDayKey] || [];
-      const todayProgress = masterTasks.length ? Math.round((completedTasksForDisplayedDay.length / masterTasks.length) * 100) : 0;
+      
+      // إنجاز اليوم (100% إذا كان يوم راحة، وإلا بناءً على المهام)
+      const todayProgress = isRestDay ? 100 : (masterTasks.length ? Math.round((completedTasksForDisplayedDay.length / masterTasks.length) * 100) : 0);
       $("kpiTodayProgress").innerHTML = `<i class='bx bx-check-double'></i>${todayProgress}%`;
 
       let totalCompletedAllDays = 0;
+      let totalValidDays = 0; // الأيام غير المخصصة كراحة
+
       for (let i = 1; i <= settings.challengeDuration; i++) {
-        totalCompletedAllDays += (userData.dailyStatus?.[`day_${String(i).padStart(2, '0')}`] || []).length;
+        const iterKey = `day_${String(i).padStart(2, '0')}`;
+        if (!userData.restDays?.includes(iterKey)) {
+            totalValidDays++;
+            totalCompletedAllDays += (userData.dailyStatus?.[iterKey] || []).length;
+        }
       }
-      const globalPercent = (masterTasks.length * settings.challengeDuration === 0) ? 0 : Math.round((totalCompletedAllDays / (masterTasks.length * settings.challengeDuration)) * 100);
+
+      const totalPossibleTasks = masterTasks.length * totalValidDays;
+      const globalPercent = (totalPossibleTasks === 0) ? (totalValidDays === 0 ? 100 : 0) : Math.round((totalCompletedAllDays / totalPossibleTasks) * 100);
 
       $("kpiPercent").textContent = globalPercent + "%";
       const circle = $("fg-circle"); const r = 15.9155; const circ = 2 * Math.PI * r;
       circle.style.strokeDasharray = `${circ} ${circ}`; circle.style.strokeDashoffset = circ - (globalPercent / 100) * circ;
 
-      $("badge-1").classList.toggle("active", totalCompletedAllDays >= 1);
+      $("badge-1").classList.toggle("active", totalCompletedAllDays >= 1 || (userData.restDays?.length > 0));
       $("badge-7").classList.toggle("active", displayedDayIndex >= 7);
       $("badge-14").classList.toggle("active", displayedDayIndex >= 14);
-      $("badge-21").classList.toggle("active", displayedDayIndex >= 21 && globalPercent === 100);
+      $("badge-21").classList.toggle("active", displayedDayIndex >= 21 && globalPercent >= 95);
 
       const listEl = $("taskList"); listEl.innerHTML = "";
-      $("emptyState").style.display = masterTasks.length ? "none" : "block";
+      if(!isRestDay) $("emptyState").style.display = masterTasks.length ? "none" : "block";
 
       const isFutureDay = displayedDayIndex > userData.progress.dayIndex;
 
-      masterTasks.forEach(task => {
-        const isDone = completedTasksForDisplayedDay.includes(task.id);
-        const div = document.createElement("div"); div.className = `task ${isDone ? 'done' : ''}`; div.setAttribute('data-id', task.id);
-        
-        div.innerHTML = `
-          <div class="task-left">
-            <input type="checkbox" ${isDone ? 'checked' : ''} ${isFutureDay ? 'disabled' : ''}>
-            <span class="title" title="اضغط لمعرفة إحصائيات هذه العادة">${task.title}</span>
-          </div>
-          <div class="task-actions" style="display:flex; gap:5px;">
-            <button class="btn edit" style="padding:4px 8px; font-size:10px;" ${isFutureDay ? 'disabled' : ''}><i class='bx bx-edit'></i></button>
-            <button class="btn danger delete" style="padding:4px 8px; font-size:10px;" ${isFutureDay ? 'disabled' : ''}><i class='bx bx-trash'></i></button>
-          </div>
-        `;
-        
-        // 🔍 عرض إحصائيات العادة عند الضغط على اسمها
-        div.querySelector(".title").onclick = () => {
-            let taskCount = 0;
-            // نحسب الإنجاز حتى اليوم الحالي فقط (وليس كل أيام التحدي) لتكون النسبة منطقية
-            const currentActualDay = userData.progress.dayIndex;
-            for (let i = 1; i <= currentActualDay; i++) {
-                if (userData.dailyStatus?.[`day_${String(i).padStart(2,'0')}`]?.includes(task.id)) taskCount++;
-            }
-            const taskPercent = currentActualDay > 0 ? Math.round((taskCount / currentActualDay) * 100) : 0;
-            showToast(`📊 نسبة التزامك بعادة "${task.title}" هي ${taskPercent}%`);
-        };
+      if(!isRestDay) {
+          masterTasks.forEach(task => {
+            const isDone = completedTasksForDisplayedDay.includes(task.id);
+            const div = document.createElement("div"); div.className = `task ${isDone ? 'done' : ''}`; div.setAttribute('data-id', task.id);
+            div.innerHTML = `
+              <div class="task-left">
+                <input type="checkbox" ${isDone ? 'checked' : ''} ${isFutureDay ? 'disabled' : ''}>
+                <span class="title" title="اضغط لمعرفة إحصائيات هذه العادة">${task.title}</span>
+              </div>
+              <div class="task-actions" style="display:flex; gap:5px;">
+                <button class="btn edit" style="padding:4px 8px; font-size:10px;" ${isFutureDay ? 'disabled' : ''}><i class='bx bx-edit'></i></button>
+                <button class="btn danger delete" style="padding:4px 8px; font-size:10px;" ${isFutureDay ? 'disabled' : ''}><i class='bx bx-trash'></i></button>
+              </div>`;
+            
+            div.querySelector(".title").onclick = () => {
+                let taskCount = 0; const currentActualDay = userData.progress.dayIndex;
+                for (let i = 1; i <= currentActualDay; i++) {
+                    if (userData.dailyStatus?.[`day_${String(i).padStart(2,'0')}`]?.includes(task.id)) taskCount++;
+                }
+                const taskPercent = currentActualDay > 0 ? Math.round((taskCount / currentActualDay) * 100) : 0;
+                showToast(`📊 نسبة التزامك بعادة "${task.title}" هي ${taskPercent}%`);
+            };
 
-        div.querySelector("input").onchange = (e) => {
-          if (isFutureDay) { showToast("لا يمكن تأشير مهام الأيام المستقبلية."); e.target.checked = !e.target.checked; return; }
-          if (!userData.dailyStatus) userData.dailyStatus = {};
-          if (!userData.dailyStatus[displayedDayKey]) userData.dailyStatus[displayedDayKey] = [];
-          
-          if (e.target.checked) {
-            userData.dailyStatus[displayedDayKey].push(task.id);
-            userData.points = (userData.points || 0) + 10; // ⭐️ إضافة 10 نقاط
-            if (settings.enableConfetti) confetti({ particleCount: 100, spread: 70, origin: { y: 0.8 }, colors: ['#4D7FFF', '#C77EFF'] });
-          } else {
-            userData.dailyStatus[displayedDayKey] = userData.dailyStatus[displayedDayKey].filter(id => id !== task.id);
-            userData.points = Math.max(0, (userData.points || 0) - 10); // ⭐️ خصم 10 نقاط
-          }
-          updateDB();
-        };
+            div.querySelector("input").onchange = (e) => {
+              if (isFutureDay) { showToast("لا يمكن تأشير مهام الأيام المستقبلية."); e.target.checked = !e.target.checked; return; }
+              if (!userData.dailyStatus) userData.dailyStatus = {};
+              if (!userData.dailyStatus[displayedDayKey]) userData.dailyStatus[displayedDayKey] = [];
+              if (e.target.checked) {
+                userData.dailyStatus[displayedDayKey].push(task.id);
+                userData.points = (userData.points || 0) + 10;
+                if (settings.enableConfetti) confetti({ particleCount: 100, spread: 70, origin: { y: 0.8 }, colors: ['#4D7FFF', '#C77EFF'] });
+              } else {
+                userData.dailyStatus[displayedDayKey] = userData.dailyStatus[displayedDayKey].filter(id => id !== task.id);
+                userData.points = Math.max(0, (userData.points || 0) - 10);
+              }
+              updateDB();
+            };
 
-        div.querySelector(".edit").onclick = () => {
-          if (isFutureDay) return;
-          const newTitle = prompt("تعديل اسم العادة:", task.title);
-          if (newTitle && newTitle.trim()) { task.title = newTitle.trim(); updateDB(); }
-        };
+            div.querySelector(".edit").onclick = () => {
+              if (isFutureDay) return; const newTitle = prompt("تعديل اسم العادة:", task.title);
+              if (newTitle && newTitle.trim()) { task.title = newTitle.trim(); updateDB(); }
+            };
 
-        div.querySelector(".delete").onclick = () => {
-          if (isFutureDay) return;
-          if (confirm("حذف العادة سيحذفها من كل الأيام، هل أنت متأكد؟")) {
-            userData.masterTasks = userData.masterTasks.filter(t => t.id !== task.id);
-            Object.keys(userData.dailyStatus).forEach(key => { userData.dailyStatus[key] = userData.dailyStatus[key].filter(id => id !== task.id); });
-            updateDB();
-          }
-        };
-        listEl.appendChild(div);
-      });
+            div.querySelector(".delete").onclick = () => {
+              if (isFutureDay) return;
+              if (confirm("حذف العادة سيحذفها من كل الأيام، هل أنت متأكد؟")) {
+                userData.masterTasks = userData.masterTasks.filter(t => t.id !== task.id);
+                Object.keys(userData.dailyStatus).forEach(key => { userData.dailyStatus[key] = userData.dailyStatus[key].filter(id => id !== task.id); });
+                updateDB();
+              }
+            };
+            listEl.appendChild(div);
+          });
+      }
     }
+
+    // 💤 برمجة زر يوم الراحة
+    $("btnRestDay").onclick = () => {
+        const displayedDayIndex = userData.progress.dayIndex; 
+        const displayedDayKey = `day_${String(displayedDayIndex).padStart(2, '0')}`;
+        if (!userData.restDays) userData.restDays = [];
+        
+        if (userData.restDays.includes(displayedDayKey)) {
+            userData.restDays = userData.restDays.filter(d => d !== displayedDayKey);
+            showToast("تم إلغاء يوم الراحة.");
+        } else {
+            if(confirm("تحويل هذا اليوم ليوم راحة سيعفيه من الحسابات الإحصائية. متأكد؟")) {
+                userData.restDays.push(displayedDayKey);
+                showToast("☕ استمتع بيوم الراحة!");
+            }
+        }
+        updateDB();
+    };
+
+    // 📸 برمجة زر المشاركة (تنزيل صورة)
+    $("btnShare").onclick = () => {
+        showToast("جاري تجهيز الصورة...");
+        // إخفاء الأزرار مؤقتاً لتكون الصورة نظيفة
+        $("btnShare").style.display = "none"; 
+        
+        // تصوير الحاوية الأساسية
+        html2canvas($("captureAreaMain"), { backgroundColor: "#0A0C1E" }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `إنجازي-تحدي-21-يوم.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+            $("btnShare").style.display = "inline-flex"; // إرجاع الزر
+            showToast("تم حفظ الصورة بنجاح! شاركها مع أصدقائك 🚀");
+        });
+    };
 
     function updateChart() {
         const ctx = $("progressChart").getContext('2d');
@@ -322,18 +417,23 @@
 
         for (let i = 1; i <= challengeDuration; i++) {
             labels.push(`يوم ${i}`);
-            const completedOnDay = userData.dailyStatus?.[`day_${String(i).padStart(2, '0')}`] || [];
-            data.push(masterTasksCount ? Math.round((completedOnDay.length / masterTasksCount) * 100) : 0);
+            const dayKey = `day_${String(i).padStart(2, '0')}`;
+            if (userData.restDays?.includes(dayKey)) {
+                data.push(100); // إظهار 100% شكلياً في الشارت ليوم الراحة
+            } else {
+                const completedOnDay = userData.dailyStatus?.[dayKey] || [];
+                data.push(masterTasksCount ? Math.round((completedOnDay.length / masterTasksCount) * 100) : 0);
+            }
         }
 
         if (progressChart) { progressChart.data.labels = labels; progressChart.data.datasets[0].data = data; progressChart.update(); } 
-        else { progressChart = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: 'نسبة الإنجاز اليومي', data: data, borderColor: '#4D7FFF', backgroundColor: 'rgba(77, 127, 255, 0.2)', fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100, grid: { color: 'rgba(77, 127, 255, 0.1)' }, ticks: { color: 'var(--muted)' } }, x: { grid: { color: 'rgba(77, 127, 255, 0.1)' }, ticks: { color: 'var(--muted)' } } }, plugins: { legend: { display: false } } } }); }
+        else { progressChart = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: 'نسبة الإنجاز', data: data, borderColor: '#4D7FFF', backgroundColor: 'rgba(77, 127, 255, 0.2)', fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100, grid: { color: 'rgba(77, 127, 255, 0.1)' }, ticks: { color: 'var(--muted)' } }, x: { grid: { color: 'rgba(77, 127, 255, 0.1)' }, ticks: { color: 'var(--muted)' } } }, plugins: { legend: { display: false } } } }); }
     }
 
     function initSortable() {
-        const isDraggingAllowed = (userData.progress.dayIndex <= userData.progress.dayIndex); // Fixed logic context
+        const isDraggingAllowed = (userData.progress.dayIndex <= userData.progress.dayIndex); 
         if (sortable) sortable.destroy();
-        sortable = new Sortable($("taskList"), { animation: 150, ghostClass: 'sortable-ghost', onEnd: (evt) => {
+        sortable = new Sortable($("taskList"), { animation: 150, ghostClass: 'sortable-ghost', disabled: !isDraggingAllowed, onEnd: (evt) => {
             const newOrder = Array.from(evt.to.children).map(item => userData.masterTasks.find(t => t.id === Number(item.dataset.id)));
             userData.masterTasks = newOrder.filter(Boolean); updateDB(false); 
         }});
@@ -348,20 +448,22 @@
                 userData = snap.data();
                 if (!userData.masterTasks) userData.masterTasks = [];
                 if (!userData.dailyStatus) userData.dailyStatus = {};
-                if (!userData.journal) userData.journal = {}; // 📝 تهيئة المذكرات
-                if (!userData.points) userData.points = 0;   // ⭐️ تهيئة النقاط
+                if (!userData.journal) userData.journal = {}; 
+                if (!userData.points) userData.points = 0;   
+                if (!userData.restDays) userData.restDays = []; // 💤 تهيئة أيام الراحة
                 if (!userData.settings) userData.settings = { ...defaultSettings };
             } else {
-                userData = { masterTasks: [], dailyStatus: {}, journal: {}, points: 0, progress: { dayIndex: 1 }, email: user.email, settings: { ...defaultSettings } };
+                userData = { masterTasks: [], dailyStatus: {}, journal: {}, points: 0, restDays: [], progress: { dayIndex: 1 }, email: user.email, settings: { ...defaultSettings } };
                 await setDoc(doc(db, "users", user.uid), userData);
             }
             $("btnGoogle").style.display = 'none'; $("btnLogout").style.display = 'inline-flex'; $("btnSettings").style.display = 'inline-flex';
+            $("btnShare").style.display = 'inline-flex'; // إظهار زر المشاركة
             document.querySelectorAll("button:not(#btnGoogle), input, textarea").forEach(el => el.disabled = false);
             render(); initSortable(); updateChart(); 
         } catch (e) { showToast("خطأ في تحميل البيانات."); }
       } else {
         currentUser = null; userData = null;
-        $("btnGoogle").style.display = 'inline-flex'; $("btnLogout").style.display = 'none'; $("btnSettings").style.display = 'none'; $("userLevelInfo").style.display = "none";
+        $("btnGoogle").style.display = 'inline-flex'; $("btnLogout").style.display = 'none'; $("btnSettings").style.display = 'none'; $("userLevelInfo").style.display = "none"; $("btnShare").style.display = "none";
         $("displayName").textContent = 'تحدي الـ 21 يوماً'; $("userEmail").textContent = 'بانتظار تسجيل الدخول...';
         $("taskList").innerHTML = ''; $("dailyJournal").value = ''; $("emptyState").style.display = 'block'; $("kpiPercent").textContent = '0%';
         const circle = $("fg-circle"); circle.style.strokeDashoffset = 2 * Math.PI * 15.9155;
@@ -376,7 +478,7 @@
     $("taskTitle").onkeyup = (e) => { if(e.key === 'Enter') $("btnAddTask").click() };
     $("btnNextDay").onclick = () => { if (userData.progress.dayIndex < (userData.settings.challengeDuration || 21)) { userData.progress.dayIndex++; updateDB(); } else showToast("وصلت لآخر يوم!"); };
     $("btnPrevDay").onclick = () => { if (userData.progress.dayIndex > 1) { userData.progress.dayIndex--; updateDB(); } else showToast("أنت في اليوم الأول."); };
-    $("btnReset").onclick = () => { if (confirm("تصفير التحدي؟")) { userData.dailyStatus = {}; userData.journal = {}; userData.points = 0; userData.progress.dayIndex = 1; updateDB(); } };
+    $("btnReset").onclick = () => { if (confirm("تصفير التحدي؟")) { userData.dailyStatus = {}; userData.journal = {}; userData.points = 0; userData.restDays = []; userData.progress.dayIndex = 1; updateDB(); } };
     $("btnSettings").onclick = () => { $("inputDisplayName").value = userData.settings.displayName; $("inputChallengeDuration").value = userData.settings.challengeDuration; $("settingsModal").style.display='flex'; };
     $("btnCloseSettings").onclick = () => $("settingsModal").style.display='none';
     $("btnSaveSettings").onclick = () => { userData.settings.displayName = $("inputDisplayName").value; userData.settings.challengeDuration = parseInt($("inputChallengeDuration").value); if(userData.progress.dayIndex > userData.settings.challengeDuration) userData.progress.dayIndex = userData.settings.challengeDuration; updateDB(); $("settingsModal").style.display='none'; };
