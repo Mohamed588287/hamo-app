@@ -3,11 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>تحدي 21 يوم - نظام العادات</title>
+  <title>تحدي 21 يوم - الإصدار الاحترافي</title>
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-  <!-- 📊 إضافة مكتبة Chart.js للرسوم البيانية -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
   <style>
@@ -15,7 +14,7 @@
       --bg: #0A0C1E; --panel: rgba(22, 26, 51, 0.6); --panel-solid: #161A33;
       --text: #EAF2FF; --muted: #8A98B5; --stroke: rgba(77, 127, 255, 0.2);
       --glow: rgba(77, 127, 255, 0.1); --neon: #4D7FFF; --neon-2: #C77EFF;
-      --danger: #FF4D6D; --radius: 16px;
+      --danger: #FF4D6D; --warning: #FFC107; --radius: 16px;
     }
     * { box-sizing: border-box; }
     body {
@@ -35,7 +34,8 @@
     .topbar .logo { display: flex; align-items: center; gap: 10px; }
     .topbar .logo i { font-size: 28px; color: var(--neon); }
     #displayName { margin:0; font-size:18px; color: var(--text); }
-    #userEmail { font-size: 12px; }
+    #userLevelInfo { font-size: 13px; color: var(--warning); font-weight: bold; background: rgba(255, 193, 7, 0.1); padding: 2px 8px; border-radius: 8px; display: inline-block; margin-top: 4px; }
+    #userEmail { font-size: 12px; display: block; }
     .grid { margin-top: 20px; display: grid; gap: 20px; grid-template-columns: 1.2fr 0.8fr; }
     @media (max-width: 980px) { .grid { grid-template-columns: 1fr; } }
     .card header { padding: 16px 20px; border-bottom: 1px solid var(--stroke); display: flex; align-items: center; justify-content: space-between; }
@@ -59,35 +59,24 @@
     .task.done { border-color: rgba(77, 127, 255, 0.3); background: rgba(77, 127, 255, 0.05); }
     .task.done .title { text-decoration: line-through; color: var(--muted); }
     .task-left { display: flex; align-items: center; gap: 12px; }
+    .task .title { cursor: pointer; transition: color 0.2s; } /* 🔍 جعل العنوان قابلاً للضغط */
+    .task .title:hover { color: var(--neon-2); }
     .task input[type="checkbox"] { appearance: none; width: 20px; height: 20px; border: 2px solid var(--stroke); border-radius: 6px; cursor: pointer; position: relative; transition: 0.2s; }
     .task input[type="checkbox"]:checked { background: var(--neon); border-color: var(--neon); }
     .task input[type="checkbox"]:checked::after { content: '\ecb3'; font-family: 'Boxicons'; font-size: 20px; color: var(--bg); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-    /* ✅ إضافة ستايل لـ checkbox المعطل */
     .task input[type="checkbox"]:disabled { opacity: 0.5; cursor: not-allowed; }
-    .input { flex: 1; background: var(--panel-solid); border: 1px solid var(--stroke); color: var(--text); padding: 12px; border-radius: 12px; outline: none; transition: 0.2s; width: 100%; }
+    .input { flex: 1; background: var(--panel-solid); border: 1px solid var(--stroke); color: var(--text); padding: 12px; border-radius: 12px; outline: none; transition: 0.2s; width: 100%; font-family: inherit; }
+    textarea.input { resize: vertical; min-height: 80px; } /* 📝 تنسيق صندوق المذكرات */
     .btn { border: 1px solid var(--stroke); background: var(--panel); color: var(--text); padding: 10px 16px; border-radius: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
     .btn.primary { background: var(--neon); border-color: var(--neon); color: var(--bg); }
     .btn:disabled { opacity: 0.4; cursor: not-allowed; }
     .badge-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap:15px; }
-    /* 🌟 تصميم الأوسمة الجديد */
-    .badge { 
-      text-align: center; padding: 15px 10px; border-radius: 12px; 
-      background: rgba(0,0,0,0.2); border: 1px solid var(--stroke); 
-      filter: grayscale(1); opacity: 0.5; transition: all 0.3s ease-in-out; 
-      position: relative; overflow: hidden; /* لإخفاء أي جزء من الظل الزائد */
-    }
+    .badge { text-align: center; padding: 15px 10px; border-radius: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--stroke); filter: grayscale(1); opacity: 0.5; transition: all 0.3s ease-in-out; position: relative; overflow: hidden; }
     .badge .icon { font-size: 28px; transition: transform 0.3s ease-in-out; }
     .badge .label { font-size: 9px; display: block; color: var(--muted); transition: color 0.3s ease-in-out; }
-    .badge.active { 
-      filter: grayscale(0); opacity: 1; 
-      border-color: var(--neon-2); 
-      background: linear-gradient(45deg, rgba(77, 127, 255, 0.1), rgba(200, 120, 255, 0.15));
-      box-shadow: 0 0 20px rgba(200, 120, 255, 0.3), 0 0 10px rgba(77, 127, 255, 0.2);
-      transform: scale(1.05); /* تكبير بسيط عند التفعيل */
-    }
+    .badge.active { filter: grayscale(0); opacity: 1; border-color: var(--neon-2); background: linear-gradient(45deg, rgba(77, 127, 255, 0.1), rgba(200, 120, 255, 0.15)); box-shadow: 0 0 20px rgba(200, 120, 255, 0.3), 0 0 10px rgba(77, 127, 255, 0.2); transform: scale(1.05); }
     .badge.active .icon { transform: scale(1.1); text-shadow: 0 0 8px rgba(255,255,255,0.7); }
     .badge.active .label { color: var(--text); }
-
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; }
     .modal-content { background: var(--panel-solid); border-radius: var(--radius); border: 1px solid var(--stroke); padding: 25px; width: 90%; max-width: 450px; }
     .form-group { margin-bottom: 20px; }
@@ -104,6 +93,8 @@
             <i class='bx bxs-rocket'></i>
             <div>
                 <h2 id="displayName">تحدي الـ 21 يوماً</h2>
+                <!-- ⭐️ عرض المستوى والنقاط -->
+                <span id="userLevelInfo" style="display:none;"><i class='bx bxs-star'></i> <span id="lvlName">مبتدئ</span> (<span id="lvlPoints">0</span> نقطة)</span>
                 <small id="userEmail" class="muted">بانتظار تسجيل الدخول...</small>
             </div>
         </div>
@@ -130,7 +121,7 @@
           </div>
         </section>
 
-        <!-- 📊 قسم الإحصائيات البيانية الجديد -->
+        <!-- 📊 قسم الإحصائيات -->
         <section class="card" style="margin-top:20px;">
             <header><h2><i class='bx bx-chart'></i> إحصائيات التقدم اليومي</h2></header>
             <div class="body">
@@ -138,9 +129,19 @@
             </div>
         </section>
 
+        <!-- 📝 قسم العادات والمذكرات -->
         <section class="card" style="margin-top:20px;">
           <header><h2 id="tasks-header"><i class='bx bx-list-ul'></i> عادات التحدي</h2><div id="todayKey" class="btn" style="font-size:12px; padding:4px 12px;">اليوم 1</div></header>
-          <div class="body"><div id="taskList"></div><div id="emptyState" style="text-align:center; padding:30px; color:var(--muted);"><i class='bx bx-moon' style="font-size:30px; display:block; margin-bottom:10px;"></i>لا توجد عادات بعد.</div></div>
+          <div class="body">
+            <div id="taskList"></div>
+            <div id="emptyState" style="text-align:center; padding:30px; color:var(--muted);"><i class='bx bx-moon' style="font-size:30px; display:block; margin-bottom:10px;"></i>لا توجد عادات بعد.</div>
+            
+            <!-- 📝 المذكرات اليومية -->
+            <div style="margin-top: 20px; border-top: 1px solid var(--stroke); padding-top: 15px;">
+                <label style="display:block; color:var(--muted); font-size:12px; margin-bottom:8px;"><i class='bx bx-book-open'></i> مذكرات اليوم:</label>
+                <textarea id="dailyJournal" class="input" placeholder="كيف كان يومك؟ أو ما هي الصعوبات التي واجهتها؟..."></textarea>
+            </div>
+          </div>
         </section>
       </main>
 
@@ -181,24 +182,23 @@
     const provider = new GoogleAuthProvider();
     const $ = (id) => document.getElementById(id);
 
-    let currentUser = null, userData = null, sortable = null;
-    let progressChart = null; // 📊 متغير جديد للرسم البياني
+    let currentUser = null, userData = null, sortable = null, progressChart = null;
     const defaultSettings = { displayName: '', challengeDuration: 21, enableConfetti: true };
 
     function showToast(msg) { $("toast").textContent = msg; $("toast").style.display = "block"; setTimeout(() => $("toast").style.display = "none", 3000); }
     async function updateDB(doRender = true) { 
         if (!currentUser) return; 
-        try {
-            await updateDoc(doc(db, "users", currentUser.uid), userData); 
-            if(doRender) { 
-                render(); 
-                initSortable(); 
-                updateChart(); // 📊 تحديث الرسم البياني بعد كل حفظ
-            }
-        } catch (error) {
-            console.error("Error updating DB:", error);
-            showToast("خطأ في حفظ البيانات.");
-        }
+        try { await updateDoc(doc(db, "users", currentUser.uid), userData); 
+            if(doRender) { render(); initSortable(); updateChart(); }
+        } catch (error) { console.error("DB Error:", error); showToast("خطأ في الحفظ."); }
+    }
+
+    // ⭐️ دالة حساب المستوى
+    function getUserLevel(points) {
+        if (points < 100) return 'مبتدئ 🌱';
+        if (points < 300) return 'متمرس ⚔️';
+        if (points < 500) return 'خبير 🛡️';
+        return 'أسطورة 👑';
     }
 
     function render() {
@@ -209,38 +209,41 @@
       
       $("displayName").textContent = settings.displayName || `تحدي ${settings.challengeDuration} يوماً`;
       $("userEmail").textContent = currentUser.email;
+      
+      // ⭐️ تحديث UI للمستويات والنقاط
+      const currentPoints = userData.points || 0;
+      $("userLevelInfo").style.display = "inline-block";
+      $("lvlName").textContent = getUserLevel(currentPoints);
+      $("lvlPoints").textContent = currentPoints;
+
       $("kpiDay").innerHTML = `<i class='bx bx-calendar-star'></i>${displayedDayIndex}/${settings.challengeDuration}`;
       $("todayKey").textContent = `اليوم ${displayedDayIndex}`;
 
+      // 📝 تحديث المذكرات
+      $("dailyJournal").value = userData.journal?.[displayedDayKey] || "";
+      $("dailyJournal").onchange = (e) => {
+          if (!userData.journal) userData.journal = {};
+          userData.journal[displayedDayKey] = e.target.value;
+          updateDB(false); // حفظ صامت بدون إعادة رسم
+          showToast("تم حفظ المذكرات.");
+      };
+
       const masterTasks = userData.masterTasks || [];
       const completedTasksForDisplayedDay = userData.dailyStatus?.[displayedDayKey] || [];
-
       const todayProgress = masterTasks.length ? Math.round((completedTasksForDisplayedDay.length / masterTasks.length) * 100) : 0;
       $("kpiTodayProgress").innerHTML = `<i class='bx bx-check-double'></i>${todayProgress}%`;
 
       let totalCompletedAllDays = 0;
-      // 🌟 حساب التقدم الإجمالي بدقة أكبر
-      const totalMasterTasksCount = masterTasks.length;
-      let totalCompletedProgress = 0;
-
       for (let i = 1; i <= settings.challengeDuration; i++) {
-        const dayKeyIter = `day_${String(i).padStart(2, '0')}`;
-        const completedOnDay = userData.dailyStatus?.[dayKeyIter] || [];
-        totalCompletedProgress += completedOnDay.length;
+        totalCompletedAllDays += (userData.dailyStatus?.[`day_${String(i).padStart(2, '0')}`] || []).length;
       }
-      
-      // إذا كان لا توجد مهام، نعتبر التقدم 0% لتجنب القسمة على صفر
-      const globalPercent = (totalMasterTasksCount * settings.challengeDuration === 0) 
-                            ? 0 
-                            : Math.round((totalCompletedProgress / (totalMasterTasksCount * settings.challengeDuration)) * 100);
+      const globalPercent = (masterTasks.length * settings.challengeDuration === 0) ? 0 : Math.round((totalCompletedAllDays / (masterTasks.length * settings.challengeDuration)) * 100);
 
       $("kpiPercent").textContent = globalPercent + "%";
-
       const circle = $("fg-circle"); const r = 15.9155; const circ = 2 * Math.PI * r;
-      circle.style.strokeDasharray = `${circ} ${circ}`;
-      circle.style.strokeDashoffset = circ - (globalPercent / 100) * circ;
+      circle.style.strokeDasharray = `${circ} ${circ}`; circle.style.strokeDashoffset = circ - (globalPercent / 100) * circ;
 
-      $("badge-1").classList.toggle("active", totalCompletedProgress >= 1);
+      $("badge-1").classList.toggle("active", totalCompletedAllDays >= 1);
       $("badge-7").classList.toggle("active", displayedDayIndex >= 7);
       $("badge-14").classList.toggle("active", displayedDayIndex >= 14);
       $("badge-21").classList.toggle("active", displayedDayIndex >= 21 && globalPercent === 100);
@@ -249,8 +252,6 @@
       $("emptyState").style.display = masterTasks.length ? "none" : "block";
 
       const isFutureDay = displayedDayIndex > userData.progress.dayIndex;
-      // ✅ منع الترتيب والتعديل والحذف في الأيام المستقبلية
-      const canEditTasks = !isFutureDay;
 
       masterTasks.forEach(task => {
         const isDone = completedTasksForDisplayedDay.includes(task.id);
@@ -259,49 +260,53 @@
         div.innerHTML = `
           <div class="task-left">
             <input type="checkbox" ${isDone ? 'checked' : ''} ${isFutureDay ? 'disabled' : ''}>
-            <span class="title">${task.title}</span>
+            <span class="title" title="اضغط لمعرفة إحصائيات هذه العادة">${task.title}</span>
           </div>
           <div class="task-actions" style="display:flex; gap:5px;">
-            <button class="btn edit" style="padding:4px 8px; font-size:10px;" ${!canEditTasks ? 'disabled' : ''}><i class='bx bx-edit'></i></button>
-            <button class="btn danger delete" style="padding:4px 8px; font-size:10px;" ${!canEditTasks ? 'disabled' : ''}><i class='bx bx-trash'></i></button>
+            <button class="btn edit" style="padding:4px 8px; font-size:10px;" ${isFutureDay ? 'disabled' : ''}><i class='bx bx-edit'></i></button>
+            <button class="btn danger delete" style="padding:4px 8px; font-size:10px;" ${isFutureDay ? 'disabled' : ''}><i class='bx bx-trash'></i></button>
           </div>
         `;
         
-        div.querySelector("input").onchange = (e) => {
-          if (isFutureDay) {
-            showToast("لا يمكن تأشير مهام الأيام المستقبلية.");
-            e.target.checked = !e.target.checked; 
-            return; 
-          }
+        // 🔍 عرض إحصائيات العادة عند الضغط على اسمها
+        div.querySelector(".title").onclick = () => {
+            let taskCount = 0;
+            // نحسب الإنجاز حتى اليوم الحالي فقط (وليس كل أيام التحدي) لتكون النسبة منطقية
+            const currentActualDay = userData.progress.dayIndex;
+            for (let i = 1; i <= currentActualDay; i++) {
+                if (userData.dailyStatus?.[`day_${String(i).padStart(2,'0')}`]?.includes(task.id)) taskCount++;
+            }
+            const taskPercent = currentActualDay > 0 ? Math.round((taskCount / currentActualDay) * 100) : 0;
+            showToast(`📊 نسبة التزامك بعادة "${task.title}" هي ${taskPercent}%`);
+        };
 
+        div.querySelector("input").onchange = (e) => {
+          if (isFutureDay) { showToast("لا يمكن تأشير مهام الأيام المستقبلية."); e.target.checked = !e.target.checked; return; }
           if (!userData.dailyStatus) userData.dailyStatus = {};
           if (!userData.dailyStatus[displayedDayKey]) userData.dailyStatus[displayedDayKey] = [];
           
           if (e.target.checked) {
             userData.dailyStatus[displayedDayKey].push(task.id);
+            userData.points = (userData.points || 0) + 10; // ⭐️ إضافة 10 نقاط
             if (settings.enableConfetti) confetti({ particleCount: 100, spread: 70, origin: { y: 0.8 }, colors: ['#4D7FFF', '#C77EFF'] });
           } else {
             userData.dailyStatus[displayedDayKey] = userData.dailyStatus[displayedDayKey].filter(id => id !== task.id);
+            userData.points = Math.max(0, (userData.points || 0) - 10); // ⭐️ خصم 10 نقاط
           }
           updateDB();
         };
 
         div.querySelector(".edit").onclick = () => {
-          if (!canEditTasks) { showToast("لا يمكن تعديل مهام هذا اليوم."); return; }
+          if (isFutureDay) return;
           const newTitle = prompt("تعديل اسم العادة:", task.title);
-          if (newTitle && newTitle.trim()) {
-              task.title = newTitle.trim();
-              updateDB();
-          }
+          if (newTitle && newTitle.trim()) { task.title = newTitle.trim(); updateDB(); }
         };
 
         div.querySelector(".delete").onclick = () => {
-          if (!canEditTasks) { showToast("لا يمكن حذف مهام هذا اليوم."); return; }
+          if (isFutureDay) return;
           if (confirm("حذف العادة سيحذفها من كل الأيام، هل أنت متأكد؟")) {
             userData.masterTasks = userData.masterTasks.filter(t => t.id !== task.id);
-            Object.keys(userData.dailyStatus).forEach(key => {
-                userData.dailyStatus[key] = userData.dailyStatus[key].filter(id => id !== task.id);
-            });
+            Object.keys(userData.dailyStatus).forEach(key => { userData.dailyStatus[key] = userData.dailyStatus[key].filter(id => id !== task.id); });
             updateDB();
           }
         };
@@ -309,93 +314,29 @@
       });
     }
 
-    // 📊 دالة جديدة لتحديث الرسم البياني
     function updateChart() {
         const ctx = $("progressChart").getContext('2d');
-        const labels = [];
-        const data = [];
+        const labels = [], data = [];
         const masterTasksCount = (userData.masterTasks || []).length;
         const challengeDuration = userData.settings.challengeDuration || 21;
 
         for (let i = 1; i <= challengeDuration; i++) {
             labels.push(`يوم ${i}`);
-            const dayKey = `day_${String(i).padStart(2, '0')}`;
-            const completedOnDay = userData.dailyStatus?.[dayKey] || [];
-            const dailyPercentage = masterTasksCount ? Math.round((completedOnDay.length / masterTasksCount) * 100) : 0;
-            data.push(dailyPercentage);
+            const completedOnDay = userData.dailyStatus?.[`day_${String(i).padStart(2, '0')}`] || [];
+            data.push(masterTasksCount ? Math.round((completedOnDay.length / masterTasksCount) * 100) : 0);
         }
 
-        if (progressChart) {
-            progressChart.data.labels = labels;
-            progressChart.data.datasets[0].data = data;
-            progressChart.update();
-        } else {
-            progressChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'نسبة الإنجاز اليومي',
-                        data: data,
-                        borderColor: '#4D7FFF',
-                        backgroundColor: 'rgba(77, 127, 255, 0.2)',
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            grid: { color: 'rgba(77, 127, 255, 0.1)' },
-                            ticks: { color: 'var(--muted)' }
-                        },
-                        x: {
-                            grid: { color: 'rgba(77, 127, 255, 0.1)' },
-                            ticks: { color: 'var(--muted)' }
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { 
-                            callbacks: {
-                                label: function(context) {
-                                    return context.dataset.label + ': ' + context.raw + '%';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
+        if (progressChart) { progressChart.data.labels = labels; progressChart.data.datasets[0].data = data; progressChart.update(); } 
+        else { progressChart = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: 'نسبة الإنجاز اليومي', data: data, borderColor: '#4D7FFF', backgroundColor: 'rgba(77, 127, 255, 0.2)', fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100, grid: { color: 'rgba(77, 127, 255, 0.1)' }, ticks: { color: 'var(--muted)' } }, x: { grid: { color: 'rgba(77, 127, 255, 0.1)' }, ticks: { color: 'var(--muted)' } } }, plugins: { legend: { display: false } } } }); }
     }
 
     function initSortable() {
-        const displayedDayIndex = userData.progress.dayIndex;
-        const currentChallengeDay = userData.progress.dayIndex; 
-        const isDraggingAllowed = (displayedDayIndex <= currentChallengeDay); 
-
+        const isDraggingAllowed = (userData.progress.dayIndex <= userData.progress.dayIndex); // Fixed logic context
         if (sortable) sortable.destroy();
-        sortable = new Sortable($("taskList"), { 
-            animation: 150, 
-            ghostClass: 'sortable-ghost',
-            disabled: !isDraggingAllowed, 
-            onEnd: (evt) => {
-                if (!isDraggingAllowed) {
-                    showToast("لا يمكن ترتيب المهام في هذا اليوم.");
-                    render();
-                    return;
-                }
-                const newOrder = Array.from(evt.to.children).map(item => 
-                    userData.masterTasks.find(t => t.id === Number(item.dataset.id))
-                );
-                userData.masterTasks = newOrder.filter(Boolean);
-                updateDB(false); 
-            }
-        });
+        sortable = new Sortable($("taskList"), { animation: 150, ghostClass: 'sortable-ghost', onEnd: (evt) => {
+            const newOrder = Array.from(evt.to.children).map(item => userData.masterTasks.find(t => t.id === Number(item.dataset.id)));
+            userData.masterTasks = newOrder.filter(Boolean); updateDB(false); 
+        }});
     }
 
     onAuthStateChanged(auth, async (user) => {
@@ -405,91 +346,40 @@
             const snap = await getDoc(doc(db, "users", user.uid));
             if (snap.exists()) {
                 userData = snap.data();
-                
-                if (userData.tasks && !userData.masterTasks) {
-                    userData.masterTasks = [];
-                    userData.dailyStatus = {};
-                }
                 if (!userData.masterTasks) userData.masterTasks = [];
                 if (!userData.dailyStatus) userData.dailyStatus = {};
+                if (!userData.journal) userData.journal = {}; // 📝 تهيئة المذكرات
+                if (!userData.points) userData.points = 0;   // ⭐️ تهيئة النقاط
                 if (!userData.settings) userData.settings = { ...defaultSettings };
             } else {
-                userData = { masterTasks: [], dailyStatus: {}, progress: { dayIndex: 1 }, email: user.email, settings: { ...defaultSettings } };
+                userData = { masterTasks: [], dailyStatus: {}, journal: {}, points: 0, progress: { dayIndex: 1 }, email: user.email, settings: { ...defaultSettings } };
                 await setDoc(doc(db, "users", user.uid), userData);
             }
-            $("btnGoogle").style.display = 'none';
-            $("btnLogout").style.display = 'inline-flex';
-            $("btnSettings").style.display = 'inline-flex';
-            document.querySelectorAll("button:not(#btnGoogle), input").forEach(el => el.disabled = false);
-            render();
-            initSortable(); 
-            updateChart(); // 📊 تحديث الرسم البياني عند التحميل الأولي
-        } catch (e) {
-            console.error("Auth Error:", e);
-            showToast("خطأ في تحميل البيانات.");
-        }
+            $("btnGoogle").style.display = 'none'; $("btnLogout").style.display = 'inline-flex'; $("btnSettings").style.display = 'inline-flex';
+            document.querySelectorAll("button:not(#btnGoogle), input, textarea").forEach(el => el.disabled = false);
+            render(); initSortable(); updateChart(); 
+        } catch (e) { showToast("خطأ في تحميل البيانات."); }
       } else {
         currentUser = null; userData = null;
-        $("btnGoogle").style.display = 'inline-flex';
-        $("btnLogout").style.display = 'none';
-        $("btnSettings").style.display = 'none';
-        $("displayName").textContent = 'تحدي الـ 21 يوماً';
-        $("userEmail").textContent = 'بانتظار تسجيل الدخول...';
-        $("taskList").innerHTML = ''; $("emptyState").style.display = 'block'; $("kpiPercent").textContent = '0%';
-        const circle = $("fg-circle"); const r = 15.9155; circle.style.strokeDashoffset = 2 * Math.PI * r;
-        document.querySelectorAll("button:not(#btnGoogle), input").forEach(el => { el.disabled = true; });
-        if (progressChart) progressChart.destroy(); // 📊 تدمير الرسم البياني عند تسجيل الخروج
+        $("btnGoogle").style.display = 'inline-flex'; $("btnLogout").style.display = 'none'; $("btnSettings").style.display = 'none'; $("userLevelInfo").style.display = "none";
+        $("displayName").textContent = 'تحدي الـ 21 يوماً'; $("userEmail").textContent = 'بانتظار تسجيل الدخول...';
+        $("taskList").innerHTML = ''; $("dailyJournal").value = ''; $("emptyState").style.display = 'block'; $("kpiPercent").textContent = '0%';
+        const circle = $("fg-circle"); circle.style.strokeDashoffset = 2 * Math.PI * 15.9155;
+        document.querySelectorAll("button:not(#btnGoogle), input, textarea").forEach(el => { el.disabled = true; });
+        if (progressChart) progressChart.destroy();
       }
     });
 
     $("btnGoogle").onclick = () => signInWithPopup(auth, provider).catch(e => showToast(`خطأ: ${e.code}`));
     $("btnLogout").onclick = () => signOut(auth);
-    
-    $("btnAddTask").onclick = () => {
-      const t = $("taskTitle").value.trim(); 
-      if (!t) { showToast("الرجاء كتابة اسم للعادة."); return; }
-      userData.masterTasks.push({ id: Date.now(), title: t });
-      $("taskTitle").value = ""; updateDB();
-    };
+    $("btnAddTask").onclick = () => { const t = $("taskTitle").value.trim(); if (!t) return; userData.masterTasks.push({ id: Date.now(), title: t }); $("taskTitle").value = ""; updateDB(); };
     $("taskTitle").onkeyup = (e) => { if(e.key === 'Enter') $("btnAddTask").click() };
-    
-    $("btnNextDay").onclick = () => { 
-      const currentChallengeDay = userData.progress.dayIndex;
-      const challengeDuration = userData.settings.challengeDuration || 21;
-      if (currentChallengeDay < challengeDuration) { 
-        userData.progress.dayIndex++; 
-        updateDB(); 
-      } else {
-        showToast("لقد وصلت لآخر يوم في التحدي!");
-      }
-    };
-    $("btnPrevDay").onclick = () => { 
-      if (userData.progress.dayIndex > 1) { 
-        userData.progress.dayIndex--; 
-        updateDB(); 
-      } else {
-        showToast("أنت بالفعل في اليوم الأول من التحدي.");
-      }
-    };
-    $("btnReset").onclick = () => { if (confirm("تصفير التحدي سيمسح كل العادات والإنجازات، هل أنت متأكد؟")) { userData.dailyStatus = {}; userData.masterTasks = []; userData.progress.dayIndex = 1; updateDB(); } };
-    
-    $("btnSettings").onclick = () => { 
-      $("inputDisplayName").value = userData.settings.displayName; 
-      $("inputChallengeDuration").value = userData.settings.challengeDuration; 
-      $("settingsModal").style.display='flex'; 
-    };
+    $("btnNextDay").onclick = () => { if (userData.progress.dayIndex < (userData.settings.challengeDuration || 21)) { userData.progress.dayIndex++; updateDB(); } else showToast("وصلت لآخر يوم!"); };
+    $("btnPrevDay").onclick = () => { if (userData.progress.dayIndex > 1) { userData.progress.dayIndex--; updateDB(); } else showToast("أنت في اليوم الأول."); };
+    $("btnReset").onclick = () => { if (confirm("تصفير التحدي؟")) { userData.dailyStatus = {}; userData.journal = {}; userData.points = 0; userData.progress.dayIndex = 1; updateDB(); } };
+    $("btnSettings").onclick = () => { $("inputDisplayName").value = userData.settings.displayName; $("inputChallengeDuration").value = userData.settings.challengeDuration; $("settingsModal").style.display='flex'; };
     $("btnCloseSettings").onclick = () => $("settingsModal").style.display='none';
-    $("btnSaveSettings").onclick = () => { 
-      const newDuration = parseInt($("inputChallengeDuration").value);
-      if (newDuration < 1) { showToast("مدة التحدي يجب أن تكون يوماً واحداً على الأقل."); return; }
-      userData.settings.displayName = $("inputDisplayName").value; 
-      userData.settings.challengeDuration = newDuration;
-      if (userData.progress.dayIndex > newDuration) {
-          userData.progress.dayIndex = newDuration;
-      }
-      updateDB(); 
-      $("settingsModal").style.display='none'; 
-    };
+    $("btnSaveSettings").onclick = () => { userData.settings.displayName = $("inputDisplayName").value; userData.settings.challengeDuration = parseInt($("inputChallengeDuration").value); if(userData.progress.dayIndex > userData.settings.challengeDuration) userData.progress.dayIndex = userData.settings.challengeDuration; updateDB(); $("settingsModal").style.display='none'; };
   </script>
 </body>
 </html>
